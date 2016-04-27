@@ -1,0 +1,27 @@
+add_tendencies.o : add_tendencies.f90 params.o vars.o 
+alloc.o : alloc.f90 vars.o params.o grid.o 
+convert_to_sam_state.o : convert_to_sam_state.f90 vars.o params.o grid.o 
+dealloc.o : dealloc.f90 params.o grid.o vars.o 
+edmf.o : edmf.f90 vars.o params.o grid.o 
+get_abcd.o : get_abcd.f90 params.o grid.o vars.o 
+get_def2.o : get_def2.f90 params.o vars.o 
+get_dimlessdiff.o : get_dimlessdiff.f90 vars.o params.o grid.o 
+get_pblh.o : get_pblh.f90 grid.o params.o vars.o 
+get_state.o : get_state.f90 vars.o params.o grid.o 
+grid.o : grid.f90  
+main.o : main.f90 grid.o params.o snapshot.o vars.o 
+netcdf_mod.o : netcdf_mod.f90 grid.o 
+oceflx.o : oceflx.f90 vars.o params.o 
+params.o : params.f90  
+reconvert_sam_to_state.o : reconvert_sam_to_state.f90 params.o grid.o vars.o 
+sat.o : sat.f90  
+setdata.o : setdata.f90 vars.o params.o grid.o 
+setgrid.o : setgrid.f90 grid.o params.o 
+setparm.o : setparm.f90 params.o grid.o vars.o 
+sgs_tendencies.o : sgs_tendencies.f90 grid.o params.o vars.o 
+snapshot.o : snapshot.f90 vars.o netcdf_mod.o params.o grid.o 
+surface.o : surface.f90 vars.o params.o 
+tke_full.o : tke_full.f90 vars.o params.o grid.o 
+tridiag.o : tridiag.f90 grid.o 
+vars.o : vars.f90 grid.o 
+zero_stuff.o : zero_stuff.f90 grid.o params.o vars.o 
