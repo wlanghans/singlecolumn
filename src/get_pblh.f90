@@ -53,7 +53,6 @@ implicit none
     ELSE 
 
 
-
     !FIND MAX TKE AND MIN THETAV IN THE LOWEST 500 M
     k = 1
     kthv = 1

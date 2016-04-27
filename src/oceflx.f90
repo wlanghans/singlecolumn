@@ -218,7 +218,6 @@ implicit none
 ! WL get coefficients
          Ctheta  = rh * rd  
          Crv     = re * rd
-         Cthetav = (Ctheta*delt*(1.+epsv*rvbot/(1.+rvbot)) +epsv*Crv*thbot*delrv )/deltv
          Cm      = ustar**2 / vmag**2
 
 !---------------------------------------------------------------

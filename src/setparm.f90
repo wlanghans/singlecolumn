@@ -14,7 +14,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      ocean, land, nup, dopblh, windshear, &
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
-                     dolteix,pblhfluxmin,nzm, fixedtau
+                     dolteix,pblhfluxmin,nzm, fixedtau, doneuman
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -31,9 +31,6 @@ close(55)
 
 path='./'//trim(case)//'/'
 
-if (doconsttk) then
-  write(*,*) 'doconsttk=.true., a constant eddy-diffusivity K=',tkconst,' m2/s is used'
-end if
 
 
 !  Ensure parameters are set consistently
@@ -52,14 +49,32 @@ if (.not.dosurface) then
    fluxt0=0.0
    fluxq0=0.0
    tau0=0.0
+   sfc_flx_fxd=.true.
+   sfc_tau_fxd=.true.
 end if
 
-if (dosmagor) then 
-   if (dosgs) write(*,*) 'Smagorinski closure is used to get K'
-   progtke = .false.
+if (sfc_flx_fxd.or.doneuman) then
+   write(*,*) 'Fully explicit Neuman BC is used for sgs-tendencies of scalars'
 else
-   if (dosgs) write(*,*) 'TKE closure is used to get K'
-   progtke = .true.
+    write(*,*) 'Dirichlet BC is used for sgs-tendencies of scalars'
+end if
+if (sfc_tau_fxd.or.doneuman) then
+   write(*,*) 'fully explicit neuman BC is used for sgs-tendencies of momentum'
+else
+    write(*,*) 'Dirichlet BC is used for sgs-tendencies of momentum'
+end if
+
+
+if (doconsttk) then
+  if (dosgs) write(*,*) 'doconsttk=.true., a constant eddy-diffusivity K=',tkconst,' m2/s is used'
+else
+  if (dosmagor) then 
+     if (dosgs) write(*,*) 'Smagorinski closure is used to get K'
+     progtke = .false.
+  else
+     if (dosgs) write(*,*) 'TKE closure is used to get K'
+     progtke = .true.
+  end if
 end if
 
 if (land) ocean=.false.

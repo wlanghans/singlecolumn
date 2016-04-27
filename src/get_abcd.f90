@@ -20,7 +20,7 @@
         REAL, DIMENSION(nzm),    INTENT(in)  :: s, tkin    ! S and eddy viscosity at cell center
         REAL, DIMENSION(nz    ), INTENT(in)  :: sumMs      ! sum(MiSi) on faces
         REAL,                    INTENT(in)  :: Cs,ssfc    ! drag coefficient, surface value of S
-        LOGICAL, INTENT(in)   ,  OPTIONAL    :: dosfcbcneuman ! If true, then neuman bc conditions, dirichlet otherwise
+        LOGICAL,                 INTENT(in)  :: dosfcbcneuman ! If true, then neuman bc conditions, dirichlet otherwise
         REAL, INTENT(in)   ,     OPTIONAL    :: kinflx
         ! output
         REAL, DIMENSION(nzm),    INTENT(out) :: a,b,c,d
@@ -79,7 +79,7 @@
                    -rhof(k+1)*(sumMs(k+1) - 0.5*betam*(s(k)+s(k+1))*sumM(k+1)))
               if (.not.dosfcbcneuman) then
                   d(k) = d(k) + vmag*tkf(1)/adz(k)/dz*(betam*s(k)-ssfc)
-              else ! neuman bc, fully explicit right now 
+              else ! neuman bc, always fully explicit right now
                   d(k) = d(k) - kinflx/adz(k)/dz
               end if
            ELSE

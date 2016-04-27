@@ -76,13 +76,16 @@ write(*,*) 'Working on timestep ', nstep
 ! ======================================= 
   if (dosurface.or.dosgs) then
        !requires sam state rho=rhod and mixing ratios qv=rv
+       ! note that in case of tke, mixing will act on the preliminary tke from tke_full; not sure if this is matters
        call sgs_tendencies()
+       ! optional diagnostic call to get dimensionless K's
        !if (dosgs) call get_dimlessdiff()
   end if
 
 ! ======================================= 
   ! convert mixing ratios back to mass fractions
   ! dry air density to air density
+  ! Note: this reconversion is only needed here in case tke is diagnosed (rhtke=rho*tke in add_tendencies)
 ! ======================================= 
  call reconvert_sam_to_state()
 

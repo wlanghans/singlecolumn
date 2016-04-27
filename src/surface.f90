@@ -29,13 +29,16 @@ if(.not.SFC_FLX_FXD) then
 
          ! WL here requires mixing ratio at first level NOT specific humidity
          ! WL needs temperature, pot. temp, and virt. pot. temp at first model level
+         ! NOTE: either a flux boundary condition or a Dirichlet can be used to solve for tendencies
          call oceflx( pres(1),u(1),v(1),tabs(1), &
                       qv(1)/(1.-qv(1)),thetav(1)/(1.+epsv* qv(1)),thetav(1),z(1),sst+t00, r_s, thetav_s)
          sgs_thv_flux(1) = sgs_sens_heat_flux(1) * (1.+epsv* qv(1)) + epsv * thetav(1)/(1.+epsv* qv(1)) * sgs_lat_heat_flux(1)
+         Cthetav = -sgs_thv_flux(1) / (thetav(1) - thetav_s)/vmag
                       
 
          ! WL re-compute Cm if tau is fixed
          if(SFC_TAU_FXD) then
+         ! NOTE: if flux is prescribed, then we will use neuman conditions. Cm will actually not be used
             Cm = tau0 / vmag**2
             taux(1) = -tau0 * u(1)  / vmag 
             tauy(1) = -tau0 * v(1)  / vmag 
@@ -53,18 +56,17 @@ if(.not.SFC_FLX_FXD) then
 
 else   ! IF SFC_FLX_FXD=True
 
-  ! WL invert bulk transfer formulae to get drag coefficients C=-flux/dtheta/vmag
+  ! WL invert bulk transfer formulae to get drag coefficients C=-flux/dtheta/vmag, which are needed for implicit formulation
   ! WL coefficients might be negative just to ensure that fluxes equal their prescribed values; in this case the surface values are meaningless (that's ok)
-  Ctheta = - fluxt0 /( thetav(1)/(1.+epsv* qv(1))  - theta_s) /vmag
+  ! NOTE: if fluxes are prescribed, we will use neuman conditions. Cs will not be used
   sgs_sens_heat_flux(1)  = fluxt0 
-  Crv    = - fluxq0 / ( qv(1)/(1.-qv(1)) - r_s  ) / vmag 
+  Ctheta = - fluxt0 /( thetav(1)/(1.+epsv* qv(1))  - theta_s) /vmag
   sgs_lat_heat_flux(1)  = fluxq0 
-
-  Cthetav = ((Ctheta*( thetav(1)/(1.+epsv* qv(1))  - theta_s) * (1. +epsv * qv(1))) + &
-            epsv * Crv * thetav(1)/(1.+epsv* qv(1)) * (qv(1)/(1.-qv(1))-r_s)  )       &
-            /( thetav(1)  - thetav_s)
+  Crv    = - fluxq0 / ( qv(1)/(1.-qv(1)) - r_s  ) / vmag 
   sgs_thv_flux(1) = sgs_sens_heat_flux(1) * (1.+epsv* qv(1)) + epsv * thetav(1)/(1.+epsv* qv(1)) * sgs_lat_heat_flux(1)
-  
+  Cthetav = -sgs_thv_flux(1) / (thetav(1) - thetav_s)/vmag
+
+
     if(.not.SFC_TAU_FXD) then
       if(OCEAN) z0 = 0.0001  ! for LAND z0 should be set in namelist (default z0=0.035)
 

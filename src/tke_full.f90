@@ -87,7 +87,7 @@ do k=1,nzm
 !bloss    +(bbb*lstarp-tabs(i,j,k))* &
 !bloss         (qpl(i,j,kc)+qpi(i,j,kc)-qpl(i,j,kb)-qpi(i,j,kb)) )
       end if
-       !WL
+       !WL use simpler formulation for N**2
        buoy_sgs(k)=ggr/thetav(k) * (thetav(kc)-thetav(kb))/ (z(kc)-z(kb))
 
    if(buoy_sgs(k).le.0.) then
@@ -95,10 +95,11 @@ do k=1,nzm
    else
      ! WL replaced SAM's formulation with the equivalent formulation based on tke, which is l=0.76 * (e/Nm^2)^(1/2)
      ! WL this way we don't need to store tk for the next timestep, but only tke 
-     ! WL TKE will have been advected and thus provides a better esimate than the local Km from the previous step
-     !smix=min(grd,max(0.1*grd, sqrt(0.76*tk(i,j,k)/Ck/sqrt(buoy_sgs+1.e-10))))
+     ! WL also, TKE will have been advected and thus provides a better esimate than the local Km from the previous step
+     ! smix=min(grd,max(0.1*grd, sqrt(0.76*tk(i,j,k)/Ck/sqrt(buoy_sgs+1.e-10))))
      smix(k)=min(grd,max(0.1*grd, 0.76*tke(k)/sqrt(buoy_sgs(k)+1.e-10))) 
    end if
+
    if (dolteix) then 
       if (fixedtau) then
          tketau=600.
@@ -133,7 +134,7 @@ do k=1,nzm
 
      else
 
-       ! get Km from previous timestep
+       ! get Km 
        tk(k) = 0.5*smix(k)*sqrt(tke(k))
        a_prod_sh=(tk(k)+0.001)*def2(k)
        a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
@@ -149,9 +150,11 @@ do k=1,nzm
          a_prod_sh = dtkedtsum * a_prod_sh
          a_diss    = dtkedtsum * a_diss
        end if
-       !tke(k)=max(0.0,tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss))
+       ! this is a preliminary euler step to get K(n+1), which is used for mixing 
+       ! we will later advance rhotke if progtke=true
+       tke(k)=max(0.0,tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss))
 
-       !tk(k)=Ck*smix(k)*sqrt(tke(k))
+       tk(k)=Ck*smix(k)*sqrt(tke(k))
        !tk(k)=0.5*smix(k)*sqrt(tke(k))
 
      end if
@@ -160,9 +163,9 @@ do k=1,nzm
    tkh(k)=Pr*tk(k)
 
    if (progtke) then
-     tend_rho_tke_buoy(k)    =    rho(k) * a_prod_bu
+     tend_rho_tke_buoy (k)   =    rho(k) * a_prod_bu
      tend_rho_tke_shear(k)   =    rho(k) * a_prod_sh
-     tend_rho_tke_diss(k)    =  - rho(k) * a_diss 
+     tend_rho_tke_diss (k)   =  - rho(k) * a_diss 
    end if
 
    ! apply stability limiter if fully explicit
