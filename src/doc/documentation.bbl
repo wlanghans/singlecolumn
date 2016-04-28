@@ -1,0 +1,85 @@
+\begin{thebibliography}{14}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Bryan et~al.(2003)Bryan, Wyngaard, and Fritsch}]{bryan03}
+Bryan, G.~H., J.~C. Wyngaard, and J.~M. Fritsch, 2003: Resolution requirements
+  for simulations of deep moist convection. \textit{Mon. Wea. Rev.},
+  \textbf{131}, 2394--2416.
+
+\bibitem[{Cheinet(2003)}]{cheinet03a}
+Cheinet, S., 2003: A multiple mass-flux parameterization for the
+  surface-generated convection. {P}art {I}: {D}ry plumes. \textit{J. Atmos.
+  Sci.}, \textbf{60}, 2313--2327.
+
+\bibitem[{Collins et~al.(2004)Collins, Rasch, Boville, Hack, McCaa, Williamson,
+  Kiehl, and Briegleb}]{collins04}
+Collins, W.~D., P.~J. Rasch, B.~A. Boville, J.~J. Hack, J.~R. McCaa, D.~L.
+  Williamson, J.~T. Kiehl, and B.~Briegleb, 2004: Description of the {NCARG}
+  {C}ommunity {A}tmosphere {M}odel ({CAM 3.0}). {NCAR} Technical note
+  TN–464+STR, National Center for Atmospheric Research, USA.
+
+\bibitem[{Han(2015)}]{han15}
+Han, J., 2015: Implementation in the {NCEP GFS} of a hybrid eddy-diffusivity
+  mass-flux ({EDMF}) boundary layer parameterization with dissipative heating
+  and modified stable boundary layer mixing. \textit{Wea. Forecasting},
+  submitted.
+
+\bibitem[{Khairoutdinov and Randall(2003)}]{khairou03}
+Khairoutdinov, M.~F. and D.~A. Randall, 2003: Cloud resolving modeling of the
+  {ARM} summer 1997 {IOP}: {M}odel formulation, results, uncertainties, and
+  sensitivities. \textit{J. Atmos. Sci.}, \textbf{60}, 607--625.
+
+\bibitem[{Lenschow et~al.(1980)Lenschow, Wyngaard, and Pennell}]{lenschow80}
+Lenschow, D.~H., J.~C. Wyngaard, and W.~T. Pennell, 1980: Mean-field and
+  second-moment budgets in a baroclinic, convective boundary layer. \textit{J.
+  Atmos. Sci.}, \textbf{37}, 1313--1326.
+
+\bibitem[{Siebesma et~al.(2007)Siebesma, Soares, and Teixeira}]{siebesma07}
+Siebesma, A.~P., P.~M.~M. Soares, and J.~Teixeira, 2007: A combined
+  eddy-diffusivity mass-flux approach for the convective boundary layer.
+  \textit{J. Atmos. Sci.}, \textbf{64}, 1230--1248.
+
+\bibitem[{Soares et~al.(2004)Soares, Miranda, Siebesma, and
+  Teixeira}]{soares04}
+Soares, P. M.~M., P.~M.~A. Miranda, A.~P. Siebesma, and J.~Teixeira, 2004: An
+  eddy-diffusivity/mass-flux parametrization for dry and shallow cumulus
+  convection. \textit{Quart. J. Roy. Met. Soc.}, \textbf{130~(604)},
+  3365--3383.
+
+\bibitem[{Stull(1994)}]{stull94}
+Stull, R.~B., 1994: A convective transport theory for surface fluxes.
+  \textit{J. Atmos. Sci.}, \textbf{51}, 3--22.
+
+\bibitem[{Su\v{s}elj et~al.(2014)Su\v{s}elj, Hogan, and Teixeira}]{suselj14}
+Su\v{s}elj, K., T.~F. Hogan, and J.~Teixeira, 2014: Implementation of a
+  stochastic eddy-diffusivity/mass-flux parameterization into the {N}avy
+  {G}lobal {E}nvironmental {M}odel. \textit{Wea. Forecasting}, \textbf{29},
+  1374--1390.
+
+\bibitem[{Su\v{s}elj et~al.(2013)Su\v{s}elj, Teixeira, and Chung}]{suselj13}
+Su\v{s}elj, K., J.~Teixeira, and D.~Chung, 2013: A unified model for moist
+  convective boundary layers based on stochastic eddy-diffusivity/mass-flux
+  parameterization. \textit{J. Atmos. Sci.}, \textbf{70}, 1929--1953.
+
+\bibitem[{Su\v{s}elj et~al.(2012)Su\v{s}elj, Teixeira, and Matheou}]{suselj12}
+Su\v{s}elj, K., J.~Teixeira, and G.~Matheou, 2012: Eddy diffusivity/mass flux
+  and shallow cumulus boundary layer: {A}n updraft pdf multiple mass flux
+  scheme. \textit{J. Atmos. Sci.}, \textbf{69}, 1513--1533.
+
+\bibitem[{Teixeira and Cheinet(2004)}]{teixeira04}
+Teixeira, J. and S.~Cheinet, 2004: A simple mixing length formulation for the
+  eddy-diffusivity parameterization of dry convection. \textit{Bound.-Lay.
+  Meteor.}, \textbf{110~(3)}, 435--453.
+
+\bibitem[{Wyngaard(2010)}]{wyngaard10}
+Wyngaard, J.~C., 2010: \textit{Turbulence in the Atmosphere}. Cambridge
+  University Press, 393 pp.
+
+\end{thebibliography}
