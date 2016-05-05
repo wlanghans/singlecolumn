@@ -152,10 +152,10 @@ do k=1,nzm
        end if
        ! this is a preliminary euler step to get K(n+1), which is used for mixing 
        ! we will later advance rhotke if progtke=true
-       tke(k)=max(0.0,tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss))
+!       tke(k)=max(0.0,tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss))
 
        !tk(k)=Ck*smix(k)*sqrt(tke(k))
-       tk(k)=0.5*smix(k)*sqrt(tke(k))
+!       tk(k)=0.5*smix(k)*sqrt(tke(k))
 
      end if
    end if

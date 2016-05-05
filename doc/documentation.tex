@@ -131,7 +131,7 @@ which is provided from the Dycore at cell centers.
 
 \subsubsection{TKE closure}
 The formulation of the TKE boundary layer scheme follows the description given by \cite{teixeira04} and is specifically designed here to model the evolution of the convective boundary layer (and not as a LES closure). The prognostic equation for $e$, the sgs kinetic energy per unit dry air, is
-\begin{eqnarray}
+\begin{eqnarray}\label{eqn:tkebudget}
  \frac{\partial e}{\partial t}&=& \mathrm{ADV} + \mathrm{TRANS} + \mathrm{SHEAR} + \mathrm{BUOY} - \mathrm{DISS}\\
  \mathrm{TRANS} &=& \frac{1}{\rho_d}\frac{\partial}{\partial z} (\rho_d K_m  \frac{\partial e}{\partial z})\\
  \mathrm{SHEAR} &=& K_m \overline{D}^2 \\
@@ -228,7 +228,7 @@ with $\epsilon_d=0.1$, $L_0=100$~m, $a=2/3$, $b=0.002$~m$^{-1}$, $c=1.5$, and $\
 
 \section{Solving for the tendency}\label{sec:solve}
 
-Equation (\ref{eqn:tendency}) needs to be solved to obtain tentendy $T^{\psi}$. The spatial discretization of the equations is done using a centered scheme for the diffusion term and the mass-flux term. Same as in Teixeira and Siebesma (2000), \cite{siebesma07}, and \cite{soares04}, disretization in time is achieved using a fully implicit scheme for both the diffusion and the mass flux term. $K$, $M_i$, and $\psi^{up}_i$ are treated explicitly in time. See the discussion in \cite{siebesma07} (section 4c and appendix B) for further reference. For brevity we drop index $_\psi$ here for eddy diffusivities $K$. The vertical grid structure and the indexing is illustrated in Fig.~\ref{fig:staggering}. The discretized form of Eq. (\ref{eqn:tendency}) is
+Equation (\ref{eqn:tendency}) needs to be solved to obtain tentendy $T^{\psi}$. The spatial discretization of the equations is done using a centered scheme for the diffusion term and the mass-flux term. Same as in Teixeira and Siebesma (2000), \cite{siebesma07}, and \cite{soares04}, disretization in time is achieved using a fully implicit scheme for both the diffusion and the mass flux term. $K$, $M_i$, and $\psi^{up}_i$ are treated explicitly in time.\footnote{If the prognostic TKE closure is used then SAM would use an intermediate $K$ obtained from an intermediate $e$ that got advanced through a truncated budget (\ref{eqn:tkebudget}) without the TRANS term. TRANS (i.e. mixing) is then computed based on the intermediate $e$ and $K$. We find, however, that this approach leads to strange instabilities in a CPBL test. Thus, we use a truly explicit approach for $e$ and $K$.} See the discussion in \cite{siebesma07} (section 4c and appendix B) for further reference. For brevity we drop index $_\psi$ here for eddy diffusivities $K$. The vertical grid structure and the indexing is illustrated in Fig.~\ref{fig:staggering}. The discretized form of Eq. (\ref{eqn:tendency}) is
 \begin{align*}
   &\frac{\psi^{n+1,k}- \psi^{n,k} }{\Delta t} =\\
   &-\frac{1}{\rho^{n,k}\Delta z^{k}}\left\{ -\frac{K^{n,k+1/2}\rho^{n,k+1/2} }{\Delta z^{k+1/2}} [\beta^+(\psi^{n+1,k+1}-\psi^{n+1,k}) + \beta^-(\psi^{n,k+1}-\psi^{n,k})] \right. \\
@@ -278,6 +278,7 @@ Again, $\rho$ needs to be replaced by $\rho_d$ in case of $\psi=r_v$ or $\psi=e$
  \includegraphics[width=0.5\textwidth]{staggering.eps}
 \caption{Locations of prognostic variable $\psi$, the updraft mass fluxes $M_i$, the updraft properties $\psi^{up}_i$, and eddy-diffusivities $K^{\psi}$ on the 1D vertical grid. } \label{fig:staggering}
 \end{figure}
+
 
 
 \section{Cloud cover and interaction with radiation}\label{sec:clouds}
