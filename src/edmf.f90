@@ -44,7 +44,7 @@ implicit none
 ! w parameters
       REAL,PARAMETER :: &
         &Wa=2./3., &
-        &Wb=0.00,&
+        &Wb=0.002,&
         &Wc=1.5
 
 ! entrainment parameters
@@ -95,7 +95,7 @@ implicit none
 
 ! set initial conditions for updrafts
     zs=50.
-    pwmin=0.0
+    pwmin=0.5
     pwmax=3.
 
 ! see Lenschow et al. (1980), JAS
