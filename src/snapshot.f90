@@ -519,6 +519,48 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => sgs_thv_flux (1:nz)
             end if
+ 
+            if (trim(field_name) .eq. 'sumM') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'plume mass flux', &
+                  ! Long name
+                                           'sum of mass flux of all plumes', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => sumM (1:nz)
+            end if
+
+            if (trim(field_name) .eq. 'sumMrv') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'plume moisture flux', &
+                  ! Long name
+                                           'sum of moisture flux of all plumes', &
+                  ! Units
+                                           'g/g m/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => sumMrv (1:nz)
+            end if
+
+            if (trim(field_name) .eq. 'sumMthetav') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'plume thetav flux', &
+                  ! Long name
+                                           'sum of virt pot temp flux of all plumes', &
+                  ! Units
+                                           'K m/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => sumMthetav (1:nz)
+            end if
 
             if (trim(field_name) .eq. 'upw') then
                call fill_fields_snapshot( &
