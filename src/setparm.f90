@@ -64,7 +64,7 @@ else
     write(*,*) 'Dirichlet BC is used for sgs-tendencies of scalars'
 end if
 if (sfc_tau_fxd.or.doneuman) then
-   write(*,*) 'fully explicit neuman BC is used for sgs-tendencies of momentum'
+   write(*,*) 'Fully explicit neuman BC is used for sgs-tendencies of momentum'
 else
     write(*,*) 'Dirichlet BC is used for sgs-tendencies of momentum'
 end if

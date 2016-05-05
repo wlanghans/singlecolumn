@@ -106,4 +106,6 @@ call snapshot_close()
 !deallocate memory
 call dealloc()
 
+write(*,*) 'Done'
+
 end program singlecolumn
