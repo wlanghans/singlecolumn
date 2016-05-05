@@ -30,12 +30,15 @@ call tridiag(a,b,c,d)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface flux in mass flux units
-  sgs_lat_heat_flux (1) = - vmag *rho(1)* Crv * (betam*qv(1) + betap*d(1) - r_s )
+  !sgs_lat_heat_flux (1) = - vmag *rho(1)* Crv * (betam*qv(1) + betap*d(1) - r_s )
+  sgs_lat_heat_flux (1) = - vmag * Crv * (betam*qv(1) + betap*d(1) - r_s )
 else
-  sgs_lat_heat_flux (1) = sgs_lat_heat_flux (1) *rho(1) 
+  !sgs_lat_heat_flux (1) = sgs_lat_heat_flux (1) *rho(1) 
+  sgs_lat_heat_flux (1) = sgs_lat_heat_flux (1) 
 end if
 ! Diagnose implicit atm. sgs fluxes in mass flux units
-sgs_lat_heat_flux (2:nzm) = 0.5*(rho(1:nzm-1) + rho(2:nzm)) * (  &  
+!sgs_lat_heat_flux (2:nzm) = 0.5*(rho(1:nzm-1) + rho(2:nzm)) * (  &  
+sgs_lat_heat_flux (2:nzm) = 1.0 * (  &  
               (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qv(2:nzm)-qv(1:nzm-1)) ) &
                            +(sumMrv(2:nzm) - 0.5 * (betap*(d(2:nzm) + d(1:nzm-1)) + betam*(qv(2:nzm)+qv(1:nzm-1))) * sumM(2:nzm) ))
@@ -63,21 +66,28 @@ call tridiag(a,b,c,d)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface virt. pot. temp. flux 
-  sgs_thv_flux (1)       = - vmag * rhoold(1)*Cthetav * (betam*thetav(1) + betap*d(1) - thetav_s )
+  !sgs_thv_flux (1)       = - vmag * rhoold(1)*Cthetav * (betam*thetav(1) + betap*d(1) - thetav_s )
+  sgs_thv_flux (1)       = - vmag * Cthetav * (betam*thetav(1) + betap*d(1) - thetav_s )
 ! Diagnose implicit surface sensible heat flux 
-  sgs_sens_heat_flux (1) =  rhoold(1)*( sgs_thv_flux (1)/rhoold(1) &
-                    - epsv*thetav(1)/(1.+epsv*qvspec(1)) * sgs_lat_heat_flux (1)/rho(1) )/ (1.+epsv*qvspec(1))
+  !sgs_sens_heat_flux (1) =  rhoold(1)*( sgs_thv_flux (1)/rhoold(1) &
+  !                  - epsv*thetav(1)/(1.+epsv*qvspec(1)) * sgs_lat_heat_flux (1)/rho(1) )/ (1.+epsv*qvspec(1))
+  sgs_sens_heat_flux (1) =  ( sgs_thv_flux (1) &
+                    - epsv*thetav(1)/(1.+epsv*qvspec(1)) * sgs_lat_heat_flux (1))/ (1.+epsv*qvspec(1))
 else
-  sgs_thv_flux (1)       =  sgs_thv_flux (1)  * rhoold(1)
-  sgs_sens_heat_flux (1) = sgs_sens_heat_flux (1)  * rhoold(1)
+  !sgs_thv_flux (1)       =  sgs_thv_flux (1)  * rhoold(1)
+  !sgs_sens_heat_flux (1) = sgs_sens_heat_flux (1)  * rhoold(1)
+  sgs_thv_flux (1)       =  sgs_thv_flux (1)  
+  sgs_sens_heat_flux (1) = sgs_sens_heat_flux (1)  
 end if
 ! Diagnose atm. sgs fluxes 
-sgs_thv_flux (2:nzm)       = 0.5*(rhoold(1:nzm-1) + rhoold(2:nzm)) * ( & 
+!sgs_thv_flux (2:nzm)       = 0.5*(rhoold(1:nzm-1) + rhoold(2:nzm)) * ( & 
+sgs_thv_flux (2:nzm)       = 1. * ( & 
             (-1.)/adzw(2:nzm)/dz * 0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(thetav(2:nzm)-thetav(1:nzm-1)) ) &
         + sumMthetav(2:nzm) - 0.5 * (betap*(d(2:nzm) + d(1:nzm-1)) + betam*(thetav(2:nzm)+thetav(1:nzm-1))) * sumM(2:nzm))
 ! WL don't even bother right now to compute it, set to zero
-sgs_sens_heat_flux (2:nzm) = 0.5*(rhoold(1:nzm-1)+rhoold(2:nzm) ) * ( 2. * sgs_thv_flux (2:nzm)/(rhoold(1:nzm-1)+rhoold(2:nzm)) &
+!sgs_sens_heat_flux (2:nzm) = 0.5*(rhoold(1:nzm-1)+rhoold(2:nzm) ) * ( 2. * sgs_thv_flux (2:nzm)/(rhoold(1:nzm-1)+rhoold(2:nzm)) &
+sgs_sens_heat_flux (2:nzm) = 1. * ( 2. * sgs_thv_flux (2:nzm)/(rhoold(1:nzm-1)+rhoold(2:nzm)) &
                           - epsv*0.5*(thetav(1:nzm-1)+thetav(2:nzm))/(1.+epsv*0.5*(qvspec(1:nzm-1)+qvspec(2:nzm))) &
                * 2.*sgs_lat_heat_flux (2:nzm)/(rho(1:nzm-1)+rho(2:nzm)) )  / (1.+epsv * 0.5*(qvspec(1:nzm-1)+qvspec(2:nzm)))
 
@@ -98,12 +108,15 @@ call tridiag(a,b,c,d)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface momentum flux
-  taux(1) = - Cm * rhoold(1) * vmag * (betap*d(1)+betam*u(1))
+!  taux(1) = - Cm * rhoold(1) * vmag * (betap*d(1)+betam*u(1))
+  taux(1) = - Cm * vmag * (betap*d(1)+betam*u(1))
 else
-  taux(1) = taux(1) * rhoold(1)
+  !taux(1) = taux(1) * rhoold(1)
+  taux(1) = taux(1) 
 end if
 !diagnose atm. fluxes, NOTE: no contribution from mass fluxes
-taux(2:nzm) = (-0.5)*(rhoold(1:nzm-1)+rhoold(2:nzm))/adzw(2:nzm)/dz * &
+!taux(2:nzm) = (-0.5)*(rhoold(1:nzm-1)+rhoold(2:nzm))/adzw(2:nzm)/dz * &
+taux(2:nzm) = -1./adzw(2:nzm)/dz * &
                             0.5*(tk(1:nzm-1) + tk(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(u(2:nzm)-u(1:nzm-1)) )
 !tendency
@@ -123,12 +136,15 @@ call tridiag(a,b,c,d)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface momentum flux
-  tauy(1) = - Cm * rhoold(1) * vmag * (betap*d(1)+betam*v(1))
+  !tauy(1) = - Cm * rhoold(1) * vmag * (betap*d(1)+betam*v(1))
+  tauy(1) = - Cm * vmag * (betap*d(1)+betam*v(1))
 else
-  tauy(1) = tauy(1) * rhoold(1)
+  !tauy(1) = tauy(1) * rhoold(1)
+  tauy(1) = tauy(1) 
 end if
 !diagnose atm. fluxes, NOTE: no contribution from mass fluxes
-tauy(2:nzm) = (-0.5)*(rhoold(1:nzm-1)+rhoold(2:nzm))/adzw(2:nzm)/dz * &
+!tauy(2:nzm) = (-0.5)*(rhoold(1:nzm-1)+rhoold(2:nzm))/adzw(2:nzm)/dz * &
+tauy(2:nzm) = -1.0/adzw(2:nzm)/dz * &
                             0.5*(tk(1:nzm-1) + tk(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(v(2:nzm)-v(1:nzm-1)) )
 !tendency
@@ -144,7 +160,8 @@ if (progtke) then
   call tridiag(a,b,c,d)
 
   !diagnose atm. fluxes
-  sgs_tke_flux(2:nzm) = 0.5*(rho(1:nzm-1)+rho(2:nzm))*(            &
+  !sgs_tke_flux(2:nzm) = 0.5*(rho(1:nzm-1)+rho(2:nzm))*(            &
+  sgs_tke_flux(2:nzm) =      (            &
                (-1.)/adzw(2:nzm)/dz * 0.5*(tk(1:nzm-1) + tk(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(tke(2:nzm)-tke(1:nzm-1)) ) &
           + sumMtke(2:nzm) - 0.5 * (betap*(d(2:nzm) + d(1:nzm-1)) + betam*(tke(2:nzm)+tke(1:nzm-1))) * sumM(2:nzm) )
