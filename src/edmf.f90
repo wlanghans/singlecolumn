@@ -176,7 +176,17 @@ implicit none
     ENDDO
 
 ! computing variables needed for tendency calculation
-    DO k=1,nz
+
+
+! mass flux is zero at surface
+    sumM(1)       = 0.0
+    sumMthetav(1) = 0.0
+    sumMrv(1)     = 0.0
+    sumMu(1)      = 0.0
+    sumMv(1)      = 0.0
+    sumMtke(1)    = 0.0
+
+    DO k=2,nz
       DO i=1,nup
         sumM(k)      =sumM(k)      +UPA(K,I)*UPW(K,I)
         ! WL and convert back to thetav

@@ -16,7 +16,7 @@ allocate(u(nzm),v(nzm),t(nzm), theta(nzm), thetav(nzm), pres(nzm), tabs(nzm), &
 allocate(tend_sgs_rho_qv(nzm), tend_sgs_rho(nzm), tend_sgs_rho_thetav(nzm), &
      tend_sgs_rho_u(nzm),tend_sgs_rho_v(nzm),tend_sgs_rho_tke(nzm), tend_sgs_rho_qt(nzm), &
      tend_rho_tke_buoy(nzm), tend_rho_tke_shear(nzm), tend_rho_tke_diss(nzm), & 
-sumM(nzm), sumMrv(nzm), sumMu(nzm), sumMv(nzm), sumMtke(nzm), sumMthetav(nzm), buoy_sgs(nzm), smix(nzm))
+sumM(nz), sumMrv(nz), sumMu(nz), sumMv(nz), sumMtke(nz), sumMthetav(nz), buoy_sgs(nzm), smix(nzm))
 
 allocate(sgs_sens_heat_flux(nzm), sgs_lat_heat_flux(nzm), sgs_thv_flux(nzm), taux(nzm), tauy(nzm), sgs_tke_flux(nzm))
 
