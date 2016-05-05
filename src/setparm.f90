@@ -60,11 +60,17 @@ end if
 
 if (sfc_flx_fxd.or.doneuman) then
    write(*,*) 'Fully explicit Neuman BC is used for sgs-tendencies of scalars'
+   if (sfc_flx_fxd) then
+     write(*,*) ' Fixed fluxes are: ', fluxt0,' K m/s  and ', fluxq0, ' g/g m/s' 
+   end if
 else
     write(*,*) 'Dirichlet BC is used for sgs-tendencies of scalars'
 end if
 if (sfc_tau_fxd.or.doneuman) then
    write(*,*) 'Fully explicit Neuman BC is used for sgs-tendencies of momentum'
+   if (sfc_tau_fxd) then
+     write(*,*) ' Fixed tau at sfc is ', tau0,' (m/s)**2 '
+   end if
 else
     write(*,*) 'Dirichlet BC is used for sgs-tendencies of momentum'
 end if
