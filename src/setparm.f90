@@ -43,6 +43,11 @@ if (dopblh.and..not.dosgs) then
   write(*,*) 'Cant compute pblh without turbulence parameterization. Stopping'
   stop
 end if
+if (dosgs.and.dolteix.and..not.fixedtau) then
+   dopblh=.true.
+   pblhfluxmin=.true.
+   write(*,*) 'Setting dopblh = .true. and pblhfluxmin = .true.'
+end if
 if (.not.dosurface) then
    write(*,*) 'dosurface = .false., thus zero all surface fluxes'
    write(*,*) 'fluxt0=0,fluxq0=0, and tau0=0'

@@ -130,7 +130,7 @@ which is provided from the Dycore at cell centers.
 
 
 \subsubsection{TKE closure}
-The formulation of the TKE boundary layer scheme follows the description given by \cite{teixeira04} and is specifically designed here to model the evolution of the convective boundary layer. The prognostic equation for $e$, the sgs kinetic energy per unit dry air, is
+The formulation of the TKE boundary layer scheme follows the description given by \cite{teixeira04} and is specifically designed here to model the evolution of the convective boundary layer (and not as a LES closure). The prognostic equation for $e$, the sgs kinetic energy per unit dry air, is
 \begin{eqnarray}
  \frac{\partial e}{\partial t}&=& \mathrm{ADV} + \mathrm{TRANS} + \mathrm{SHEAR} + \mathrm{BUOY} - \mathrm{DISS}\\
  \mathrm{TRANS} &=& \frac{1}{\rho_d}\frac{\partial}{\partial z} (\rho_d K_m  \frac{\partial e}{\partial z})\\
@@ -138,11 +138,11 @@ The formulation of the TKE boundary layer scheme follows the description given b
  \mathrm{BUOY} &=& - \mathrm{Pr} K_m N^2\\
  \mathrm{DISS}&=& 0.16\cdot 2.5\sqrt{e}/l.
 \end{eqnarray}
-The advective term is eventually computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required (i.e., analogous to the water vapor mixing ratio). The eddy diffusivity for momentum is obtained as $K_m=0.5 l \sqrt{e}$ and $K_h=\mathrm{Pr} K_m$ with $\mathrm{Pr}=1$. The mixing length is obtained as
+The advective term is computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required (i.e., analogous to the water vapor mixing ratio). The eddy diffusivity for momentum is obtained as $K_m=0.5 l \sqrt{e}$ and $K_h=\mathrm{Pr} K_m$ with $\mathrm{Pr}=1$. The mixing length is obtained as
 \begin{eqnarray}
  l &=& \tau \sqrt{e} + (\kappa z - \tau \sqrt{e}) e^{-z/\alpha}
 \end{eqnarray}
-with $\alpha=100\mathrm{~m}$ and $\tau$ taken to be either 600 sec or $\tau=h/w^*$ and $w^*=(hg/\theta_v \overline{w'\theta_v'})^{1/3}$. The boundary layer height $h$ is defined as the level where the buoyancy flux is minimized. The TRANS diffusion term is solved in the same way as for any other scalar. Note that to obtain a standard LES TKE closure the mixing length can be defined same as in (\ref{eqn:lmixsmag}) and the coefficients in DISS can be adopted. 
+with $\alpha=100\mathrm{~m}$ and $\tau$ taken to be either 600 sec or $\tau=h/w^*$ with $w^*=(hg/\theta_{v0} \overline{w'\theta_v'})^{1/3}$. The boundary layer height $h$ is defined as the level where the buoyancy flux is minimized. The TRANS diffusion term is solved in the same way as for any other scalar. Note that to obtain a standard LES TKE closure the mixing length can be defined same as in (\ref{eqn:lmixsmag}) and the coefficients in DISS can be adopted. 
 
 The numerical implementation to advance $e$ from step $n$ to step $n+1$ is as follows. SHEAR, BUOY, and DISS are treated explicitly with an Euler step. Thereby, $K_m$ at step $n$ is diagnosed from $e$ at step $n$. In case the boundary layer height $h$ (defined as the level where the buoyancy flux is minimized) and $w^*$ are needed to evaluate mixing length $l$, the required buoyancy flux is obtained from the implicit computation for the previous time step. The three tendencies will be limited in magnitude to ensure their sum is not smaller than $-\frac{e}{\Delta t}$. Then, TRANS is computed as described below (general formulation allowing for an implicit solver) again based on the $e$ distribution at step $n$. That means that TRANS may still cause some negative $e$ at step $n+1$ since the solver for TRANS is not necessarily positive definite. Negative $e$ will be clipped at the beginning of the next step.   
 

@@ -97,14 +97,14 @@ do k=1,nzm
      ! WL this way we don't need to store tk for the next timestep, but only tke 
      ! WL also, TKE will have been advected and thus provides a better esimate than the local Km from the previous step
      ! smix=min(grd,max(0.1*grd, sqrt(0.76*tk(i,j,k)/Ck/sqrt(buoy_sgs+1.e-10))))
-     smix(k)=min(grd,max(0.1*grd, 0.76*tke(k)/sqrt(buoy_sgs(k)+1.e-10))) 
+     smix(k)=min(grd,max(0.1*grd, 0.76*sqrt(tke(k)/ (buoy_sgs(k)+1.e-10)))) 
    end if
 
    if (dolteix) then 
       if (fixedtau) then
          tketau=600.
       else
-         tketau= max(0.5 * pblh /  ((ggr/300.*sgs_sens_heat_flux(1)*pblh)**(1./3.)),0.0)
+         tketau= max(0.5 * pblh /  ((ggr/thetav(1)*sgs_sens_heat_flux(1)*pblh)**(1./3.)),0.0)
       end if
       smix(k)=  tketau*sqrt(tke(k)) +(xkar*z(k)-tketau*sqrt(tke(k)))*exp(-z(k)/100.)
    end if
@@ -154,8 +154,8 @@ do k=1,nzm
        ! we will later advance rhotke if progtke=true
        tke(k)=max(0.0,tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss))
 
-       tk(k)=Ck*smix(k)*sqrt(tke(k))
-       !tk(k)=0.5*smix(k)*sqrt(tke(k))
+       !tk(k)=Ck*smix(k)*sqrt(tke(k))
+       tk(k)=0.5*smix(k)*sqrt(tke(k))
 
      end if
    end if
