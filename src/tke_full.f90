@@ -137,7 +137,8 @@ do k=1,nzm
        ! get Km 
        tk(k) = 0.5*smix(k)*sqrt(tke(k))
        a_prod_sh=(tk(k)+0.001)*def2(k)
-       a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
+       !a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
+       a_prod_bu=ggr/thetav(k) * sgs_thv_flux(k) 
        !a_diss=min(tke(k)/(4.*dt),Cee/smix(k)*tke(k)**1.5) ! cap the diss rate (useful for large time steps
        !a_diss=min(tke(k)/(4.*dt),0.16*2.5 / smix(k)*tke(k)**1.5) ! cap the diss rate (useful for large time steps
        a_diss=0.16*2.5 / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
