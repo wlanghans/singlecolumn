@@ -1,0 +1,3 @@
+* compile the code
+* run ./sc_wl
+* this runs the Case specified in CaseName; a corresponding directory with prm file has to exist
