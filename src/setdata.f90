@@ -99,7 +99,7 @@ do k = 1,nzm
    
 end do
 
-elseif (trim(case).eq.'TEIXEIRA04'.or.trim(case).eq.'CHEINET03') then
+elseif (trim(case).eq.'TEIXEIRA04'.or.trim(case).eq.'CHEINET03'.or.trim(case).eq.'TEST') then
 
 zinvbottom  = 1400.
 theta0      = 300.

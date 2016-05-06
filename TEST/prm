@@ -1,0 +1,38 @@
+&PARAMETERS
+dz = 40.
+nzm=75
+doconstdz = .true.
+
+betap=1.0
+betam=0.0
+
+dt=1.
+nstop=28800  ! 8 hours
+
+dosgs=.true.
+dosmagor=.false.
+dolteix = .true.
+fixedtau=.true.
+doedmf = .true.
+doconsttk = .false.
+dopblh = .true.
+pblhfluxmin = .true.
+dosurface=.true.
+dolargescale=.false.
+sfc_flx_fxd=.true. 
+tkconst = 0.0
+sst=5.0
+
+nup=10
+
+fluxt0   = 0.06    ! K m/s
+fluxq0   = 0.0e-05 ! g/g m/s
+tau0     = 0.0
+
+snapshot_do = .true.
+snapshot_start = 0
+snapshot_period =  100 ! 45
+snapshot_end = 1000000000
+snapshot_as_double = .true.
+snapshot_fields = 'upthv,upt,upthl,upw,upa,upqt,upqc,sumM,sumMthetav,rho,th,tke,heatflx,n2,lmix,tend_mix_rhothetav,tend_diss_rhotke,tend_buoy_rhotke,tend_mix_rhotke,tend_shear_rhotke,pres,tk,tkeflx,pblh'
+/
