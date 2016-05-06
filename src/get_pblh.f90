@@ -39,8 +39,8 @@ implicit none
     kthv = 1
     minthv = 9.E9
     DO WHILE (k.le.nzm)
-       ! compute flux from N^2 and write to qtke
-       qtke  = - buoy_sgs(k) * tkh(k) * thetav(k) / ggr   ! maximum QKE
+       ! use flux from previous step
+       qtke  = sgs_thv_flux(k) ! 
        IF (minthv > qtke) then
            minthv = qtke
            kthv = k

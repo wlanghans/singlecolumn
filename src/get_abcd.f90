@@ -52,45 +52,72 @@
            
            
            IF (k.gt.1.and.k.lt.nzm) THEN
-              a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *           &
-                    (tkf(k)/adzw(k)/dz - 0.5 * sumM(k))
-              b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz * & 
-                    (-tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1) ) - & 
-                    betap*rhof(k)/rhoin(k)/adz(k)/dz*               &
-                    (tkf(k)/adzw(k)/dz + 0.5 * sumM(k))
-              c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz * betap *         &
-                     (tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1))
+              !a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *           &
+              !      (tkf(k)/adzw(k)/dz - 0.5 * sumM(k))
+              a(k) = rhof(k)/rhoin(k)/adz(k)/dz *                   &
+                    (betap*tkf(k)/adzw(k)/dz - 0.5 * sumM(k))
+              !b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz * & 
+              !      (-tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1) ) - & 
+              !      betap*rhof(k)/rhoin(k)/adz(k)/dz*               &
+              !      (tkf(k)/adzw(k)/dz + 0.5 * sumM(k))
+              b(k) = -1./dt +  rhof(k+1)/rhoin(k)/adz(k)/dz * & 
+                    (-betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1) ) - & 
+                     rhof(k)/rhoin(k)/adz(k)/dz*               &
+                    (betap*tkf(k)/adzw(k)/dz + 0.5 * sumM(k))
+              !c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz * betap *         &
+              !       (tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1))
+              c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz *              &
+                     (betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1))
+              !d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
+              !      tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
+              !     -tkf(k)*rhof(k)/adzw(k)/dz*betam*(s(k)-s(k-1))         &
+              !     +(rhof(k)*(sumMs(k) - 0.5*betam*(s(k)+s(k-1))*sumM(k)))&
+              !     -(rhof(k+1)*(sumMs(k+1) - 0.5*betam*(s(k)+s(k+1))*sumM(k+1))) )
               d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
                     tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
                    -tkf(k)*rhof(k)/adzw(k)/dz*betam*(s(k)-s(k-1))         &
-                   +(rhof(k)*(sumMs(k) - 0.5*betam*(s(k)+s(k-1))*sumM(k)))&
-                   -(rhof(k+1)*(sumMs(k+1) - 0.5*betam*(s(k)+s(k+1))*sumM(k+1))) )
+                   +(rhof(k)* sumMs(k))&
+                   -(rhof(k+1)*sumMs(k+1)) )
            ELSEIF (k.eq.1) THEN
               a(k) = 0.0
-              b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz * &
-                    (-tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1) ) 
+              !b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz * &
+              !      (-tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1) ) 
+              b(k) = -1./dt +  rhof(k+1)/rhoin(k)/adz(k)/dz * &
+                    (-betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1) ) 
               if (.not.dosfcbcneuman) then
                   b(k) = b(k) - betap*vmag*tkf(1)/adz(k)/dz
               end if
-              c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz * betap *         &
-                     (tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1))
+              !c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz * betap *         &
+              !       (tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1))
+              c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz *                  &
+                     (betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1))
+              !d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
+              !      tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
+              !     -rhof(k+1)*(sumMs(k+1) - 0.5*betam*(s(k)+s(k+1))*sumM(k+1)))
               d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
                     tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
-                   -rhof(k+1)*(sumMs(k+1) - 0.5*betam*(s(k)+s(k+1))*sumM(k+1)))
+                   -rhof(k+1)*sumMs(k+1) )
               if (.not.dosfcbcneuman) then
                   d(k) = d(k) + vmag*tkf(1)/adz(k)/dz*(betam*s(k)-ssfc)
               else ! neuman bc, always fully explicit right now
                   d(k) = d(k) - kinflx/adz(k)/dz
               end if
            ELSE
-              a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *                  &
-                    (tkf(k)/adzw(k)/dz - 0.5 * sumM(k))
-              b(k) = -1./dt - betap* rhof(k)/rhoin(k)/adz(k)/dz *          &
-                    (tkf(k)/adzw(k)/dz + 0.5 * sumM(k) )
+              !a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *                  &
+              !      (tkf(k)/adzw(k)/dz - 0.5 * sumM(k))
+              a(k) = rhof(k)/rhoin(k)/adz(k)/dz *                           &
+                    (betap*tkf(k)/adzw(k)/dz - 0.5 * sumM(k))
+              !b(k) = -1./dt - betap* rhof(k)/rhoin(k)/adz(k)/dz *          &
+              !      (tkf(k)/adzw(k)/dz + 0.5 * sumM(k) )
+              b(k) = -1./dt - rhof(k)/rhoin(k)/adz(k)/dz *          &
+                    (betap * tkf(k)/adzw(k)/dz + 0.5 * sumM(k) )
               c(k) = 0.0
+              !d(k) = -s(k)/dt + 1./rhoin(k)/adz(k)/dz * (              &
+              !      tkf(k)*rhof(k)/adzw(k)/dz*betam*(s(k)-s(k-1))&
+              !     -rhof(k)*(sumMs(k) - 0.5*betam*(s(k)+s(k-1))*sumM(k)))
               d(k) = -s(k)/dt + 1./rhoin(k)/adz(k)/dz * (              &
                     tkf(k)*rhof(k)/adzw(k)/dz*betam*(s(k)-s(k-1))&
-                   -rhof(k)*(sumMs(k) - 0.5*betam*(s(k)+s(k-1))*sumM(k)))
+                   -rhof(k)*sumMs(k) )
            END IF
         ENDDO
 
