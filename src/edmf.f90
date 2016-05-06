@@ -140,15 +140,17 @@ implicit none
         !    write(*,*) 'qv=',qv(1)/(1.+qv(1))*1000. 
 ! updraft integration     
     DO i=1,nup
-       DO k=2,nz
+       DO k=2,nzm
 
           EntExp=exp(-ENT(k-1,i)*(zi(k)-zi(k-1)))
 
           ! WL assume environment unsaturated: use qv instead of qtotal for now
           ! WL FIX later once the prog. water variables are defined in Dycore
           QTn=qv(k-1)/(1.+qv(k-1))*(1.-EntExp)+UPQT(k-1,i)*EntExp
+          !QTn=qv(k)/(1.+qv(k))*(1.-EntExp)+UPQT(k-1,i)*EntExp
           ! WL assuming for now that the environment holds no liquid or solid water: theta_l=theta
           THLn=thetav(k-1)/(1.+epsv*qv(k-1)/(1.+qv(k-1)))& 
+          !THLn=thetav(k)/(1.+epsv*qv(k)/(1.+qv(k)))& 
                *(1.-EntExp)+UPTHL(k-1,i)*EntExp
           !Un=u(k)*(1.-EntExp)+UPU(k-1,i)*EntExp
           !Vn=v(k)*(1.-EntExp)+UPV(k-1,i)*EntExp
@@ -157,6 +159,7 @@ implicit none
           !THVn = UPTHL(k-1,i)*(1.+epsv*UPQT(k-1,i))
           !QCn = 0.
           B=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k-1)-1.)
+          !B=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k)-1.)
           EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
           Wn2=UPW(k-1,i)**2*EntW + 2.*Wa* B *(zi(k)-zi(k-1))   !+(1.-EntW)*Wa*B/(Wb+Wc*ENT(k-1,i))
           IF (Wn2 >0.) THEN
@@ -178,15 +181,21 @@ implicit none
 ! computing variables needed for tendency calculation
 
 
-! mass flux is zero at surface
+! mass flux is zero at surface and top
     sumM(1)       = 0.0
     sumMthetav(1) = 0.0
     sumMrv(1)     = 0.0
     sumMu(1)      = 0.0
     sumMv(1)      = 0.0
     sumMtke(1)    = 0.0
+    sumM(nz)       = 0.0
+    sumMthetav(nz) = 0.0
+    sumMrv(nz)     = 0.0
+    sumMu(nz)      = 0.0
+    sumMv(nz)      = 0.0
+    sumMtke(nz)    = 0.0
 
-    DO k=2,nz
+    DO k=2,nzm
       DO i=1,nup
         sumM(k)      =sumM(k)      +UPA(K,I)*UPW(K,I)
         ! WL and convert back to thetav

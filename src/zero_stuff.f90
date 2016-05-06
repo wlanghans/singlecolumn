@@ -35,11 +35,4 @@ Cthetav = 0.0
 Ctheta  = 0.0
 Crv     = 0.0
 
-sgs_thv_flux=0.0
-sgs_sens_heat_flux=0.0
-sgs_lat_heat_flux=0.0
-taux=0.0
-tauy=0.0
-sgs_tke_flux=0.0
-
 end subroutine zero_stuff

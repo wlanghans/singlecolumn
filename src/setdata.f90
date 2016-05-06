@@ -211,7 +211,14 @@ tabs0=tabs
  UPQC=0.
  ENT=0.
 
+ sgs_thv_flux=0.0
+ sgs_sens_heat_flux=0.0
+ sgs_lat_heat_flux=0.0
+ taux=0.0
+ tauy=0.0
+ sgs_tke_flux=0.0
 
+ ! write initial condition
  open(unit=45,file='./'//trim(case)//'/'//trim(case)//'.init',&
            form='formatted', action='write')
  write(45,FMT1)'z','p','rho','T','th','thv','qv' 

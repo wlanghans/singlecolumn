@@ -135,10 +135,10 @@ The formulation of the TKE boundary layer scheme follows the description given b
  \frac{\partial e}{\partial t}&=& \mathrm{ADV} + \mathrm{TRANS} + \mathrm{SHEAR} + \mathrm{BUOY} - \mathrm{DISS}\\
  \mathrm{TRANS} &=& \frac{1}{\rho_d}\frac{\partial}{\partial z} (\rho_d K_m  \frac{\partial e}{\partial z})\\
  \mathrm{SHEAR} &=& K_m \overline{D}^2 \\
- \mathrm{BUOY} &=& - \mathrm{Pr} K_m N^2\\
+ \mathrm{BUOY} &=& \frac{g}{\theta_v}\overline{w'\theta_v'}\\
  \mathrm{DISS}&=& 0.16\cdot 2.5\sqrt{e}/l.
 \end{eqnarray}
-The advective term is computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required (i.e., analogous to the water vapor mixing ratio). The eddy diffusivity for momentum is obtained as $K_m=0.5 l \sqrt{e}$ and $K_h=\mathrm{Pr} K_m$ with $\mathrm{Pr}=1$. The mixing length is obtained as
+The virtual potential temperature flux is the sum of the ED and MF parts and computed at the end of the previous time step. The advective term is eventually computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required (i.e., analogous to the water vapor mixing ratio). The eddy diffusivity for momentum is obtained as $K_m=0.5 l \sqrt{e}$ and $K_h=\mathrm{Pr} K_m$ with $\mathrm{Pr}=1$. The mixing length is obtained as
 \begin{eqnarray}
  l &=& \tau \sqrt{e} + (\kappa z - \tau \sqrt{e}) e^{-z/\alpha}
 \end{eqnarray}
