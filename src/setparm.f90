@@ -14,7 +14,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      ocean, land, nup, dopblh, windshear, &
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
-                     dolteix,pblhfluxmin,nzm, fixedtau, doneuman
+                     dolteix,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -31,6 +31,10 @@ close(55)
 
 path='./'//trim(case)//'/'
 
+if (doedmf.and.dosgs.and.fixedeps.and.eps0.lt.0.) then
+   write(*,*) 'ERROR: eps0 has to be non-negative'
+   stop
+end if
 
 
 !  Ensure parameters are set consistently
