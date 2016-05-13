@@ -161,7 +161,6 @@ implicit none
           call condensation_edmf(QTn,THLn,presi(k),THVn,QCn)
           BUOY(k-1,i)=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k-1)-1.)
         
-          !B=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k)-1.)
           EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
           Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))
           IF (Wn2 >0.) THEN
@@ -193,9 +192,10 @@ implicit none
     sumM(nz)       = 0.0
     sumMthetav(nz) = 0.0
     sumMrv(nz)     = 0.0
-    sumMu(nz)      = 0.0
-    sumMv(nz)      = 0.0
-    sumMtke(nz)    = 0.0
+
+    sumMu      = 0.0
+    sumMv      = 0.0
+    sumMtke    = 0.0
 
     DO k=2,nzm
       DO i=1,nup
@@ -210,7 +210,7 @@ implicit none
         !sumMv(k)  =sumMv(k)+UPA(K,i)*UPW(K,I)*UPV(K,I)
       ENDDO
     ENDDO
- 
+
 
 end subroutine edmf
 
