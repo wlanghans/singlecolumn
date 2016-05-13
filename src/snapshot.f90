@@ -588,6 +588,21 @@ module snapshot
                )
                ncsnap%field(field_count)%data2 => ENT (1:nzm,1:nup)
             end if
+
+            if (trim(field_name) .eq. 'B') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'B', &
+                  ! Long name
+                                           'plume buoyancy', &
+                  ! Units
+                                           'm/s2', &
+                  ! Dimensions
+                                           (/ zID, npID, timeID /) &
+               )
+               ncsnap%field(field_count)%data2 => BUOY (1:nzm,1:nup)
+            end if
+
             if (trim(field_name) .eq. 'upt') then
                call fill_fields_snapshot( &
                   ! Short name
