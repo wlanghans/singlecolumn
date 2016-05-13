@@ -21,10 +21,10 @@ qvspec  = qv/(1.+qv)
 ! water vapor mixing ratio rv (input has to be dry air density rho_d and vapor mixing ratio rv)
 if (doneuman.or.sfc_flx_fxd) then
   !Neuman
-  call get_abcd(rho,qv,sumMrv,Crv,tkh,r_s,a,b,c,d,.true.,sgs_lat_heat_flux (1))
+  call get_abcd(rho,qv,sumMrv,Crv,tkh,r_s,a,b,c,d,.true.,.true.,sgs_lat_heat_flux (1))
 else
   !Dirichlet
-  call get_abcd(rho,qv,sumMrv,Crv,tkh,r_s,a,b,c,d,.false.)
+  call get_abcd(rho,qv,sumMrv,Crv,tkh,r_s,a,b,c,d,.true.,.false.)
 end if
 call tridiag(a,b,c,d)
 
@@ -41,7 +41,7 @@ end if
 sgs_lat_heat_flux (2:nzm) = 1.0 * (  &  
               (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qv(2:nzm)-qv(1:nzm-1)) ) &
-                           +(sumMrv(2:nzm) - 0.5 * (betap*(d(2:nzm) + d(1:nzm-1)) + betam*(qv(2:nzm)+qv(1:nzm-1))) * sumM(2:nzm) ))
+                           +(sumMrv(2:nzm) - (betap*d(2:nzm) + betam*qv(2:nzm)) * sumM(2:nzm) ))
 
 ! compute rho and rhov tendency
 tend_sgs_rho_qv = rho * (d-qv)/dt    ! =rho_d * (rvnew - rvold) /dt
@@ -57,10 +57,10 @@ tend_sgs_rho_qt = 0.
 ! thetav (input has to be air density rho and thetav)
 if (doneuman.or.sfc_flx_fxd) then 
   !Neuman
-  call get_abcd(rhoold,thetav,sumMthetav,Cthetav,tkh,thetav_s,a,b,c,d,.true.,sgs_thv_flux (1))
+  call get_abcd(rhoold,thetav,sumMthetav,Cthetav,tkh,thetav_s,a,b,c,d,.true.,.true.,sgs_thv_flux (1))
 else
   !Dirichlet
-  call get_abcd(rhoold,thetav,sumMthetav,Cthetav,tkh,thetav_s,a,b,c,d,.false.)
+  call get_abcd(rhoold,thetav,sumMthetav,Cthetav,tkh,thetav_s,a,b,c,d,.true.,.false.)
 end if
 call tridiag(a,b,c,d)
 
@@ -84,7 +84,7 @@ end if
 sgs_thv_flux (2:nzm)       = 1. * ( & 
             (-1.)/adzw(2:nzm)/dz * 0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(thetav(2:nzm)-thetav(1:nzm-1)) ) &
-        + sumMthetav(2:nzm) - 0.5 * (betap*(d(2:nzm) + d(1:nzm-1)) + betam*(thetav(2:nzm)+thetav(1:nzm-1))) * sumM(2:nzm))
+        + sumMthetav(2:nzm) - (betap*d(2:nzm) + betam*thetav(2:nzm)) * sumM(2:nzm))
 ! WL don't even bother right now to compute it, set to zero
 !sgs_sens_heat_flux (2:nzm) = 0.5*(rhoold(1:nzm-1)+rhoold(2:nzm) ) * ( 2. * sgs_thv_flux (2:nzm)/(rhoold(1:nzm-1)+rhoold(2:nzm)) &
 sgs_sens_heat_flux (2:nzm) = 1. * ( sgs_thv_flux (2:nzm) &
@@ -99,10 +99,10 @@ thetav = d
 ! u (input has to be air density rho and u)
 if (doneuman.or.sfc_flx_fxd) then 
   ! Neuman
-  call get_abcd(rhoold,u,sumMu,Cm,tk,0.,a,b,c,d,.true.,taux(1))
+  call get_abcd(rhoold,u,sumMu,Cm,tk,0.,a,b,c,d,.false.,.true.,taux(1))
 else
   ! Dirichlet
-  call get_abcd(rhoold,u,sumMu,Cm,tk,0.,a,b,c,d,.false.)
+  call get_abcd(rhoold,u,sumMu,Cm,tk,0.,a,b,c,d,.false.,.false.)
 end if
 call tridiag(a,b,c,d)
 
@@ -127,10 +127,10 @@ u=d
 ! v (input has to be air density rho and u)
 if (doneuman.or.sfc_flx_fxd) then 
   ! Neuman
-  call get_abcd(rhoold,v,sumMv,Cm,tk,0.,a,b,c,d,.true.,tauy(1))
+  call get_abcd(rhoold,v,sumMv,Cm,tk,0.,a,b,c,d,.false.,.true.,tauy(1))
 else
   ! Dirichlet
-  call get_abcd(rhoold,v,sumMv,Cm,tk,0.,a,b,c,d,.false.)
+  call get_abcd(rhoold,v,sumMv,Cm,tk,0.,a,b,c,d,.false.,.false.)
 end if
 call tridiag(a,b,c,d)
 
@@ -156,15 +156,13 @@ if (progtke) then
   ! tke (input has to be dry air density rho_d and tke per mass of dry air) 
   ! use Neuman conditions right now, since Ctke unknown
   sgs_tke_flux(1) = 0.0   ! lower BC for tke transfer (questionable)
-  call get_abcd(rho,tke,sumMtke,0.,tk,0.,a,b,c,d,.true.,sgs_tke_flux(1))
+  call get_abcd(rho,tke,sumMtke,0.,tk,0.,a,b,c,d,.false.,.true.,sgs_tke_flux(1))
   call tridiag(a,b,c,d)
 
   !diagnose atm. fluxes
   !sgs_tke_flux(2:nzm) = 0.5*(rho(1:nzm-1)+rho(2:nzm))*(            &
-  sgs_tke_flux(2:nzm) =      (            &
-               (-1.)/adzw(2:nzm)/dz * 0.5*(tk(1:nzm-1) + tk(2:nzm)) *                  &
+  sgs_tke_flux(2:nzm) =    (-1.)/adzw(2:nzm)/dz * 0.5*(tk(1:nzm-1) + tk(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(tke(2:nzm)-tke(1:nzm-1)) ) &
-          + sumMtke(2:nzm) - 0.5 * (betap*(d(2:nzm) + d(1:nzm-1)) + betam*(tke(2:nzm)+tke(1:nzm-1))) * sumM(2:nzm) )
 
   ! tendency
   tend_sgs_rho_tke = rho * (d-tke)/dt
