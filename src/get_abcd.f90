@@ -21,7 +21,7 @@
         REAL, DIMENSION(nz    ), INTENT(in)  :: sumMs      ! sum(MiSi) on faces
         REAL,                    INTENT(in)  :: Cs,ssfc    ! drag coefficient, surface value of S
         LOGICAL,                 INTENT(in)  :: dosfcbcneuman ! If true, then neuman bc conditions, dirichlet otherwise
-        LOGICAL,                 INTENT(in)  :: massflux   ! If true, then sumM is used otherwise sumM=0
+        LOGICAL,                 INTENT(in)  :: massflux   ! If true, then sumM is used otherwise sumM=0; note that sumMs needs to be zero then
         REAL, INTENT(in)   ,     OPTIONAL    :: kinflx
         ! output
         REAL, DIMENSION(nzm),    INTENT(out) :: a,b,c,d
@@ -48,8 +48,6 @@
           sumMloc = sumM
         else
           sumMloc = 0.0
-          !sumMs has to be zero in this case too (should already be but make sure)
-          sumMs   = 0.0
         end if
 
 
