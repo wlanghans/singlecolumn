@@ -53,19 +53,19 @@
            
            IF (k.gt.1.and.k.lt.nzm) THEN
               a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *           &
-                    (tkf(k)/adzw(k)/dz )
+                    (tkf(k)/adzw(k)/dz)
               !a(k) = rhof(k)/rhoin(k)/adz(k)/dz *                   &
               !      (betap*tkf(k)/adzw(k)/dz - 0.5 * sumM(k))
               b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz * & 
                     (-tkf(k+1)/adzw(k+1)/dz ) - & 
                     betap*rhof(k)/rhoin(k)/adz(k)/dz*               &
-                    (tkf(k)/adzw(k)/dz +  sumM(k))
+                    (tkf(k)/adzw(k)/dz + sumM(k))
               !b(k) = -1./dt +  rhof(k+1)/rhoin(k)/adz(k)/dz * & 
               !      (-betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1) ) - & 
               !       rhof(k)/rhoin(k)/adz(k)/dz*               &
               !      (betap*tkf(k)/adzw(k)/dz + 0.5 * sumM(k))
               c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz * betap *         &
-                     (tkf(k+1)/adzw(k+1)/dz +  sumM(k+1))
+                     (tkf(k+1)/adzw(k+1)/dz + sumM(k+1))
               !c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz *              &
               !       (betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1))
               d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
@@ -88,7 +88,7 @@
                   b(k) = b(k) - betap*vmag*tkf(1)/adz(k)/dz
               end if
               c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz * betap *         &
-                     (tkf(k+1)/adzw(k+1)/dz +  sumM(k+1))
+                     (tkf(k+1)/adzw(k+1)/dz + sumM(k+1))
               !c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz *                  &
               !       (betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumM(k+1))
               d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
@@ -103,8 +103,8 @@
                   d(k) = d(k) - kinflx/adz(k)/dz
               end if
            ELSE
-              a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *           &
-                    (tkf(k)/adzw(k)/dz )
+              a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *                  &
+                    (tkf(k)/adzw(k)/dz)
               !a(k) = rhof(k)/rhoin(k)/adz(k)/dz *                           &
               !      (betap*tkf(k)/adzw(k)/dz - 0.5 * sumM(k))
               b(k) = -1./dt - betap* rhof(k)/rhoin(k)/adz(k)/dz *          &
