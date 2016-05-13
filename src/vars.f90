@@ -30,7 +30,7 @@ real, external :: esatw,esati,dtesatw,dtesati,qsatw,qsati,dtqsatw,dtqsati
 integer, external :: lenstr, bytes_in_rec
 
 ! plume properties
-real, allocatable, dimension(:,:), target :: UPW,UPTHL,UPQT,UPQC,UPA,UPU,UPV,UPTHV,UPT,ENT
+real, allocatable, dimension(:,:), target :: UPW,UPTHL,UPQT,UPQC,UPA,UPU,UPV,UPTHV,UPT,ENT,BUOY
 
 
 
