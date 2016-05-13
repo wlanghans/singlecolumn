@@ -39,7 +39,7 @@ implicit none
       INTEGER :: K,I
       REAL :: wthv,wqt,wthl,wstar,qstar,thstar,sigmaW,sigmaQT,sigmaTH,sigmaTHV,zs, &
            pwmin,pwmax,wmin,wmax,wlv,wtv
-      REAL :: B,B2,B3,QTn,THLn,THVn,QCn,Un,Vn,Wn2,EntEXP,EntW, hlp
+      REAL :: QTn,THLn,THVn,QCn,Un,Vn,Wn2,EntEXP,EntW, hlp
 
 ! w parameters
       REAL,PARAMETER :: &
@@ -63,6 +63,7 @@ implicit none
  UPV=0.
  UPQC=0.
  ENT=0.
+ BUOY=0.
 
  
  ! surface fluxes
@@ -89,7 +90,11 @@ implicit none
  ! Calculate entrainment rate: Ent=Ent0/dz*P(dz/L0) for each layer             
     do i=1,nup
     do k=1,nzm
-      ENT(k,i)= 1.e-03 ! real(ENTi(k,i))*Ent0/(zi(k+1)-zi(k))
+      if (fixedeps) then
+        ENT(k,i)= eps0  
+      else
+        ENT(k,i)=real(ENTi(k,i))*Ent0/(zi(k+1)-zi(k))
+      end if
     enddo
     enddo
 
@@ -147,21 +152,18 @@ implicit none
           ! WL assume environment unsaturated: use qv instead of qtotal for now
           ! WL FIX later once the prog. water variables are defined in Dycore
           QTn=qv(k-1)/(1.+qv(k-1))*(1.-EntExp)+UPQT(k-1,i)*EntExp
-          !QTn=qv(k)/(1.+qv(k))*(1.-EntExp)+UPQT(k-1,i)*EntExp
           ! WL assuming for now that the environment holds no liquid or solid water: theta_l=theta
           THLn=thetav(k-1)/(1.+epsv*qv(k-1)/(1.+qv(k-1)))& 
-          !THLn=thetav(k)/(1.+epsv*qv(k)/(1.+qv(k)))& 
                *(1.-EntExp)+UPTHL(k-1,i)*EntExp
           !Un=u(k)*(1.-EntExp)+UPU(k-1,i)*EntExp
           !Vn=v(k)*(1.-EntExp)+UPV(k-1,i)*EntExp
           ! compute condensation
           call condensation_edmf(QTn,THLn,presi(k),THVn,QCn)
-          !THVn = UPTHL(k-1,i)*(1.+epsv*UPQT(k-1,i))
-          !QCn = 0.
-          B=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k-1)-1.)
+          BUOY(k-1,i)=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k-1)-1.)
+        
           !B=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k)-1.)
           EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
-          Wn2=UPW(k-1,i)**2*EntW + 2.*Wa* B *(zi(k)-zi(k-1))   !+(1.-EntW)*Wa*B/(Wb+Wc*ENT(k-1,i))
+          Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))
           IF (Wn2 >0.) THEN
             UPW(k,i)=sqrt(Wn2)
             UPTHV(k,i)=THVn
