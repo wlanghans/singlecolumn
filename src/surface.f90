@@ -34,14 +34,29 @@ if(.not.SFC_FLX_FXD) then
                       qv(1)/(1.-qv(1)),thetav(1)/(1.+epsv* qv(1)),thetav(1),z(1),sst+t00, r_s, thetav_s)
          sgs_thv_flux(1) = sgs_sens_heat_flux(1) * (1.+epsv* qv(1)) + epsv * thetav(1)/(1.+epsv* qv(1)) * sgs_lat_heat_flux(1)
          Cthetav = -sgs_thv_flux(1) / (thetav(1) - thetav_s)/vmag
-                      
 
+         if (SFC_CS_FXD) then
+           ! reset transfer coefficients 
+           Ctheta  = Cs_in
+           Cthetav = Cs_in
+           Crv     = Cs_in
+           ! recompute fluxes in case explicit Neuman conditions are used
+           sgs_sens_heat_flux(1)     = -Ctheta * vmag * (thetav(1)/(1.+epsv* qv(1)) - theta_s)
+           sgs_lat_heat_flux(1) = -Crv  * vmag * (qv(1)/(1.-qv(1)) - r_s)
+           sgs_thv_flux(1) = sgs_sens_heat_flux(1) * (1.+epsv* qv(1)) + epsv * thetav(1)/(1.+epsv* qv(1)) * sgs_lat_heat_flux(1)
+         end if
+                      
          ! WL re-compute Cm if tau is fixed
          if(SFC_TAU_FXD) then
          ! NOTE: if flux is prescribed, then we will use neuman conditions. Cm will actually not be used
             Cm = tau0 / vmag**2
             taux(1) = -tau0 * u(1)  / vmag 
             tauy(1) = -tau0 * v(1)  / vmag 
+         elseif (SFC_CM_FXD) then
+            Cm = Cm_in
+            tau0 =  Cm * vmag**2
+            taux(1) = -tau0 * u(1)  / vmag
+            tauy(1) = -tau0 * v(1)  / vmag
          end if
 
   end if ! OCEAN
@@ -74,6 +89,12 @@ else   ! IF SFC_FLX_FXD=True
                 ggr/tabs(1)* (fluxt0+epsv*tabs(1)*fluxq0),vmag,z0)
       tau0  = ustar**2
       Cm = tau0 / vmag**2
+     
+      if (SFC_CM_FXD) then
+         Cm = Cm_in
+         tau0 = Cm * vmag**2
+      end if
+
     else
       Cm = tau0 / vmag**2
       ustar=sqrt(tau0)
