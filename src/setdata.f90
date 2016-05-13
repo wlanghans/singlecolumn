@@ -217,6 +217,8 @@ tabs0=tabs
  taux=0.0
  tauy=0.0
  sgs_tke_flux=0.0
+ tk=0.
+ tkh=0.
 
  ! write initial condition
  open(unit=45,file='./'//trim(case)//'/'//trim(case)//'.init',&
