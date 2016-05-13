@@ -14,7 +14,8 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      ocean, land, nup, dopblh, windshear, &
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
-                     dolteix,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0
+                     dolteix,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
+                     sfc_cs_fxd, sfc_cm_fxd
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -38,6 +39,72 @@ end if
 
 
 !  Ensure parameters are set consistently
+if ((betam+betap).ne.1.) betam=1.-betap
+if (betam.gt.1.or.betam.lt.0.) then
+     !namelist error checking
+        write(*,*) '****** ERROR: bad specification of betap'
+        stop
+end if
+write(*,*) '++++++++++++++++++++++++++++++++++++++++++++++++++'
+write(*,*) 'Solver for k>1: '
+write(*,*) '++++++++++++++++++++++++++++++++++++++++++++++++++'
+write(*,*) 'Implicit weight is beta+=',betap
+write(*,*) '  '
+if (sfc_flx_fxd.and.sfc_cs_fxd) then
+   write(*,*) 'Since sfc_flx is fixed, sfc_cs_fxd is set to .false.'
+   write(*,*) '  '
+   sfc_cs_fxd=.false.
+end if
+if (sfc_tau_fxd.and.sfc_cm_fxd) then
+   write(*,*) 'Since tau is fixed, sfc_cm_fxd is set to .false.'
+   write(*,*) '  '
+   sfc_cm_fxd=.false.
+end if
+if (.not.dosurface) then
+   write(*,*) 'dosurface = .false., thus zero all surface fluxes'
+   write(*,*) 'fluxt0=0,fluxq0=0, and tau0=0'
+   write(*,*) '  '
+   fluxt0=0.0
+   fluxq0=0.0
+   tau0=0.0
+   sfc_flx_fxd=.true.
+   sfc_tau_fxd=.true.
+end if
+write(*,*) '++++++++++++++++++++++++++++++++++++++++++++++++++'
+write(*,*) 'Solver for k=1: '
+write(*,*) '++++++++++++++++++++++++++++++++++++++++++++++++++'
+if (sfc_flx_fxd.or.doneuman) then
+   write(*,*) 'Neuman BC is used for sgs-tendencies of scalars'
+   if (sfc_flx_fxd) then
+     write(*,*) 'Explicit solve with fixed fluxes: ', fluxt0,' K m/s  and ', fluxq0, ' g/g m/s' 
+   else
+     write(*,*) 'Implicit weight is beta+=',betap
+   end if
+else
+    write(*,*) 'Dirichlet BC is used for sgs-tendencies of scalars'
+    write(*,*) 'Implicit weight is beta+=',betap
+end if
+if (sfc_tau_fxd.or.doneuman) then
+   write(*,*) 'Neuman BC is used for sgs-tendencies of momentum'
+   if (sfc_tau_fxd) then
+     write(*,*) 'Explicit solve with fixed tau = ', tau0,' (m/s)**2 '
+   else
+     write(*,*) 'Implicit weight is beta+=',betap
+   end if
+else
+    write(*,*) 'Dirichlet BC is used for sgs-tendencies of momentum'
+    write(*,*) 'Implicit weight is beta+=',betap
+end if
+
+if (sfc_cs_fxd) then
+   write(*,*) 'Cs is fixed at ', cs_in,', T_s =  ',sst+t00
+end if
+if (sfc_cm_fxd) then
+   write(*,*) 'Cm is fixed at ', cm_in
+end if
+
+write(*,*) '  '
+write(*,*) 'General other settings:  '
 if (dosgs.and.doedmf) then 
    dopblh = .true.
    pblhfluxmin = .true.
@@ -52,34 +119,6 @@ if (dosgs.and.dolteix.and..not.fixedtau) then
    pblhfluxmin=.true.
    write(*,*) 'Setting dopblh = .true. and pblhfluxmin = .true.'
 end if
-if (.not.dosurface) then
-   write(*,*) 'dosurface = .false., thus zero all surface fluxes'
-   write(*,*) 'fluxt0=0,fluxq0=0, and tau0=0'
-   fluxt0=0.0
-   fluxq0=0.0
-   tau0=0.0
-   sfc_flx_fxd=.true.
-   sfc_tau_fxd=.true.
-end if
-
-if (sfc_flx_fxd.or.doneuman) then
-   write(*,*) 'Fully explicit Neuman BC is used for sgs-tendencies of scalars'
-   if (sfc_flx_fxd) then
-     write(*,*) ' Fixed fluxes are: ', fluxt0,' K m/s  and ', fluxq0, ' g/g m/s' 
-   end if
-else
-    write(*,*) 'Dirichlet BC is used for sgs-tendencies of scalars'
-end if
-if (sfc_tau_fxd.or.doneuman) then
-   write(*,*) 'Fully explicit Neuman BC is used for sgs-tendencies of momentum'
-   if (sfc_tau_fxd) then
-     write(*,*) ' Fixed tau at sfc is ', tau0,' (m/s)**2 '
-   end if
-else
-    write(*,*) 'Dirichlet BC is used for sgs-tendencies of momentum'
-end if
-
-
 if (doconsttk) then
   if (dosgs) write(*,*) 'doconsttk=.true., a constant eddy-diffusivity K=',tkconst,' m2/s is used'
 else
@@ -93,12 +132,6 @@ else
 end if
 
 if (land) ocean=.false.
-if ((betam+betap).ne.1.) betam=1.-betap
-if (betam.gt.1.or.betam.lt.0.) then
-     !namelist error checking
-        write(*,*) '****** ERROR: bad specification of betap'
-        stop
-end if
 if (snapshot_fields(1:1) .eq. '+') then
    snapshot_fields = 'u,v,th,thv,tabs,tke,rho,qv,qcl,qci,vaporflx,heatflx,virtheatflx,cthetav,crv,ctheta,cm,'&
                      //trim(snapshot_fields(2:len(snapshot_fields)))
