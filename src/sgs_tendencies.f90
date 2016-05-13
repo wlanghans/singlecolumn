@@ -162,7 +162,7 @@ if (progtke) then
   !diagnose atm. fluxes
   !sgs_tke_flux(2:nzm) = 0.5*(rho(1:nzm-1)+rho(2:nzm))*(            &
   sgs_tke_flux(2:nzm) =    (-1.)/adzw(2:nzm)/dz * 0.5*(tk(1:nzm-1) + tk(2:nzm)) *                  &
-                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(tke(2:nzm)-tke(1:nzm-1)) ) &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(tke(2:nzm)-tke(1:nzm-1)) ) 
 
   ! tendency
   tend_sgs_rho_tke = rho * (d-tke)/dt
