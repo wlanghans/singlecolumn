@@ -1,4 +1,4 @@
-\begin{thebibliography}{14}
+\begin{thebibliography}{13}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
@@ -41,18 +41,6 @@ Lenschow, D.~H., J.~C. Wyngaard, and W.~T. Pennell, 1980: Mean-field and
   second-moment budgets in a baroclinic, convective boundary layer. \textit{J.
   Atmos. Sci.}, \textbf{37}, 1313--1326.
 
-\bibitem[{Siebesma et~al.(2007)Siebesma, Soares, and Teixeira}]{siebesma07}
-Siebesma, A.~P., P.~M.~M. Soares, and J.~Teixeira, 2007: A combined
-  eddy-diffusivity mass-flux approach for the convective boundary layer.
-  \textit{J. Atmos. Sci.}, \textbf{64}, 1230--1248.
-
-\bibitem[{Soares et~al.(2004)Soares, Miranda, Siebesma, and
-  Teixeira}]{soares04}
-Soares, P. M.~M., P.~M.~A. Miranda, A.~P. Siebesma, and J.~Teixeira, 2004: An
-  eddy-diffusivity/mass-flux parametrization for dry and shallow cumulus
-  convection. \textit{Quart. J. Roy. Met. Soc.}, \textbf{130~(604)},
-  3365--3383.
-
 \bibitem[{Stull(1994)}]{stull94}
 Stull, R.~B., 1994: A convective transport theory for surface fluxes.
   \textit{J. Atmos. Sci.}, \textbf{51}, 3--22.
@@ -77,6 +65,11 @@ Su\v{s}elj, K., J.~Teixeira, and G.~Matheou, 2012: Eddy diffusivity/mass flux
 Teixeira, J. and S.~Cheinet, 2004: A simple mixing length formulation for the
   eddy-diffusivity parameterization of dry convection. \textit{Bound.-Lay.
   Meteor.}, \textbf{110~(3)}, 435--453.
+
+\bibitem[{Tiedtke(1989)}]{tiedtke89}
+Tiedtke, M., 1989: A comprehensive mass flux scheme for cumulus
+  parameterization in large-scale models. \textit{Mon. Wea. Rev.},
+  \textbf{117}, 1779--1800.
 
 \bibitem[{Wyngaard(2010)}]{wyngaard10}
 Wyngaard, J.~C., 2010: \textit{Turbulence in the Atmosphere}. Cambridge

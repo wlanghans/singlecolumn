@@ -228,45 +228,45 @@ with $\epsilon_d=0.1$, $L_0=100$~m, $a=2/3$, $b=0.002$~m$^{-1}$, $c=1.5$, and $\
 
 \section{Solving for the tendency}\label{sec:solve}
 
-Equation (\ref{eqn:tendency}) needs to be solved to obtain tentendy $T^{\psi}$. The spatial discretization of the equations is done using a centered scheme for the diffusion term and the mass-flux term. Same as in Teixeira and Siebesma (2000), \cite{siebesma07}, and \cite{soares04}, disretization in time is achieved using a fully implicit scheme for both the diffusion and the mass flux term. $K$, $M_i$, and $\psi^{up}_i$ are treated explicitly in time.\footnote{If the prognostic TKE closure is used then SAM would use an intermediate $K$ obtained from an intermediate $e$ that got advanced through a truncated budget (\ref{eqn:tkebudget}) without the TRANS term. TRANS (i.e. mixing) is then computed based on the intermediate $e$ and $K$. We find, however, that this approach leads to strange instabilities in a CPBL test. Thus, we use a truly explicit approach for $e$ and $K$.} See the discussion in \cite{siebesma07} (section 4c and appendix B) for further reference. For brevity we drop index $_\psi$ here for eddy diffusivities $K$. The vertical grid structure and the indexing is illustrated in Fig.~\ref{fig:staggering}. The discretized form of Eq. (\ref{eqn:tendency}) is
+Equation (\ref{eqn:tendency}) needs to be solved to obtain tentendy $T^{\psi}$. The spatial discretization of the equations is done using a centered scheme for the diffusion term and the mass-flux term. $K$, $M_i$, and $\psi^{up}_i$ are treated explicitly in time while other terms can be implicit. \footnote{If the prognostic TKE closure is used then SAM would use an intermediate $K$ obtained from an intermediate $e$ that got advanced through a truncated budget (\ref{eqn:tkebudget}) without the TRANS term. TRANS (i.e. mixing) is then computed based on the intermediate $e$ and $K$. We find, however, that this approach leads to strange instabilities in a CPBL test. Thus, we use a truly explicit approach for $e$ and $K$.} For brevity we drop index $_\psi$ here for eddy diffusivities $K$. The vertical grid structure and the indexing is illustrated in Fig.~\ref{fig:staggering} and is the same as used by \cite{tiedtke89}. An important stability criterion -- realized by \cite{tiedtke89} -- is that the environmental value of $\psi$ at the interface $k+1/2$ can not be taken as the average between $k$ and $k+1$. The interface value of $\psi$ is needed in the subsidence term $- \psi(z) \sum_i M_i(z)$ and in line with an upwind discretization has to be interpolated/taken from above. Since all prognostic variables are to a good approximation conserved along the unsaturated downdraft (besides detrainment effects) we simply say $\psi^{k+1/2}=\psi^{k+1}$ and  $\psi^{k-1/2}=\psi^{k}$. We find that taking the average indeed results in numerical instabilities, while this approach works fine. The discretized form of Eq. (\ref{eqn:tendency}) is then
 \begin{align*}
   &\frac{\psi^{n+1,k}- \psi^{n,k} }{\Delta t} =\\
   &-\frac{1}{\rho^{n,k}\Delta z^{k}}\left\{ -\frac{K^{n,k+1/2}\rho^{n,k+1/2} }{\Delta z^{k+1/2}} [\beta_1^+(\psi^{n+1,k+1}-\psi^{n+1,k}) + \beta_1^-(\psi^{n,k+1}-\psi^{n,k})] \right. \\
     & \left.+\frac{K^{n,k-1/2}\rho^{n,k-1/2} }{\Delta z^{k-1/2}} [\beta_1^+(\psi^{n+1,k}-\psi^{n+1,k-1}) + \beta_1^-(\psi^{n,k}-\psi^{n,k-1})] \right.\\
-    & \left. +\rho^{n,k+1/2}\left[\sum_i M_i^{n,k+1/2}\psi_i^{up~n,k+1/2} - \frac{1}{2}(\beta_2^+\psi^{n+1,k}+\beta_2^-\psi^{n,k}+\beta_2^+\psi^{n+1,k+1}+\beta_2^-\psi^{n,k+1} )\sum_i M_i^{n,k+1/2} \right]\right.\\
-    &\left.-\rho^{n,k-1/2}\left[\sum_i M_i^{n,k-1/2}\psi_i^{up~n,k-1/2} - \frac{1}{2}(\beta_2^+\psi^{n+1,k}+\beta_2^-\psi^{n,k}+\beta_2^+\psi^{n+1,k-1}+\beta_2^-\psi^{n,k-1} )\sum_i M_i^{n,k-1/2} \right] \right\}\\
+    & \left. +\rho^{n,k+1/2}\left[\sum_i M_i^{n,k+1/2}\psi_i^{up~n,k+1/2} - (\beta_2^+\psi^{n+1,k+1}+\beta_2^-\psi^{n,k+1} )\sum_i M_i^{n,k+1/2} \right]\right.\\
+    &\left.-\rho^{n,k-1/2}\left[\sum_i M_i^{n,k-1/2}\psi_i^{up~n,k-1/2} -(\beta_2^+\psi^{n+1,k}+\beta_2^-\psi^{n,k} )\sum_i M_i^{n,k-1/2} \right] \right\}\\
 \end{align*}
-with $\beta_1^+=1-\beta_1^-$ and $\beta_2^+=1-\beta_2^-$ the implicit weights. A fully implicit solver, i.e., $\beta_1^{+}=\beta_2^{+}=1$, is used here to prevent instabilities. A tridiagonal matrix solver is used to solve $\mathbf{A}\cdot\Psi^{n+1}=\mathbf{d}$ for $\Psi^{n+1}$. 
+with $\beta_1^+=1-\beta_1^-$ and $\beta_2^+=1-\beta_2^-$ the implicit weights. A fully implicit solver, i.e., $\beta_1^{+}=\beta_2^{+}=1$, is mostly used here. A tridiagonal matrix solver is used to solve $\mathbf{A}\cdot\Psi^{n+1}=\mathbf{d}$ for $\Psi^{n+1}$. 
 
 \noindent For $2\leq k \leq N_k-1$ the coefficients are given as 
 
 \begin{align*}
-  a_k &=  \frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+ \frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}-\beta_2^+\frac{1}{2} \sum_iM_i^{n,k-1/2}\right]\\
-    b_k &= -\frac{1}{\Delta t} + \frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k} \left[-\beta_1^+\frac{K^{n,k+1/2}}{\Delta z ^{k+1/2}}+\beta_2^+\frac{1}{2}\sum_iM_i^{n,k+1/2} \right]-\frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+\frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}+\beta_2^+\frac{1}{2}\sum_iM_i^{n,k-1/2} \right] \\
-      c_k &= \frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k}\left[\beta_1^+ \frac{K^{n,k+1/2}}{\Delta z ^{k+1/2}}+\beta_2^+\frac{1}{2}\sum_iM_i^{n,k+1/2} \right] \\
+  a_k &=  \frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+ \frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}\right]\\
+    b_k &= -\frac{1}{\Delta t} + \frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k} \left[-\beta_1^+\frac{K^{n,k+1/2}}{\Delta z ^{k+1/2}} \right]-\frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+\frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}+\beta_2^+\sum_iM_i^{n,k-1/2} \right] \\
+      c_k &= \frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k}\left[\beta_1^+ \frac{K^{n,k+1/2}}{\Delta z ^{k+1/2}}+\beta_2^+\sum_iM_i^{n,k+1/2} \right] \\
       d_k &=-\frac{\psi^{n,k}}{\Delta t} - \frac{1}{\rho^{n,k}\Delta z^k} \left\{ \frac{K^{n,k+1/2}\rho^{n,k+1/2}}{\Delta z^{k+1/2}}\beta_1^{-}\left[\psi^{n,k+1} - \psi^{n,k}\right]-\frac{K^{n,k-1/2}\rho^{n,k-1/2}}{\Delta z^{k-1/2}}\beta_1^{-}\left[\psi^{n,k} - \psi^{n,k-1}\right]\right.   \\   
-          & \left.+\rho^{n,k-1/2}\left[\sum_iM_i^{n,k-1/2}\psi_i^{up~n,k-1/2} - \frac{1}{2}\beta_2^{-}(\psi^{n,k}+\psi^{n,k-1})\sum_iM_i^{n,k-1/2} \right]\right.\\
-          & \left. -\rho^{n,k+1/2}\left[\sum_iM_i^{n,k+1/2}\psi_i^{up~n,k+1/2} - \frac{1}{2}\beta_2^{-}(\psi^{n,k}+\psi^{n,k+1})\sum_iM_i^{n,k+1/2} \right] \right\}.
+          & \left.+\rho^{n,k-1/2}\left[\sum_iM_i^{n,k-1/2}\psi_i^{up~n,k-1/2} - \beta_2^{-}\psi^{n,k}\sum_iM_i^{n,k-1/2} \right]\right.\\
+          & \left. -\rho^{n,k+1/2}\left[\sum_iM_i^{n,k+1/2}\psi_i^{up~n,k+1/2} - \beta_2^{-}\psi^{n,k+1}\sum_iM_i^{n,k+1/2} \right] \right\}.
 \end{align*}
 
 \noindent The boundary conditions at the surface are specified for $k=1$, as
 
 \begin{align*}
   a_k &= 0 \\
-    b_k &= -\frac{1}{\Delta t} +\frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k} \left[- \beta_1^+\frac{K^{n,k+1/2}}{\Delta z^{k+1/2}}+ \beta_2^+\frac{1}{2}\sum_iM_i^{n,k+1/2} \right]-\beta_1^+|\mathbf{v_{h1}}|C^n_{\psi}/\Delta z^k  \\
+    b_k &= -\frac{1}{\Delta t} +\frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k} \left[- \beta_1^+\frac{K^{n,k+1/2}}{\Delta z^{k+1/2}} \right]-\beta_1^+|\mathbf{v_{h1}}|C^n_{\psi}/\Delta z^k  \\
       c_k &= \mathrm{same~as~for~}2\leq k \leq N_k-1 \\
       d_k &=  -\frac{\psi^{n,k}}{\Delta t} - \frac{1}{\rho^{n,k}\Delta z^k} \left\{ \frac{K^{n,k+1/2}\rho^{n,k+1/2}}{\Delta z^{k+1/2}}\beta_1^{-}\left[\psi^{n,k+1} - \psi^{n,k}\right]\right.   \\   
-          & \left. -\rho^{n,k+1/2}\left[\sum_iM_i^{n,k+1/2}\psi_i^{up~n,k+1/2} - \frac{1}{2}\beta_2^{-}(\psi^{n,k}+\psi^{n,k+1})\sum_iM_i^{n,k+1/2} \right] \right\} +|\mathbf{v_{h1}}|\frac{C^n_{\psi}}{\Delta z^k}\left[\beta^-\psi^{n,k} - \psi_s\right]    
+          & \left. -\rho^{n,k+1/2}\left[\sum_iM_i^{n,k+1/2}\psi_i^{up~n,k+1/2} -\beta_2^{-}\psi^{n,k+1}\sum_iM_i^{n,k+1/2} \right] \right\} +|\mathbf{v_{h1}}|\frac{C^n_{\psi}}{\Delta z^k}\left[\beta^-\psi^{n,k} - \psi_s\right]    
 \end{align*}
 This formulation with Dirichlet boundary conditions makes use of the drag coefficients computed in the surface scheme and through (\ref{eqn:dragvirtual}). The user can, however, also decide to use a Neuman boundary condition ({\tt doneuman=.true.}) using the fluxes from the surface scheme and from (\ref{eqn:wthetav}). In this case, the last rhs term in $b_k$ is dropped and the last term in $d_k$ becomes $- \overline{\psi'w'}^n/\Delta z^k$ makeing the surface fluxes fully explicit. This explicit Neuman boundary condition is also used if surface fluxes are prescribed ({\tt sfc\_tau\_fxd} or {\tt sfc\_flx\_fxd} respectively). Same as in SAM, the surface flux of $e$ is assumed to be zero and the explicit Neuman condition is always used. 
 
 The boundary condition at the top for $k=N_k$ is given as
 \begin{align*}
   a_k &= \mathrm{same~as~for~}2\leq k \leq N_k-1  \\
-    b_k &= -\frac{1}{\Delta t} - \frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+\frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}+\beta_2^+\frac{1}{2}\sum_iM_i^{n,k-1/2} \right] \\
+    b_k &= -\frac{1}{\Delta t} - \frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+\frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}+\beta_2^+\sum_iM_i^{n,k-1/2} \right] \\
       c_k &= 0 \\
       d_k &= -\frac{\psi^{n,k}}{\Delta t} + \frac{1}{\rho^{n,k}\Delta z^k} \left\{ \frac{K^{n,k-1/2}\rho^{n,k-1/2}}{\Delta z^{k-1/2}}\beta_1^{-}\left[\psi^{n,k} - \psi^{n,k-1}\right]\right.   \\   
-          & \left.-\rho^{n,k-1/2}\left[\sum_iM_i^{n,k-1/2}\psi_i^{up~n,k-1/2} - \frac{1}{2}\beta_2^{-}(\psi^{n,k}+\psi^{n,k-1})\sum_iM_i^{n,k-1/2} \right]\right\}.    
+          & \left.-\rho^{n,k-1/2}\left[\sum_iM_i^{n,k-1/2}\psi_i^{up~n,k-1/2} -\beta_2^{-}\psi^{n,k}\sum_iM_i^{n,k-1/2} \right]\right\}.    
 \end{align*}
 Again, $\rho$ needs to be replaced by $\rho_d$ in case of $\psi=r_v$ or $\psi=e$. 
 
@@ -295,7 +295,6 @@ W.L. would like to thank Joao Teixeira and Kay Suselj for providing the code of 
 
 \bibliographystyle{ametsoc}
 \input{documentation.bbl}
-%\bibliography
 
  
 \end{document}          
