@@ -21,7 +21,7 @@ sumM(nz), sumMrv(nz), sumMu(nz), sumMv(nz), sumMtke(nz), sumMthetav(nz), buoy_sg
 allocate(sgs_sens_heat_flux(nzm), sgs_lat_heat_flux(nzm), sgs_thv_flux(nzm), taux(nzm), tauy(nzm), sgs_tke_flux(nzm))
 
 allocate(UPW(nz,nup),UPTHL(nz,nup),UPQT(nz,nup),UPQC(nz,nup),UPA(nz,nup),UPU(nz,nup),UPV(nz,nup),UPTHV(nz,nup),UPT(nz,nup))
-allocate(ENT(nzm,nup))
+allocate(ENT(nzm,nup),BUOY(nzm,nup))
 
 
 end subroutine alloc
