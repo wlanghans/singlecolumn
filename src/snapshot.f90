@@ -562,6 +562,20 @@ module snapshot
                ncsnap%field(field_count)%data1 => sumMthetav (1:nz)
             end if
 
+            if (trim(field_name) .eq. 'upm') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'upm', &
+                  ! Long name
+                                           'plume mass flux', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ z2ID, npID, timeID /) &
+               )
+               ncsnap%field(field_count)%data2 => UPM (1:nz,1:nup)
+            end if
+
             if (trim(field_name) .eq. 'upw') then
                call fill_fields_snapshot( &
                   ! Short name
