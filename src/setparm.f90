@@ -15,7 +15,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
                      dolteix,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
-                     sfc_cs_fxd, sfc_cm_fxd
+                     sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -31,6 +31,20 @@ end if
 close(55)
 
 path='./'//trim(case)//'/'
+
+if (dosgs.and.doedmf.and.count((/fixedeps,neggerseps,randomeps/)).gt.1  ) then
+  write(*,*) 'ERROR: only one entrainment option can be chosen.'
+  stop
+end if
+
+if (dosgs.and.doedmf.and.randomeps ) then
+  write(*,*) 'WARNING: random entrainment not implemented yet'
+  write(*,*) 'Using Neggers entrainment eps~1/w instead'
+  randomeps =.false.
+  neggerseps=.true.
+  fixedeps  = .false.
+end if
+
 
 if (doedmf.and.dosgs.and.fixedeps.and.eps0.lt.0.) then
    write(*,*) 'ERROR: eps0 has to be non-negative'

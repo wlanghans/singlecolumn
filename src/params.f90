@@ -49,7 +49,9 @@ integer :: nup = 1
 
 logical:: dosgs = .true.
 logical:: doedmf = .false.
-logical:: fixedeps=.true.
+logical:: fixedeps=.false.
+logical:: neggerseps=.true.
+logical:: randomeps=.false.
 real   :: eps0=1.e-03
 logical:: dosmagor = .true.
 logical:: dopblh = .false.

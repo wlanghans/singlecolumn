@@ -39,7 +39,7 @@ implicit none
       INTEGER :: K,I
       REAL :: wthv,wqt,wthl,wstar,qstar,thstar,sigmaW,sigmaQT,sigmaTH,sigmaTHV,zs, &
            pwmin,pwmax,wmin,wmax,wlv,wtv
-      REAL :: QTn,THLn,THVn,QCn,Un,Vn,Wn2,EntEXP,EntW, hlp
+      REAL :: QTn,THLn,THVn,QCn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit
 
 ! w parameters
       REAL,PARAMETER :: &
@@ -50,9 +50,17 @@ implicit none
 ! entrainment parameters
       REAL,PARAMETER :: &
         & L0=100.,&
-        & ENT0=0.1
+        & ENT0=0.1,&
+        & del0=0.0,&        ! detrainment below cloud base
+        & deldz=2.e-3/1000. ! increase in detrainment above cloud base
+
+! termination fractional criterion: exit, if ai < facrit * ai0
+      REAL,PARAMETER :: &
+        & facrit=1.e-4
+
 
 !initialize plume properties
+ UPM=0.
  UPW=0.
  UPTHL=0.
  UPT=0.
@@ -63,6 +71,7 @@ implicit none
  UPV=0.
  UPQC=0.
  ENT=0.
+ DET=0.
  BUOY=0.
 
  
@@ -78,25 +87,25 @@ implicit none
  if (wthv.le.0.0) return
  
  ! get entrainment rate
-  do i=1,nup
-    do k=1,nzm
-      ENTf(k,i)=(zi(k+1)-zi(k))/L0
-     enddo
-   enddo
+  !do i=1,nup
+  !  do k=1,nzm
+  !    ENTf(k,i)=(zi(k+1)-zi(k))/L0
+  !   enddo
+  ! enddo
 
  ! get random Poisson number
    !call Poisson(1,nup,1,nzm,ENTf,ENTi)
 
  ! Calculate entrainment rate: Ent=Ent0/dz*P(dz/L0) for each layer             
-    do i=1,nup
-    do k=1,nzm
-      if (fixedeps) then
-        ENT(k,i)= eps0  
-      else
-        ENT(k,i)=real(ENTi(k,i))*Ent0/(zi(k+1)-zi(k))
-      end if
-    enddo
-    enddo
+  !  do i=1,nup
+  !  do k=1,nzm
+  !    if (fixedeps) then
+  !      ENT(k,i)= eps0  
+  !    else
+  !      ENT(k,i)=real(ENTi(k,i))*Ent0/(zi(k+1)-zi(k))
+  !    end if
+  !  enddo
+  !  enddo
 
 ! set initial conditions for updrafts
     zs=50.
@@ -146,6 +155,14 @@ implicit none
 ! updraft integration     
     DO i=1,nup
        DO k=2,nzm
+ 
+          if (fixedeps) then
+            ENT(k-1,i) = eps0
+          elseif (neggerseps) then
+            ENT(k-1,i) = 1./(UPW(k-1,i)*500.) + 0.4/z(k-1)
+          elseif (randomeps) then
+            ! not implemented yet
+          end if
 
           EntExp=exp(-ENT(k-1,i)*(zi(k)-zi(k-1)))
 
@@ -157,30 +174,48 @@ implicit none
                *(1.-EntExp)+UPTHL(k-1,i)*EntExp
           !Un=u(k)*(1.-EntExp)+UPU(k-1,i)*EntExp
           !Vn=v(k)*(1.-EntExp)+UPV(k-1,i)*EntExp
+
+          ! compute mass flux
+          ! linear increase in detrainment above cloud base
+          if (k.gt.2.and.(UPQC(k-1,i).gt.0.0 .or. DET(k-2,i).gt. del0)) then
+             DET(k-1,i) = DET(k-2,i) + deldz * (z(k-1) - z(k-2))
+          ! constant detrainment below cloud base
+          else
+             DET(k-1,i) = del0
+          end if
+          EntExp=exp((ENT(k-1,i)-DET(k-1,i))*(zi(k)-zi(k-1)))
+          UPM(k,i) = UPM(k-1,i) * EntExp
+
           ! compute condensation
           call condensation_edmf(QTn,THLn,presi(k),THVn,QCn)
           BUOY(k-1,i)=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k-1)-1.)
         
           EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
           Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))
-          IF (Wn2 >0.) THEN
-            UPW(k,i)=sqrt(Wn2)
-            UPTHV(k,i)=THVn
-            UPT  (k,i)=THVn/(1.+epsv*(QTn-QCn))*(presi(k)/p00)**(rgas/cp)
-            UPTHL(k,i)=THLn
-            UPQT(k,i)=QTn
-            UPQC(k,i)=QCn
-          !  UPU(k,i)=Un
-          !  UPV(k,i)=Vn
-            UPA(k,i)=UPA(k-1,i)
-         ELSE
-             EXIT
-         END IF
+ 
+          IF (Wn2 >0) THEN
+             UPW(k,i)=sqrt(Wn2) 
+             UPA(k,i) = UPM(k,i) / UPW(k,i) 
+             IF (UPA(k,i).ge.facrit*UPA(1,i)) THEN
+               UPTHV(k,i)=THVn
+               UPT  (k,i)=THVn/(1.+epsv*(QTn-QCn))*(presi(k)/p00)**(rgas/cp)
+               UPTHL(k,i)=THLn
+               UPQT(k,i)=QTn
+               UPQC(k,i)=QCn
+             !  UPU(k,i)=Un
+             !  UPV(k,i)=Vn
+             ELSE
+                UPW(k,i)= 0.
+                UPA(k,i)= 0.
+                EXIT
+             END IF
+          ELSE
+            EXIT
+          END IF 
        ENDDO
     ENDDO
 
 ! computing variables needed for tendency calculation
-
 
 ! mass flux is zero at surface and top
     sumM(1)       = 0.0

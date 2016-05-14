@@ -19,6 +19,6 @@ deallocate(tend_sgs_rho_qv, tend_sgs_rho, tend_sgs_rho_thetav, &
 sumM, sumMrv, sumMu, sumMv, sumMtke, sumMthetav, buoy_sgs, smix)
 
 deallocate(sgs_sens_heat_flux, sgs_lat_heat_flux, sgs_thv_flux, taux, tauy, sgs_tke_flux)
-deallocate(UPW,UPTHL,UPQT,UPQC,UPA,UPU,UPV,UPTHV,UPT,ENT,BUOY)
+deallocate(UPM,UPW,UPTHL,UPQT,UPQC,UPA,UPU,UPV,UPTHV,UPT,ENT,BUOY,DET)
 
 end subroutine dealloc
