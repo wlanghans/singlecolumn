@@ -135,6 +135,8 @@ implicit none
        UPA(1,I)=0.5*ERF(wtv/(sqrt(2.)*sigmaW))-0.5*ERF(wlv/(sqrt(2.)*sigmaW))
        !UPW(1,I)=0.5*(wlv+wtv)
        UPW(1,I)=  sigmaW/(UPA(1,I)*sqrt(2.*pi)) * (exp(-(wlv**2)/(2.*sigmaW**2)) - exp(-(wtv**2)/(2.*sigmaW**2))  ) 
+ 
+       UPM(1,I) = UPA(1,I) * UPW(1,I)
 
        UPU(1,I)=u(1)
        UPV(1,I)=v(1)
