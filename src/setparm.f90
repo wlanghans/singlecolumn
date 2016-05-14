@@ -15,7 +15,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
                      dolteix,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
-                     sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps
+                     sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -48,6 +48,11 @@ end if
 
 if (doedmf.and.dosgs.and.fixedeps.and.eps0.lt.0.) then
    write(*,*) 'ERROR: eps0 has to be non-negative'
+   stop
+end if
+
+if (doedmf.and.dosgs.and.del0.lt.0.) then
+   write(*,*) 'ERROR: del0 has to be non-negative'
    stop
 end if
 

@@ -51,7 +51,6 @@ implicit none
       REAL,PARAMETER :: &
         & L0=100.,&
         & ENT0=0.1,&
-        & del0=0.0,&        ! detrainment below cloud base
         & deldz=2.e-3/1000. ! increase in detrainment above cloud base
 
 ! termination fractional criterion: exit, if ai < facrit * ai0

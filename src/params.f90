@@ -53,6 +53,7 @@ logical:: fixedeps=.false.
 logical:: neggerseps=.true.
 logical:: randomeps=.false.
 real   :: eps0=1.e-03
+real   :: del0=1.e-03
 logical:: dosmagor = .true.
 logical:: dopblh = .false.
 logical:: pblhfluxmin=.true.
