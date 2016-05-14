@@ -602,6 +602,19 @@ module snapshot
                )
                ncsnap%field(field_count)%data2 => ENT (1:nzm,1:nup)
             end if
+            if (trim(field_name) .eq. 'det') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'det', &
+                  ! Long name
+                                           'plume frac. detrain. rate', &
+                  ! Units
+                                           '1/m', &
+                  ! Dimensions
+                                           (/ zID, npID, timeID /) &
+               )
+               ncsnap%field(field_count)%data2 => DET (1:nzm,1:nup)
+            end if
 
             if (trim(field_name) .eq. 'B') then
                call fill_fields_snapshot( &
