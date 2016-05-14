@@ -52,6 +52,7 @@ logical:: doedmf = .false.
 logical:: fixedeps=.false.
 logical:: neggerseps=.true.
 logical:: randomeps=.false.
+logical :: fixedfa=.true.
 real   :: eps0=1.e-03
 real   :: del0=1.e-03
 logical:: dosmagor = .true.

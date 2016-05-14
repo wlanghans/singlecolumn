@@ -185,7 +185,9 @@ implicit none
              DET(k-1,i) = del0
           end if
           EntExp=exp((ENT(k-1,i)-DET(k-1,i))*(zi(k)-zi(k-1)))
-          UPM(k,i) = UPM(k-1,i) * EntExp
+          if (.not.fixedfa) then
+            UPM(k,i) = UPM(k-1,i) * EntExp
+          end if
 
           ! compute condensation
           call condensation_edmf(QTn,THLn,presi(k),THVn,QCn)
@@ -196,8 +198,13 @@ implicit none
  
           IF (Wn2 >0) THEN
              UPW(k,i)=sqrt(Wn2) 
-             UPA(k,i) = UPM(k,i) / UPW(k,i) 
-             IF (UPA(k,i).ge.facrit*UPA(1,i)) THEN
+             if (.not.fixedfa) then 
+                UPA(k,i) = UPM(k,i) / UPW(k,i) 
+             else
+                UPA(k,i) = UPA(k-1,i)
+                UPM(k,i) = UPW(k,i) * UPA(k,i)  
+             end if
+             IF (fixedfa.or.(UPA(k,i).ge.facrit*UPA(1,i))) THEN
                UPTHV(k,i)=THVn
                UPT  (k,i)=THVn/(1.+epsv*(QTn-QCn))*(presi(k)/p00)**(rgas/cp)
                UPTHL(k,i)=THLn

@@ -15,7 +15,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
                      dolteix,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
-                     sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0
+                     sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
