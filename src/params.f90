@@ -62,9 +62,11 @@ logical:: doconsttk = .false.
 logical:: dosurface = .true.
 logical:: dolargescale = .false.
 real   :: tkconst = 10.
-logical :: dolteix=.false.
+logical :: doteixpbl=.false.
 logical :: fixedtau=.true.
 logical :: progtke=.true.
+logical :: dosequential=.false.
+logical :: dotkeles=.false.
 
 
 !output

@@ -14,8 +14,9 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      ocean, land, nup, dopblh, windshear, &
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
-                     dolteix,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
-                     sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa
+                     doteixpbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
+                     sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
+                     dotkeles
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -32,6 +33,10 @@ close(55)
 
 path='./'//trim(case)//'/'
 
+if (dosgs.and.count((/dotkeles,doteixpbl,dosmagor,doconsttk/)).gt.1  ) then
+  write(*,*) 'ERROR: only one eddy-diffusivity closure can be chosen'
+  stop
+end if
 if (dosgs.and.doedmf.and.count((/fixedeps,neggerseps,randomeps/)).gt.1  ) then
   write(*,*) 'ERROR: only one entrainment option can be chosen.'
   stop
@@ -133,7 +138,7 @@ if (dopblh.and..not.dosgs) then
   write(*,*) 'Cant compute pblh without turbulence parameterization. Stopping'
   stop
 end if
-if (dosgs.and.dolteix.and..not.fixedtau) then
+if (dosgs.and.doteixpbl.and..not.fixedtau) then
    dopblh=.true.
    pblhfluxmin=.true.
    write(*,*) 'Setting dopblh = .true. and pblhfluxmin = .true.'
