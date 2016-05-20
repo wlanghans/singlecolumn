@@ -14,7 +14,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      ocean, land, nup, dopblh, windshear, &
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
-                     doteixpbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
+                     doteixpbl,dowitekpbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles
 
@@ -33,7 +33,7 @@ close(55)
 
 path='./'//trim(case)//'/'
 
-if (dosgs.and.count((/dotkeles,doteixpbl,dosmagor,doconsttk/)).gt.1  ) then
+if (dosgs.and.count((/dotkeles,doteixpbl,dowitekpbl,dosmagor,doconsttk/)).gt.1  ) then
   write(*,*) 'ERROR: only one eddy-diffusivity closure can be chosen'
   stop
 end if
@@ -145,14 +145,19 @@ if (dosgs.and.doteixpbl.and..not.fixedtau) then
 end if
 if (doconsttk) then
   if (dosgs) write(*,*) 'doconsttk=.true., a constant eddy-diffusivity K=',tkconst,' m2/s is used'
-else
-  if (dosmagor) then 
-     if (dosgs) write(*,*) 'Smagorinski closure is used to get K'
-     progtke = .false.
-  else
-     if (dosgs) write(*,*) 'TKE closure is used to get K'
-     progtke = .true.
-  end if
+  progtke = .false.
+elseif (dosmagor) then
+  if (dosgs) write(*,*) 'Smagorinski closure is used to get K'
+  progtke = .false.
+elseif (dotkeles) then
+  if (dosgs) write(*,*) 'TKE closure is used to get K'
+  progtke = .true.
+elseif (doteixpbl) then
+  if (dosgs) write(*,*) 'Teixeira PBL TKE closure is used to get K'
+  progtke = .true.
+elseif (dowitekpbl) then
+  if (dosgs) write(*,*) 'Witek PBL TKE closure is used to get K'
+  progtke = .true.
 end if
 
 if (land) ocean=.false.

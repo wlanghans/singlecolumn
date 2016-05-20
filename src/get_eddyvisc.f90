@@ -157,6 +157,28 @@ do k=1,nzm
      end if
      if (dosequential) tke(k)=tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss)
 
+   elseif (dowitekpbl) then
+   ! ==================================
+   ! Use Witek CPBL closure; TKE is prognostic 
+   ! ==================================
+
+     ! get Km 
+     tk(k) = 0.5*smix(k)*sqrt(tke(k))
+     a_prod_sh=(tk(k)+0.001)*def2(k)
+     ! the fluxes from the previous step are used here (sum of ED and MF eventually)
+     a_prod_bu=ggr/thetav(k) * 0.5*(sgs_thv_flux(k)+sgs_thv_flux(k+1)) 
+     a_diss=0.16*2.5 / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
+     !a_prod_bu = max(a_prod_bu,-a_prod_sh)
+     dtkedtsum = a_prod_sh+a_prod_bu-a_diss
+     dtkedtmin = -tke(k)/dt
+     if (dtkedtsum.lt.dtkedtmin) then
+       dtkedtsum = dtkedtmin / dtkedtsum
+       a_prod_bu = dtkedtsum * a_prod_bu
+       a_prod_sh = dtkedtsum * a_prod_sh
+       a_diss    = dtkedtsum * a_diss
+     end if
+     if (dosequential) tke(k)=tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss)
+
    elseif (dotkeles) then
    ! ==================================
    ! Use 1.5 TKE closure; TKE is prognostic 

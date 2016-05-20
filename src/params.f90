@@ -67,6 +67,7 @@ logical :: fixedtau=.true.
 logical :: progtke=.true.
 logical :: dosequential=.false.
 logical :: dotkeles=.false.
+logical :: dowitekpbl=.false.
 
 
 !output
