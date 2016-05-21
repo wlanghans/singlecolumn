@@ -630,6 +630,20 @@ module snapshot
                ncsnap%field(field_count)%data2 => BUOY (1:nzm,1:nup)
             end if
 
+            if (trim(field_name) .eq. 'upthd') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'upthp', &
+                  ! Long name
+                                           'plume theta excess', &
+                  ! Units
+                                           'K', &
+                  ! Dimensions
+                                           (/ zID, npID, timeID /) &
+               )
+               ncsnap%field(field_count)%data2 => UPTHD (1:nzm,1:nup)
+            end if
+
             if (trim(field_name) .eq. 'upt') then
                call fill_fields_snapshot( &
                   ! Short name
@@ -735,6 +749,19 @@ module snapshot
                ncsnap%field(field_count)%data2 => UPQT (1:nz,1:nup)
             end if
 
+            if (trim(field_name) .eq. 'wstar') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'wstar', &
+                  ! Long name
+                                           'CPBL char w scale', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ timeID /) &
+               )
+               ncsnap%field(field_count)%data0 => wstar
+            end if
             if (trim(field_name) .eq. 'pblh') then
                call fill_fields_snapshot( &
                   ! Short name

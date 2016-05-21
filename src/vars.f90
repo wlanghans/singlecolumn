@@ -18,7 +18,7 @@ real, allocatable,dimension(:),target :: tend_sgs_rho_qv, tend_sgs_rho, tend_sgs
 
 ! sgs variables
 real vmag, ustar, r_s, thetav_s, theta_s
-real, target :: pblh, Cthetav, Cm, Crv, Ctheta
+real, target :: pblh, wstar, Cthetav, Cm, Crv, Ctheta
 real, allocatable,dimension(:), target :: sumM, sumMrv, sumMu, sumMv, sumMtke, sumMthetav, buoy_sgs, smix
 real,allocatable,dimension(:), target :: sgs_sens_heat_flux, sgs_lat_heat_flux, sgs_thv_flux, taux, tauy, sgs_tke_flux
 
@@ -30,7 +30,7 @@ real, external :: esatw,esati,dtesatw,dtesati,qsatw,qsati,dtqsatw,dtqsati
 integer, external :: lenstr, bytes_in_rec
 
 ! plume properties
-real, allocatable, dimension(:,:), target :: UPM,UPW,UPTHL,UPQT,UPQC,UPA,UPU,UPV,UPTHV,UPT,ENT,DET,BUOY
+real, allocatable, dimension(:,:), target :: UPM,UPW,UPTHL,UPQT,UPQC,UPA,UPU,UPV,UPTHV,UPT,ENT,DET,BUOY,UPTHD
 
 
 

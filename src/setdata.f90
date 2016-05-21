@@ -142,7 +142,7 @@ elseif (trim(case).eq.'WITEK11') then
 
 zinvbottom  = 1350.
 theta0      = 300.
-qv0         = 0.e-03
+qv0         = 5.e-03
 dthetadzfree= 2.e-03
 dqvdzpbl    = - 3.7e-07
 dqvdzfree   = - 9.4e-07

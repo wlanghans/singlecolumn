@@ -22,7 +22,7 @@ allocate(sgs_sens_heat_flux(nzm), sgs_lat_heat_flux(nzm), sgs_thv_flux(nzm), tau
 
 allocate(UPM(nz,nup),UPW(nz,nup),UPTHL(nz,nup),UPQT(nz,nup),UPQC(nz,nup),UPA(nz,nup),UPU(nz,nup),UPV(nz,nup),&
           UPTHV(nz,nup),UPT(nz,nup))
-allocate(ENT(nzm,nup),BUOY(nzm,nup),DET(nzm,nup))
+allocate(ENT(nzm,nup),BUOY(nzm,nup),DET(nzm,nup),UPTHD(nzm,nup))
 
 
 end subroutine alloc

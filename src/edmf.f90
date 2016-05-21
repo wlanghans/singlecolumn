@@ -37,7 +37,7 @@ implicit none
       INTEGER,DIMENSION(1:nzm,1:nup) :: ENTi
 
       INTEGER :: K,I
-      REAL :: wthv,wqt,wthl,wstar,qstar,thstar,sigmaW,sigmaQT,sigmaTH,sigmaTHV,zs, &
+      REAL :: wthv,wqt,wthl,qstar,thstar,sigmaW,sigmaQT,sigmaTH,sigmaTHV,zs, &
            pwmin,pwmax,wmin,wmax,wlv,wtv
       REAL :: QTn,THLn,THVn,QCn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit
 
@@ -72,6 +72,7 @@ implicit none
  ENT=0.
  DET=0.
  BUOY=0.
+ UPTHD=0.
 
  
  ! surface fluxes
@@ -222,6 +223,7 @@ implicit none
         
           EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
           Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))
+
  
           IF (Wn2 >0) THEN
              UPW(k,i)=sqrt(Wn2) 
@@ -244,6 +246,8 @@ implicit none
                 UPA(k,i)= 0.
                 EXIT
              END IF
+             UPTHD(k-1,i)=0.5*(UPTHV(k,i)/(1.+epsv*(UPQT(k,i)-UPQC(k,i)))+&
+     UPTHV(k-1,i)/(1.+epsv*(UPQT(k-1,i)-UPQC(k-1,i))))-theta(k-1)
           ELSE
             EXIT
           END IF 
