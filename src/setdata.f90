@@ -142,7 +142,7 @@ elseif (trim(case).eq.'WITEK11') then
 
 zinvbottom  = 1350.
 theta0      = 300.
-qv0         = 5.e-03
+qv0         = 0.e-03
 dthetadzfree= 2.e-03
 dqvdzpbl    = - 3.7e-07
 dqvdzfree   = - 9.4e-07
@@ -151,10 +151,10 @@ presi(1)    = p00
 do k = 1,nzm
    if (z(k).lt.zinvbottom) then
       theta(k) = theta0
-      qv(k) = qv0+ z(k) * dqvdzpbl
+      qv(k) = max(0.,qv0+ z(k) * dqvdzpbl)
    else
       theta(k) = theta0+ (z(k)-zinvbottom) * dthetadzfree
-      qv(k) = qv0+ zinvbottom * dqvdzpbl+ (z(k)-zinvbottom) * dqvdzfree
+      qv(k) = max(0.,qv0+ zinvbottom * dqvdzpbl+ (z(k)-zinvbottom) * dqvdzfree)
    end if
 
    thetav(k)= theta(k)*(1.+epsv*qv(k))

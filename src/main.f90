@@ -53,23 +53,24 @@ write(*,*) 'Working on timestep ', nstep
  call convert_to_sam_state()
 
 ! ======================================= 
+  ! get PBL height
+! ======================================= 
+  if (dopblh) call get_pblh() ! if true is passed than over sea, over land otherwise
+
+! ======================================= 
+  ! call edmf 
+! ======================================= 
+  ! needs pblh and surface fluxes as input
+  if (dosgs.and.doedmf) then
+      call edmf()
+  end if
+
+! ======================================= 
   ! get eddy-diffusivities and tke
 ! ======================================= 
   if (dosgs) call get_def2()
   !requires sam state: rho=rhod and mixing ratios qv=rv
   if (dosgs) call get_eddyvisc()
-
-! ======================================= 
-  ! get PBL height
-! ======================================= 
-  if ((dosgs.and.doedmf).or.dopblh) call get_pblh() ! if true is passed than over sea, over land otherwise
-
-! ======================================= 
-  ! call edmf 
-! ======================================= 
-  if (dosgs.and.doedmf) then
-      call edmf()
-  end if
 
 ! ======================================= 
   ! get sgs/diffusion tendencies (tridiagonal solver)

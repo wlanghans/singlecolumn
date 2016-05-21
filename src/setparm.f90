@@ -16,7 +16,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
                      doteixpbl,dowitekpbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
-                     dotkeles,dosingleplume,pblhthgrad
+                     dotkeles,dosingleplume,pblhthgrad,witekeps
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -40,14 +40,6 @@ end if
 if (dosgs.and.doedmf.and.count((/witekeps,fixedeps,neggerseps,randomeps/)).gt.1  ) then
   write(*,*) 'ERROR: only one entrainment option can be chosen.'
   stop
-end if
-if (dosgs.and.doedmf.and.dowitekpbl) then
-  write(*,*) 'WARNING: Using Witek PBL closure so only one single plume in MF'
-  dosingleplume=.true.
-  fixedfa=.true.
-  nup=1
-  witekeps=.true.
-  pblhthgrad=.true.
 end if
 
 if (dosgs.and.doedmf.and.randomeps ) then
@@ -139,8 +131,6 @@ write(*,*) '  '
 write(*,*) 'General other settings:  '
 if (dosgs.and.doedmf) then 
    dopblh = .true.
-   pblhfluxmin = .true.
-   write(*,*) 'Setting dopblh = .true. and pblhfluxmin = .true.'
 end if
 if (dopblh.and..not.dosgs) then
   write(*,*) 'Cant compute pblh without turbulence parameterization. Stopping'
@@ -150,6 +140,15 @@ if (dosgs.and.doteixpbl.and..not.fixedtau) then
    dopblh=.true.
    pblhfluxmin=.true.
    write(*,*) 'Setting dopblh = .true. and pblhfluxmin = .true.'
+end if
+if (dosgs.and.dowitekpbl) then
+  if (doedmf) then
+    dosingleplume=.true.
+    fixedfa=.true.
+    nup=1
+    witekeps=.true.
+  end if
+  pblhthgrad=.true.
 end if
 if (doconsttk) then
   if (dosgs) write(*,*) 'doconsttk=.true., a constant eddy-diffusivity K=',tkconst,' m2/s is used'

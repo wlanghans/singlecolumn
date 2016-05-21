@@ -160,7 +160,14 @@ do k=1,nzm
      tk(k) = Ck*smix(k)*sqrt(tke(k))
      a_prod_sh=(tk(k)+0.001)*def2(k)
      ! the fluxes from the previous step are used here (sum of ED and MF eventually)
-     a_prod_bu=ggr/thetav(k) * 0.5*(sgs_thv_flux(k)+sgs_thv_flux(k+1)) 
+     ! explicit fluxes are used here in the source term from buoyancy
+     if (k.lt.nzm) then 
+       a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k) + ggr/thetav(k) * 0.5 *&
+       (sumMthetav(k) - thetav(k) * sumM(k) + sumMthetav(k+1) - thetav(k+1) * sumM(k+1))
+     else
+       a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k) + ggr/thetav(k) * 0.5 *&
+       (sumMthetav(k) - thetav(k) * sumM(k))
+     end if
      a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
      !a_prod_bu = max(a_prod_bu,-a_prod_sh)
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
@@ -181,8 +188,14 @@ do k=1,nzm
      ! get Km 
      tk(k) = Ck*smix(k)*sqrt(tke(k))
      a_prod_sh=(tk(k)+0.001)*def2(k)
-     ! the fluxes from the previous step are used here (sum of ED and MF eventually)
-     a_prod_bu=ggr/thetav(k) * 0.5*(sgs_thv_flux(k)+sgs_thv_flux(k+1)) 
+     ! explicit fluxes are used here in the source term from buoyancy
+     if (k.lt.nzm) then 
+       a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k) + ggr/thetav(k) * 0.5 *&
+       (sumMthetav(k) - thetav(k) * sumM(k) + sumMthetav(k+1) - thetav(k+1) * sumM(k+1))
+     else
+       a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k) + ggr/thetav(k) * 0.5 *&
+       (sumMthetav(k) - thetav(k) * sumM(k))
+     end if
      a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
      !a_prod_bu = max(a_prod_bu,-a_prod_sh)
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
