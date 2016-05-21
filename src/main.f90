@@ -57,7 +57,7 @@ write(*,*) 'Working on timestep ', nstep
 ! ======================================= 
   if (dosgs) call get_def2()
   !requires sam state: rho=rhod and mixing ratios qv=rv
-  if (dosgs) call tke_full()
+  if (dosgs) call get_eddyvisc()
 
 ! ======================================= 
   ! get PBL height

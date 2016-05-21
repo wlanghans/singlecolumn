@@ -106,6 +106,8 @@ implicit none
   !  enddo
   !  enddo
 
+
+
 ! set initial conditions for updrafts
     zs=50.
     pwmin=0.5
@@ -125,29 +127,52 @@ implicit none
 
     wmin=sigmaW*pwmin
     wmax=sigmaW*pwmax
+   
+    if (dosingleplume) then
+       ! following Soares (2004) and Witek (2011)
 
-    DO i=1,nup
+       UPA(1,1) = 0.1
+       UPW(1,1) = 0.0
+       UPM(1,1) = 0.0
+       UPU(1,1)=u(1)
+       UPV(1,1)=v(1)
+       UPQC(1,1)=0.0
+       ! beta=0.3
+       ! note that tke here is fully explicit only (at step n) if dosequential=.false., otherwise
+       ! the tendency from buoyancy production, shear production, and dissipation have been added.
+       ! This, if dosequential=.false., tke could be 0 and we simply add 0.01  to avoid division by zero
+       UPQT(1,1)=qv(1)/(1.+qv(1))+0.3*wqt/(sqrt(tke(1)) + 0.01 )
+       UPTHV(1,1)=thetav(1)+0.3*wthv/(sqrt(tke(1)) + 0.01 )
+       UPTHL(1,1)=UPTHV(1,1)/(1.+epsv*UPQT(1,1))     ! liquid water pot. temp = pot. temp since no condensate at sfc yet
+       UPT(1,1) = UPTHL(1,1) * (pres(1)/p00)**(rgas/cp)
 
-       wlv=wmin+(wmax-wmin)/nup*(i-1)
-       wtv=wmin+(wmax-wmin)/nup*i
+    else
+      ! following Cheinet
 
-       UPA(1,I)=0.5*ERF(wtv/(sqrt(2.)*sigmaW))-0.5*ERF(wlv/(sqrt(2.)*sigmaW))
-       !UPW(1,I)=0.5*(wlv+wtv)
-       UPW(1,I)=  sigmaW/(UPA(1,I)*sqrt(2.*pi)) * (exp(-(wlv**2)/(2.*sigmaW**2)) - exp(-(wtv**2)/(2.*sigmaW**2))  ) 
+      DO i=1,nup
+
+         wlv=wmin+(wmax-wmin)/nup*(i-1)
+         wtv=wmin+(wmax-wmin)/nup*i
+
+         UPA(1,I)=0.5*ERF(wtv/(sqrt(2.)*sigmaW))-0.5*ERF(wlv/(sqrt(2.)*sigmaW))
+         !UPW(1,I)=0.5*(wlv+wtv)
+         UPW(1,I)=  sigmaW/(UPA(1,I)*sqrt(2.*pi)) * (exp(-(wlv**2)/(2.*sigmaW**2)) - exp(-(wtv**2)/(2.*sigmaW**2))  ) 
  
-       UPM(1,I) = UPA(1,I) * UPW(1,I)
+         UPM(1,I) = UPA(1,I) * UPW(1,I)
 
-       UPU(1,I)=u(1)
-       UPV(1,I)=v(1)
+         UPU(1,I)=u(1)
+         UPV(1,I)=v(1)
 
-       UPQC(1,I)=0.0
-       ! specific humidity needed (will be convert back in the end)
-       UPQT(1,I)=qv(1)/(1.+qv(1))+0.32*UPW(1,I)*sigmaQT/sigmaW
-       ! according to cheinet the 0.58 is for thetav, hence thetav is initialized (instead of theta)
-       UPTHV(1,I)=thetav(1)+0.58*UPW(1,I)*sigmaTHV/sigmaW
-       UPTHL(1,I)=UPTHV(1,I)/(1.+epsv*UPQT(1,I))                      ! liquid water pot. temp = pot. temp since no condensate at sfc yet
-       UPT(1,I) = UPTHL(1,I) * (pres(1)/p00)**(rgas/cp)
-    ENDDO
+         UPQC(1,I)=0.0
+         ! specific humidity needed (will be convert back in the end)
+         UPQT(1,I)=qv(1)/(1.+qv(1))+0.32*UPW(1,I)*sigmaQT/sigmaW
+         ! according to cheinet the 0.58 is for thetav, hence thetav is initialized (instead of theta)
+         UPTHV(1,I)=thetav(1)+0.58*UPW(1,I)*sigmaTHV/sigmaW
+         UPTHL(1,I)=UPTHV(1,I)/(1.+epsv*UPQT(1,I))                      ! liquid water pot. temp = pot. temp since no condensate at sfc yet
+         UPT(1,I) = UPTHL(1,I) * (pres(1)/p00)**(rgas/cp)
+      ENDDO
+
+    end if
 
     
 
@@ -161,6 +186,8 @@ implicit none
             ENT(k-1,i) = eps0
           elseif (neggerseps) then
             ENT(k-1,i) = 1./(UPW(k-1,i)*500.) + 0.4/z(k-1)
+          elseif (witekeps) then
+            ENT(k-1,i) = 0.7/smix(k-1)
           elseif (randomeps) then
             ! not implemented yet
           end if

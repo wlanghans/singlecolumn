@@ -16,9 +16,14 @@ integer i,j,k,kc,kb
 
 ! call t_startf('tke_full')
 
-!Cs = 0.1944
+if (doteixpbl) then
+  Ck=0.5
+elseif (dowitekpbl) then
+  Ck=0.425
+else
+  Ck=0.1
+end if
 Cs = 0.15
-Ck=0.1
 Ce=Ck**3/Cs**4
 Ces=Ce/0.7*3.0	
 
@@ -88,31 +93,42 @@ do k=1,nzm
    !WL use simpler formulation for N**2
    buoy_sgs(k)=ggr/thetav(k) * (thetav(kc)-thetav(kb))/ (z(kc)-z(kb))
 
-   if(buoy_sgs(k).le.0.) then
-     smix(k)=grd
-   else
-     ! WL replaced SAM's formulation with the equivalent formulation based on tke, which is l=0.76 * (e/Nm^2)^(1/2)
-     ! WL this way we don't need to store tk for the next timestep, but only tke 
-     ! WL also, TKE will have been advected and thus provides a better esimate than the local Km from the previous step
-     ! smix=min(grd,max(0.1*grd, sqrt(0.76*tk(i,j,k)/Ck/sqrt(buoy_sgs+1.e-10))))
-     smix(k)=min(grd,max(0.1*grd, 0.76*sqrt(tke(k)/ (buoy_sgs(k)+1.e-10)))) 
-   end if
-
-   if (doteixpbl) then 
-   ! use Teixeira mixing length instead
+   if (doteixpbl.or.dowitekpbl) then 
+   ! always use Teixeira's mixing length (Witek's is very similar)
       if (fixedtau) then
          tketau=600.
       else
          tketau= max(0.5 * pblh /  ((ggr/thetav(1)*sgs_sens_heat_flux(1)*pblh)**(1./3.)),0.0)
       end if
       smix(k)=  tketau*sqrt(tke(k)) +(xkar*z(k)-tketau*sqrt(tke(k)))*exp(-z(k)/100.)
+   else
+     if(buoy_sgs(k).le.0.) then
+       smix(k)=grd
+     else
+       ! WL replaced SAM's formulation with the equivalent formulation based on tke, which is l=0.76 * (e/Nm^2)^(1/2)
+       ! WL this way we don't need to store tk for the next timestep, but only tke 
+       ! WL also, TKE will have been advected and thus provides a better esimate than the local Km from the previous step
+       ! smix=min(grd,max(0.1*grd, sqrt(0.76*tk(i,j,k)/Ck/sqrt(buoy_sgs+1.e-10))))
+       smix(k)=min(grd,max(0.1*grd, 0.76*sqrt(tke(k)/ (buoy_sgs(k)+1.e-10)))) 
+     end if
    end if
  
+   ! Prantdl number
+   if (dowitekpbl) then
+     Pr = 0.5882 
+   else
+     Pr=1. 
+   end if
 
-   ratio=smix(k)/grd
-   Pr=1. 
 !   Pr=1. +2.*ratio
-   Cee=Ce1+Ce2*ratio
+   if (doteixpbl) then
+      Cee= 0.16 * 2.5
+   elseif (dowitekpbl) then
+      Cee=0.304 
+   else
+      ratio=smix(k)/grd
+      Cee=Ce1+Ce2*ratio
+   end if
 
 
    if (doconsttk) then
@@ -141,11 +157,11 @@ do k=1,nzm
    ! ==================================
 
      ! get Km 
-     tk(k) = 0.5*smix(k)*sqrt(tke(k))
+     tk(k) = Ck*smix(k)*sqrt(tke(k))
      a_prod_sh=(tk(k)+0.001)*def2(k)
      ! the fluxes from the previous step are used here (sum of ED and MF eventually)
      a_prod_bu=ggr/thetav(k) * 0.5*(sgs_thv_flux(k)+sgs_thv_flux(k+1)) 
-     a_diss=0.16*2.5 / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
+     a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
      !a_prod_bu = max(a_prod_bu,-a_prod_sh)
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
      dtkedtmin = -tke(k)/dt
@@ -163,11 +179,11 @@ do k=1,nzm
    ! ==================================
 
      ! get Km 
-     tk(k) = 0.5*smix(k)*sqrt(tke(k))
+     tk(k) = Ck*smix(k)*sqrt(tke(k))
      a_prod_sh=(tk(k)+0.001)*def2(k)
      ! the fluxes from the previous step are used here (sum of ED and MF eventually)
      a_prod_bu=ggr/thetav(k) * 0.5*(sgs_thv_flux(k)+sgs_thv_flux(k+1)) 
-     a_diss=0.16*2.5 / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
+     a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
      !a_prod_bu = max(a_prod_bu,-a_prod_sh)
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
      dtkedtmin = -tke(k)/dt
@@ -189,7 +205,6 @@ do k=1,nzm
      a_prod_sh=(tk(k)+0.001)*def2(k)
      a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
      a_diss=min(tke(k)/(4.*dt),Cee/smix(k)*tke(k)**1.5) ! cap the diss rate (useful for large time steps
-     a_diss=0.16*2.5 / smix(k)*tke(k)**1.5 
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
      dtkedtmin = -tke(k)/dt
      if (dtkedtsum.lt.dtkedtmin) then
@@ -203,7 +218,6 @@ do k=1,nzm
    else
      write(*,*) 'ERROR in get_eddyvisc: Closure not implemented' 
      stop
-   end if
    end if
 	
    tkh(k)=Pr*tk(k)
@@ -233,5 +247,5 @@ do k=1,nzm
 
 end do ! k
 
-end get_eddyvisc
+end subroutine get_eddyvisc
 

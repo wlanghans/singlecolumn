@@ -49,6 +49,25 @@ implicit none
     ENDDO 
     pblh=z(kthv)
 
+    ELSEIF (pblhthgrad) THEN
+
+    k = 1
+    kthv = 1
+    maxqke = 0.
+    DO WHILE (k .LE. nzm-1)
+       if (k.eq.1) then
+         qtke = (thetav(k+1) - thetav(k))/(z(k+1)-z(k))
+       else
+         qtke = (thetav(k+1) - thetav(k-1))/(z(k+1)-z(k-1))
+       end if
+       IF (maxqke < qtke) then
+           maxqke = qtke
+           kthv = k
+       ENDIF
+       k = k+1
+    ENDDO
+    pblh=z(kthv)
+
 
     ELSE 
 

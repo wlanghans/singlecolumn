@@ -16,7 +16,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
                      doteixpbl,dowitekpbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
-                     dotkeles
+                     dotkeles,dosingleplume,pblhthgrad
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -37,9 +37,17 @@ if (dosgs.and.count((/dotkeles,doteixpbl,dowitekpbl,dosmagor,doconsttk/)).gt.1  
   write(*,*) 'ERROR: only one eddy-diffusivity closure can be chosen'
   stop
 end if
-if (dosgs.and.doedmf.and.count((/fixedeps,neggerseps,randomeps/)).gt.1  ) then
+if (dosgs.and.doedmf.and.count((/witekeps,fixedeps,neggerseps,randomeps/)).gt.1  ) then
   write(*,*) 'ERROR: only one entrainment option can be chosen.'
   stop
+end if
+if (dosgs.and.doedmf.and.dowitekpbl) then
+  write(*,*) 'WARNING: Using Witek PBL closure so only one single plume in MF'
+  dosingleplume=.true.
+  fixedfa=.true.
+  nup=1
+  witekeps=.true.
+  pblhthgrad=.true.
 end if
 
 if (dosgs.and.doedmf.and.randomeps ) then

@@ -58,6 +58,7 @@ real   :: del0=1.e-03
 logical:: dosmagor = .true.
 logical:: dopblh = .false.
 logical:: pblhfluxmin=.true.
+logical:: pblhthgrad=.false.
 logical:: doconsttk = .false.
 logical:: dosurface = .true.
 logical:: dolargescale = .false.
@@ -68,6 +69,8 @@ logical :: progtke=.true.
 logical :: dosequential=.false.
 logical :: dotkeles=.false.
 logical :: dowitekpbl=.false.
+logical :: dosingleplume=.false.
+logical :: witekeps = .false.
 
 
 !output
