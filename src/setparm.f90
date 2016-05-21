@@ -138,7 +138,8 @@ if (dopblh.and..not.dosgs) then
 end if
 if (dosgs.and.doteixpbl.and..not.fixedtau) then
    dopblh=.true.
-   pblhfluxmin=.true.
+   pblhfluxmin=.false.
+   pblhthgrad=.true.
    write(*,*) 'Setting dopblh = .true. and pblhfluxmin = .true.'
 end if
 if (dosgs.and.dowitekpbl) then
@@ -148,7 +149,9 @@ if (dosgs.and.dowitekpbl) then
     nup=1
     witekeps=.true.
   end if
+  dopblh=.true.
   pblhthgrad=.true.
+  pblhfluxmin=.false.
 end if
 if (doconsttk) then
   if (dosgs) write(*,*) 'doconsttk=.true., a constant eddy-diffusivity K=',tkconst,' m2/s is used'
