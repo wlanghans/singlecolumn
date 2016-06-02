@@ -66,6 +66,12 @@ write(*,*) 'Working on timestep ', nstep
   end if
 
 ! ======================================= 
+! call sgscloud which gives cloud fraction 
+! mean liquid water content that incl sgs clouds
+! ======================================= 
+  if (dosgscloud) call sgscloud()
+
+! ======================================= 
   ! get eddy-diffusivities and tke
 ! ======================================= 
   if (dosgs) call get_def2()

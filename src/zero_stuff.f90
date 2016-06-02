@@ -25,6 +25,7 @@ tkh= 0.0
 sumM = 0.0
 sumMthetav=0.
 sumMrv = 0.0
+sumMqt = 0.0
 sumMu  = 0.
 sumMv  = 0.
 sumMtke= 0.

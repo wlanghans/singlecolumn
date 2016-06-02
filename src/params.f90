@@ -48,6 +48,7 @@ real:: windshear = 0.
 integer :: nup = 1
 
 logical:: dosgs = .true.
+logical:: dosgscloud = .true.
 logical:: doedmf = .false.
 logical:: fixedeps=.false.
 logical:: neggerseps=.true.

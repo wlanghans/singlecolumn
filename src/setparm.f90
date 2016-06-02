@@ -16,7 +16,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
                      doteixpbl,dowitekpbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
-                     dotkeles,dosingleplume,pblhthgrad,witekeps
+                     dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -144,7 +144,7 @@ if (dosgs.and.doteixpbl.and..not.fixedtau) then
 end if
 if (dosgs.and.dowitekpbl) then
   if (doedmf) then
-    dosingleplume=.true.
+    !dosingleplume=.true.
     fixedfa=.true.
     nup=1
     witekeps=.true.

@@ -142,8 +142,8 @@ implicit none
        ! note that tke here is fully explicit only (at step n) if dosequential=.false., otherwise
        ! the tendency from buoyancy production, shear production, and dissipation have been added.
        ! This, if dosequential=.false., tke could be 0 and we simply add 0.01  to avoid division by zero
-       UPQT(1,1)=qv(1)/(1.+qv(1))+0.3*wqt/(sqrt(tke(1)) + 0.01 )
-       UPTHV(1,1)=thetav(1)+0.3*wthv/(sqrt(tke(1)) + 0.01 )
+       UPQT(1,1)=qv(1)/(1.+qv(1))+12.*wqt/(sqrt(tke(1)) + 0.01 )
+       UPTHV(1,1)=thetav(1)+12.*wthv/(sqrt(tke(1)) + 0.01 )
        UPTHL(1,1)=UPTHV(1,1)/(1.+epsv*UPQT(1,1))     ! liquid water pot. temp = pot. temp since no condensate at sfc yet
        UPT(1,1) = UPTHL(1,1) * (pres(1)/p00)**(rgas/cp)
 
@@ -260,12 +260,16 @@ implicit none
     sumM(1)       = 0.0
     sumMthetav(1) = 0.0
     sumMrv(1)     = 0.0
+    sumMqt(1)     = 0.0
+    sumMthetal(1) = 0.0
     sumMu(1)      = 0.0
     sumMv(1)      = 0.0
     sumMtke(1)    = 0.0
     sumM(nz)       = 0.0
     sumMthetav(nz) = 0.0
-    sumMrv(nz)     = 0.0
+    rumMrv(nz)     = 0.0
+    sumMqt(nz)     = 0.0
+    sumMthetal(nz) = 0.0
 
     sumMu      = 0.0
     sumMv      = 0.0
@@ -277,9 +281,11 @@ implicit none
         ! WL and convert back to thetav
         sumMthetav(k)=sumMthetav(k)+UPA(K,i)*UPW(K,I)*                   &
         (UPTHL(K,I)+fac_cond*UPQC(k,i))*(1.+epsv*(UPQT(k,i)-UPQC(k,i)))
+        sumMthetal(k)=sumMthetal(k)+UPA(K,i)*UPW(K,I)*UPTHL(K,I)
         ! WL and convert back to mixing ratio
         sumMrv(k)    =sumMrv(k)    +UPA(K,i)*UPW(K,I)*                   & 
         (UPQT(k,i)-UPQC(k,i))/(1.-(UPQT(k,i)-UPQC(k,i)))
+        sumMqt(k)    =sumMqt(k)    +UPA(K,i)*UPW(K,I)* UPQT(k,i)
         !sumMu(k)  =sumMu(k)+UPA(K,i)*UPW(K,I)*UPU(K,I)
         !sumMv(k)  =sumMv(k)+UPA(K,i)*UPW(K,I)*UPV(K,I)
       ENDDO
