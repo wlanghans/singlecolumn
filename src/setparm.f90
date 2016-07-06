@@ -16,7 +16,8 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
                      doteixpbl,dowitekpbl,dolanghanspbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
-                     dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing
+                     dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
+                     doshortwave, dolongwave, doradsimple
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -32,6 +33,11 @@ end if
 close(55)
 
 path='./'//trim(case)//'/'
+
+if (.not.doradsimple) then
+  write(*,*) 'Setting doradsimple=.true.'
+  doradsimple=.true.
+end if
 
 if (dosgs.and.count((/dotkeles,doteixpbl,dowitekpbl,dolanghanspbl,dosmagor,doconsttk/)).gt.1  ) then
   write(*,*) 'ERROR: only one eddy-diffusivity closure can be chosen'

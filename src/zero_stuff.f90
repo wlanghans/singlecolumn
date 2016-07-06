@@ -28,6 +28,7 @@ tend_sub_rho_thetav   = 0.0
 tend_sub_rho_u        = 0.0
 tend_sub_rho_v        = 0.0
 tend_sub_rho_tke      = 0.0
+tend_rad_rho_thetav = 0.0
 
 
 rhoqv  = max(0.0,rhoqv)
@@ -44,6 +45,7 @@ sumMu  = 0.
 sumMv  = 0.
 sumMtke= 0.
 tke_thvflx=0.
+radlwdn = 0.
 qlsgs_ed = 0.
 qlsgs_mf = 0.
 thvflux_ed = 0.

@@ -78,6 +78,9 @@ logical :: docoriolis = .false.
 logical :: dothuburn = .true.
 logical :: doforcing=.false.
 real :: fcor = 0.376d-04
+logical :: dolongwave=.false.
+logical :: doshortwave=.false.
+logical :: doradsimple=.true.
 
 
 !output

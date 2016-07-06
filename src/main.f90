@@ -98,6 +98,15 @@ write(*,*) 'Working on timestep ', nstep
        !if (dosgs) call get_dimlessdiff()
   end if
 
+
+! ======================================= 
+  ! call radiative transfer scheme
+! ======================================= 
+  if(dolongwave.or.doshortwave) then
+     call radiation()
+  end if
+
+
 ! ======================================= 
   ! convert mixing ratios back to mass fractions
   ! dry air density to air density
