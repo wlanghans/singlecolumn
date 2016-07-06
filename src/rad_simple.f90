@@ -14,7 +14,7 @@ real f0, xk, coef, coef1
 integer i,k
 
 !pzhu
-real qq1,qq2,hfact,flux(nz),FTHRL(nzm) !bloss: flux(nz) rather than flux(nzm)
+real qq1,qq2,hfact,flux(nz),FTHRL(nzm),qt !bloss: flux(nz) rather than flux(nzm)
 integer j,kk,itop,item3
 !pzhu-end
 
@@ -35,8 +35,8 @@ radlwdn(k) =0.
 enddo
 
 do k = 1,nzm
-   !WL: density of moist air is used, not of dry air only
-   cpmassl(k) = cp_spec*rho(k)*qv(k)/(1.+qv(k))*dz*adz(k) ! thermal mass of model layer.
+   !WL: remove density here since prog var is density times thetav
+   cpmassl(k) = cp_spec*dz*adz(k) ! thermal mass of model layer.
 end do
 
    ! search for inversion height (highest level where qt=8 g/kg) 
@@ -47,10 +47,13 @@ end do
    qzeroz = 0.! holds accumulated optical depth between surface and z
    do k = 1,nzm
       ! optical depth only includes that due to liquid water
+      ! qlsgs_ed and qlsgs_mf need to be mixing ratios here too
       if(qcl(k)+qci(k)+qlsgs_ed(k)+qlsgs_mf(k).gt.0.) deltaq(k) = xk*rho(k)*(qcl(k)+qci(k)+qlsgs_ed(k)+qlsgs_mf(k))*adz(k)*dz
 
       ! inversion height is top of highest layer w/q>8g/kg.
-      if(qv(k)+qcl(k)+qci(k)+qlsgs_ed(k)+qlsgs_mf(k).gt.0.008) itop=max(itop,k+1) ! note zi(k+1) is inversion hgt
+      ! convert rt to qt
+      qt=(qv(k)+qcl(k)+qci(k)+qlsgs_ed(k)+qlsgs_mf(k))/(1.+qv(k))
+      if(qt.gt.0.008) itop=max(itop,k+1) ! note zi(k+1) is inversion hgt
 
       ! accumulate optical depth in qzinf
       qzinf = qzinf + deltaq(k) 
@@ -70,14 +73,18 @@ end do
    ! the prescribed subsidence heating above the inversion.
    do k = itop+1,nzm
       flux(k) = coef*exp(-qzinf) + coef1*exp(-qzeroz) &
-           + cp_spec*0.5*(rho(k)+rho(k-1))*f0*(0.25*zi(k)+0.75*zi(itop)) &
-                               *(zi(k)-zi(itop))**(1./3.)
+           !+ cp_spec*0.5*(rho(k)/(1.-qv(k))+rho(k-1)/(1.-qv(k-1)))*f0*(0.25*zi(k)+0.75*zi(itop)) &
+           !                    *(zi(k)-zi(itop))**(1./3.)
+           ! WL: changed to Stevens (2005), MWR, formulation
+           + cp_spec*0.5*(rho(k)/(1.-qv(k))+rho(k-1)/(1.-qv(k-1)))*f0*(0.25*(zi(k)-zi(itop))**(4./3.) &
+                               + zi(itop)*(zi(k)-zi(itop))**(1./3.))
       qzinf  = qzinf  - deltaq(k)
       qzeroz = qzeroz + deltaq(k)
    end do
    flux(nz) = coef*exp(-qzinf) + coef1*exp(-qzeroz) &
-        + cp_spec*(rho(nzm)+ 0.5*adz(nzm)*dz* (rho(nzm)-rho(nzm-1))/adzw(nzm)/dz) *f0*(0.25*zi(nz)+0.75*zi(itop)) &
-                             *(zi(nz)-zi(itop))**(1./3.)
+   !WL: linear interpolate density to model's top and adapt Stevens (2005), MWR, formulation
+        + cp_spec*(rho(nzm)+ 0.5*adz(nzm)*dz* (rho(nzm)/(1.-qv(nzm))-rho(nzm-1)/(1.-qv(nzm-1)))/adzw(nzm)/dz)&
+               *f0*(0.25*(zi(nz)-zi(itop))**(4./3.) + zi(itop)*(zi(nz)-zi(itop))**(1./3.))
 
    ! note that our flux differs from the specification in that it
    ! uses the local density (rather than the interface density) in
@@ -88,7 +95,7 @@ end do
    ! compute radiative heating as divergence of net upward lw flux.
    do k=1,nzm
       FTHRL(k)=-(flux(k+1)-flux(k))/cpmassl(k)
-      radlwdn(k) = radlwdn(k) + flux(k)
+      radlwdn(k) = flux(k)
       tend_rad_rho_thetav(k) = (1.+epsv*qv(k)/(1.+qv(k))) * & 
       (p00/pres(k))**(rgas/cp)*FTHRL(k) 
    enddo
