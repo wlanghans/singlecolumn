@@ -4,6 +4,7 @@ use grid
 use params
 use vars
 use snapshot
+use advect_mod
 
 implicit none
 
@@ -38,6 +39,20 @@ write(*,*) 'Working on timestep ', nstep
  call zero_stuff()
 
 ! ======================================= 
+! compute tendencies from subsidence 
+! (subsidence vel has to be available on faces)
+! ======================================= 
+ if (dosubsidence) then
+   call subsidence()
+ end if
+
+! ======================================= 
+! compute tendencies from large scale forcing
+! coriolis and dqvdt, dthetadt
+! ======================================= 
+   call forcing()
+
+! ======================================= 
   ! get drag/transfer coefficients, explicit fluxes, surface values, and wind speed on 1st model level
 ! ======================================= 
   if (dosurface) then
@@ -64,12 +79,6 @@ write(*,*) 'Working on timestep ', nstep
   if (dosgs.and.doedmf) then
       call edmf()
   end if
-
-! ======================================= 
-! call sgscloud which gives cloud fraction 
-! mean liquid water content that incl sgs clouds
-! ======================================= 
-  if (dosgscloud) call sgscloud()
 
 ! ======================================= 
   ! get eddy-diffusivities and tke

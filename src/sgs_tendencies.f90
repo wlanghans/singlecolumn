@@ -91,6 +91,14 @@ sgs_sens_heat_flux (2:nzm) = 1. * ( sgs_thv_flux (2:nzm) &
                           - epsv*0.5*(thetav(1:nzm-1)+thetav(2:nzm))/(1.+epsv*0.5*(qvspec(1:nzm-1)+qvspec(2:nzm))) &
                * sgs_lat_heat_flux (2:nzm) )  / (1.+epsv * 0.5*(qvspec(1:nzm-1)+qvspec(2:nzm)))
 
+thvflux_ed(1)     = sgs_thv_flux (1)
+thvflux_ed(nz)    = 0.
+thvflux_ed(2:nzm) = (-1.)/adzw(2:nzm)/dz * 0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(thetav(2:nzm)-thetav(1:nzm-1)) )
+thvflux_mf(1)     = 0.
+thvflux_mf(nz)    = 0.
+thvflux_mf(2:nzm) = sumMthetav(2:nzm) - (betap*d(2:nzm) + betam*thetav(2:nzm)) * sumM(2:nzm)
+
 tend_sgs_rho_thetav = ((rhoold + dt*tend_sgs_rho)*d - rhoold * thetav)/dt
 
 ! update thetav

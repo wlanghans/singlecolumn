@@ -12,7 +12,7 @@ real, parameter :: umin=1.0
 
 
  ! WL compute boundary values and wind speed which are needed independently of SFC_FLX_FXD
- vmag   = umin !max(umin, sqrt(u(1,1,1) **2+v(1,1,1) **2))
+ vmag   = max(umin, sqrt(u(1) **2+v(1) **2))
  if(sst+t00.gt.271.) then
     r_s = salt_factor*qsatw(sst+t00,pres(1))
  else

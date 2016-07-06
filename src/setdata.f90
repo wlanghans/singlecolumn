@@ -11,6 +11,7 @@ real zinvbottom,zinvtop,theta0,dthetadzinv,dthetadzfree,qv0,dqvdzinv,dthetadzpbl
 CHARACTER(LEN=100), PARAMETER :: FMT1 = "(A7,A9,A7,A9,A9,A9,A8)"
 CHARACTER(LEN=100), PARAMETER :: FMT2 = "(f7.0,3x,f6.1,3x,f4.2,3x,f6.2,3x,f6.2,3x,f6.2,3x,f5.2)"
 
+
 if (trim(case).eq.'MOENG07') then
 
 zinvbottom  = 1000.
@@ -115,6 +116,137 @@ do k = 1,nzm
       theta(k) = theta0+ (z(k)-zinvbottom) * dthetadzfree
    end if
    qv(k)    = qv0
+
+   thetav(k)= theta(k)*(1.+epsv*qv(k))
+   ! get pressure at cell center and at next face from hydrostatic eqn
+   pres(k) = presi(k)*(1. - ggr/cp/thetav(k)*(p00/presi(k))**(rgas/cp) * (z(k)-zi(k)) )**(cp/rgas)
+   presi(k+1) = pres(k)*(1. - ggr/cp/thetav(k)*(p00/pres(k))**(rgas/cp) * (zi(k+1)-z(k)) )**(cp/rgas)
+ 
+   ! get temp
+   tabs(k) = thetav(k)/(1.+epsv*qv(k))*(pres(k)/p00)**(rgas/cp)
+ 
+   ! get rho from gas law
+   rho(k) = pres(k)/rgas/tabs(k)/(1.+epsv*qv(k))*100.
+   
+   u(k)     = 0.
+   v(k)     = 0.
+   tke(k)   = 0.
+   qcl(k)   = 0.
+   qpl(k)   = 0.
+   qci(k)   = 0.
+   qpi(k)   = 0.
+
+   
+end do
+
+elseif (trim(case).eq.'BOMEX') then
+
+
+zinvbottom  = 520.
+theta0      = 298.7
+qv0         = 17.0e-03
+dthetadzpbl= (302.4-theta0)/(1480.-zinvbottom)
+dthetadzinv= (308.2-302.4)/(2000.-1480.)
+dthetadzfree=(311.85-308.2)/1000.
+dqvdzpbl    = (16.3e-03-17.0e-03)/520.
+dqvdzinv    = (10.7e-03-16.3e-03)/(1480.-520.)
+dqvdzfree   = (4.2e-03-10.7e-03)/(2000.-1480.)
+presi(1)    = 1015.
+
+w(1)  = 0.
+w(nz) = 0.
+do k = 1,nzm
+   if (z(k).lt.zinvbottom) then
+      theta(k) = theta0 
+      qv(k) = max(0.,qv0+ z(k) * dqvdzpbl)
+   elseif (z(k).ge.zinvbottom.and.z(k).lt.1480. ) then
+      theta(k) = theta0+ (z(k)-zinvbottom) * dthetadzpbl
+      qv(k) = max(0.,qv0+ zinvbottom * dqvdzpbl &
+                 + (z(k)-zinvbottom) * dqvdzinv)
+   elseif (z(k).ge.1480..and.z(k).lt.2000. ) then
+      theta(k) = theta0+ (1480.-zinvbottom)* dthetadzpbl+&
+                 dthetadzinv*(z(k)-1480.)
+      qv(k) = max(0.,qv0+ zinvbottom * dqvdzpbl &
+                 + (1480.-zinvbottom) * dqvdzinv + &
+                   (z(k)-1480.)*dqvdzfree )
+   else
+      theta(k) = theta0+ (1480.-zinvbottom)* dthetadzpbl+&
+                 dthetadzinv*(2000.-1480.)              +&
+                 dthetadzfree *(z(k)-2000.)
+      qv(k) = max(0.,qv0+ zinvbottom * dqvdzpbl &
+                 + (1480.-zinvbottom) * dqvdzinv + &
+                   (2000.-1480.)*dqvdzfree       + &
+                   (3.0e-3-4.2e-03)/1000.*(z(k)-2000.))
+   end if
+   thetav(k)= theta(k)*(1.+epsv*qv(k))
+   ! get pressure at cell center and at next face from hydrostatic eqn
+   pres(k) = presi(k)*(1. - ggr/cp/thetav(k)*(p00/presi(k))**(rgas/cp) * (z(k)-zi(k)) )**(cp/rgas)
+   presi(k+1) = pres(k)*(1. - ggr/cp/thetav(k)*(p00/pres(k))**(rgas/cp) * (zi(k+1)-z(k)) )**(cp/rgas)
+ 
+   ! get temp
+   tabs(k) = thetav(k)/(1.+epsv*qv(k))*(pres(k)/p00)**(rgas/cp)
+ 
+   ! get rho from gas law
+   rho(k) = pres(k)/rgas/tabs(k)/(1.+epsv*qv(k))*100.
+   
+   if (zi(k).lt.1500.) then
+     w(k) = -.65/100./1500. * zi(k)
+   elseif (zi(k).ge.1500..and.zi(k).lt.2100.) then
+     w(k) = -.65/100. + 0.65/100./(2100.-1500.)*(zi(k)-1500.)
+   else
+     w(k) = 0.
+   end if
+   if (z(k).lt.1500.) then
+     dthetadt(k) = -2./(24.*3600.) 
+   elseif (z(k).ge.1500..and.z(k).lt.3000.)  then
+     dthetadt(k) = (-2. + (z(k)-1500.) * 2.0/1500.)/(24.*3600.)
+   else
+     dthetadt(k) = 0.0
+   end if
+   if (z(k).lt.300.) then
+     dqvdt(k) = -1.2d-08
+   elseif (z(k).ge.300. .and. z(k).lt.500.) then
+     dqvdt(k) = -1.2d-08 + (z(k)-300.) * 1.2d-08/200.
+   else
+     dqvdt(k) = 0.0
+   end if
+   ug(k) = -10. + 1.3e-03*z(k)
+   vg(k) = 0.   
+   if (z(k).lt.700.) then
+     u(k)     = -8.75
+   elseif (z(k).ge.700..and.z(k).lt.3000.) then
+     u(k)     = -8.75 + (z(k)-700.) * (8.75-4.61)/2300. 
+   else
+     u(k)     = 0.0
+   end if
+   v(k)     = 0.
+   tke(k)   = 0.
+   qcl(k)   = 0.
+   qpl(k)   = 0.
+   qci(k)   = 0.
+   qpi(k)   = 0.
+
+   
+end do
+
+elseif (trim(case).eq.'LANGHANS') then
+
+zinvbottom  = 1350.
+theta0      = 300.
+qv0         = 5.e-03
+dthetadzfree= 2.e-03
+dqvdzpbl    = - 3.7e-07
+dqvdzfree   = - 9.4e-07
+presi(1)    = p00
+
+do k = 1,nzm
+   if (z(k).lt.zinvbottom) then
+      theta(k) = theta0
+      qv(k) = max(0.,qv0+ z(k) * dqvdzpbl)
+   else
+      theta(k) = theta0+ (z(k)-zinvbottom) * dthetadzfree
+      qv(k) = max(0.,qv0+ zinvbottom * dqvdzpbl+ (z(k)-zinvbottom) * dqvdzfree)
+   end if
 
    thetav(k)= theta(k)*(1.+epsv*qv(k))
    ! get pressure at cell center and at next face from hydrostatic eqn

@@ -217,8 +217,21 @@ implicit none
             UPM(k,i) = UPM(k-1,i) * EntExp
           end if
 
-          ! compute condensation
-          call condensation_edmf(QTn,THLn,presi(k),THVn,QCn)
+          !if (dosgscloud) then 
+
+          ! Bi-normal jpdf scheme for condensation
+          !  qtflux = 
+          !  call sgscloud(qtflux,thetalflux,varqt,varthetal,covarqtthetal,UPTHL(k-1,i),UPQT(k-1,i),presi(k-1),    & ! input
+          !               cfrac,QCn(),thetavflux)                                                  ! output
+          !  THVn=(THLn+frac_cond*QCn)*(1.+epsv*(QTn-QCn))
+! 
+!          else
+
+          ! all-or-nothing condensation scheme
+            call condensation_edmf(QTn,THLn,presi(k),THVn,QCn)
+
+!          end if
+       
           BUOY(k-1,i)=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetav(k-1)-1.)
         
           EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
@@ -267,7 +280,7 @@ implicit none
     sumMtke(1)    = 0.0
     sumM(nz)       = 0.0
     sumMthetav(nz) = 0.0
-    rumMrv(nz)     = 0.0
+    sumMrv(nz)     = 0.0
     sumMqt(nz)     = 0.0
     sumMthetal(nz) = 0.0
 

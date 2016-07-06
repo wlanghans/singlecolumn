@@ -191,6 +191,22 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => tabs(1:nzm)
             end if
+
+            if (trim(field_name) .eq. 'qlsgs_ed') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qlsgs_ed', &
+                  ! Long name
+                                           'SSG qc for small scale ED flux ', &
+                  ! Units
+                                           'g/g', &
+                  ! Dimensions
+                                           (/zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qlsgs_ed(1:nzm)
+            end if
+
+            
          
          
             if (trim(field_name) .eq. 'p') then
@@ -448,6 +464,34 @@ module snapshot
                ncsnap%field(field_count)%data1 => buoy_sgs(1:nzm)
             end if
 
+            if (trim(field_name) .eq. 'dthetadt') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'dthetadt', &
+                  ! Long name
+                                           'large scale theta forcing', &
+                  ! Units
+                                           'K/s', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => dthetadt(1:nzm)
+            end if
+           
+            if (trim(field_name) .eq. 'dqvdt') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'dqvdt', &
+                  ! Long name
+                                           'large scale qv forcing', &
+                  ! Units
+                                           'g/g/s', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => dqvdt(1:nzm)
+            end if
+           
             if (trim(field_name) .eq. 'def2') then
                call fill_fields_snapshot( &
                   ! Short name
@@ -461,7 +505,50 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => def2(1:nzm)
             end if
-         
+           
+            if (trim(field_name) .eq. 'q1') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'q1', &
+                  ! Long name
+                                           'normalized sat deficit', &
+                  ! Units
+                                           '1', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => q1(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'thetalgrad') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'thetalgrad', &
+                  ! Long name
+                                           'dthetal/dz', &
+                  ! Units
+                                           'K/m', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => thetalgrad(1:nzm)
+            end if
+            if (trim(field_name) .eq. 'qtgrad') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qtgrad', &
+                  ! Long name
+                                           'dqt/dz', &
+                  ! Units
+                                           'g/g/m', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qtgrad(1:nzm)
+            end if
+
+
+
          
             if (trim(field_name) .eq. 'vaporflx') then
                call fill_fields_snapshot( &
@@ -491,6 +578,65 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => sgs_sens_heat_flux (1:nz)
             end if
+
+            if (trim(field_name) .eq. 'taux') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'taux', &
+                  ! Long name
+                                           'x-momentumflux', &
+                  ! Units
+                                           'm/s m/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => taux (1:nz)
+            end if
+
+            if (trim(field_name) .eq. 'tauy') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'tauy', &
+                  ! Long name
+                                           'y-momentumflux', &
+                  ! Units
+                                           'm/s m/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => tauy (1:nz)
+            end if
+
+
+            if (trim(field_name) .eq. 'virtheatflx_ed') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'virtheatflux_ed', &
+                  ! Long name
+                                           'Virtual heat flux ED', &
+                  ! Units
+                                           'K m/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => thvflux_ed (1:nz)
+            end if
+
+            if (trim(field_name) .eq. 'virtheatflx_mf') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'virtheatflux_mf', &
+                  ! Long name
+                                           'Virtual heat flux MF', &
+                  ! Units
+                                           'K m/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => thvflux_mf (1:nz)
+            end if
+            
+         
          
             if (trim(field_name) .eq. 'tkeflx') then
                call fill_fields_snapshot( &
@@ -643,6 +789,21 @@ module snapshot
                )
                ncsnap%field(field_count)%data2 => UPTHD (1:nzm,1:nup)
             end if
+ 
+            if (trim(field_name) .eq. 'w') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'w', &
+                  ! Long name
+                                           'subsidence velocity', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => w (1:nz)
+            end if
+
 
             if (trim(field_name) .eq. 'upt') then
                call fill_fields_snapshot( &

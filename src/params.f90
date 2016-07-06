@@ -70,8 +70,14 @@ logical :: progtke=.true.
 logical :: dosequential=.false.
 logical :: dotkeles=.false.
 logical :: dowitekpbl=.false.
+logical :: dolanghanspbl=.false.
 logical :: dosingleplume=.false.
 logical :: witekeps = .false.
+logical :: dosubsidence = .false.
+logical :: docoriolis = .false.
+logical :: dothuburn = .true.
+logical :: doforcing=.false.
+real :: fcor = 0.376d-04
 
 
 !output
@@ -80,7 +86,7 @@ integer:: snapshot_start = 0
 integer:: snapshot_period =1
 integer:: snapshot_end = 1000
 logical:: snapshot_as_double = .false.
-character(300) :: snapshot_fields = 'u,v,th,thv,tabs,tke,rho,qv,qcl,qci,vaporflx,heatflx,virtheatflx,cthetav,crv,ctheta,cm'
+character(400) :: snapshot_fields = 'u,v,th,thv,tabs,tke,rho,qv,qcl,qci,vaporflx,heatflx,virtheatflx,cthetav,crv,ctheta,cm'
 
 
 end module params

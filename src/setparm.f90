@@ -14,9 +14,9 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      ocean, land, nup, dopblh, windshear, &
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
-                     doteixpbl,dowitekpbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
+                     doteixpbl,dowitekpbl,dolanghanspbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
-                     dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud
+                     dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -33,7 +33,7 @@ close(55)
 
 path='./'//trim(case)//'/'
 
-if (dosgs.and.count((/dotkeles,doteixpbl,dowitekpbl,dosmagor,doconsttk/)).gt.1  ) then
+if (dosgs.and.count((/dotkeles,doteixpbl,dowitekpbl,dolanghanspbl,dosmagor,doconsttk/)).gt.1  ) then
   write(*,*) 'ERROR: only one eddy-diffusivity closure can be chosen'
   stop
 end if
@@ -153,6 +153,17 @@ if (dosgs.and.dowitekpbl) then
   pblhthgrad=.true.
   pblhfluxmin=.false.
 end if
+if (dosgs.and.dolanghanspbl) then
+  if (doedmf) then
+    !dosingleplume=.true.
+    fixedfa=.true.
+    nup=1
+    witekeps=.true.
+  end if
+  dopblh=.true.
+  pblhthgrad=.true.
+  pblhfluxmin=.false.
+end if
 if (doconsttk) then
   if (dosgs) write(*,*) 'doconsttk=.true., a constant eddy-diffusivity K=',tkconst,' m2/s is used'
   progtke = .false.
@@ -167,6 +178,9 @@ elseif (doteixpbl) then
   progtke = .true.
 elseif (dowitekpbl) then
   if (dosgs) write(*,*) 'Witek PBL TKE closure is used to get K'
+  progtke = .true.
+elseif (dolanghanspbl) then
+  if (dosgs) write(*,*) 'Langhans PBL TKE closure is used to get K and sgs clouds are accounted for'
   progtke = .true.
 end if
 
