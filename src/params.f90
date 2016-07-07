@@ -23,6 +23,7 @@ real, parameter ::  epsv = rv/rgas-1.
 real, parameter ::  p00 = 1.e3          ! in hPa
 real, parameter ::  salt_factor = 1.
 real, parameter ::  xkar = 0.4
+real, parameter ::  omega = 7.29212e-5
 
 
 ! implicit weight for diffusion

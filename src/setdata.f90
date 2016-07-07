@@ -145,7 +145,8 @@ elseif (trim(case).eq.'DYCOMS') then
 zinvbottom  = 840.
 theta0      = 289.0
 qv0         = 9.0e-03
-presi(1)    = 1.22 * rgas * 290.4 * (1.+epsv*qv0) / 100.
+presi(1)    = 1017.8 
+fcor        = 2. * omega * sin(31.5 * pi/180.)
 
 w(1)  = 0.
 w(nz) = 0.
@@ -185,8 +186,8 @@ do k = 1,nzm
    end if
    ug(k) = 7.
    vg(k) = -5.5  
-   u(k)     = 6.
-   v(k)     = -4.25
+   u(k)     = ug(k)
+   v(k)     = vg(k)
    tke(k)   = 0.
    qcl(k)   = 0.
    qpl(k)   = 0.
