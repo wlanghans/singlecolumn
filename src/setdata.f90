@@ -139,6 +139,63 @@ do k = 1,nzm
    
 end do
 
+elseif (trim(case).eq.'DYCOMS') then
+
+
+zinvbottom  = 840.
+theta0      = 289.0
+qv0         = 9.0e-03
+presi(1)    = 1.22 * rgas * 290.4 * (1.+epsv*qv0) / 100.
+
+w(1)  = 0.
+w(nz) = 0.
+do k = 1,nzm
+   if (z(k).le.zinvbottom) then
+      theta(k) = theta0 
+      qv(k) = qv0
+   else
+      theta(k) = 297.5 + (z(k)-zinvbottom)**(1./3.)
+      qv(k) = 1.5e-03
+   end if
+   thetav(k)= theta(k)*(1.+epsv*qv(k))
+   ! get pressure at cell center and at next face from hydrostatic eqn
+   pres(k) = presi(k)*(1. - ggr/cp/thetav(k)*(p00/presi(k))**(rgas/cp) * (z(k)-zi(k)) )**(cp/rgas)
+   presi(k+1) = pres(k)*(1. - ggr/cp/thetav(k)*(p00/pres(k))**(rgas/cp) * (zi(k+1)-z(k)) )**(cp/rgas)
+ 
+   ! get temp
+   tabs(k) = thetav(k)/(1.+epsv*qv(k))*(pres(k)/p00)**(rgas/cp)
+ 
+   ! get rho from gas law
+   rho(k) = pres(k)/rgas/tabs(k)/(1.+epsv*qv(k))*100.
+   
+   w(k) = -3.75e-06 * zi(k)
+   if (z(k).lt.1500.) then
+     dthetadt(k) = -2./(24.*3600.) 
+   elseif (z(k).ge.1500..and.z(k).lt.3000.)  then
+     dthetadt(k) = (-2. + (z(k)-1500.) * 2.0/1500.)/(24.*3600.)
+   else
+     dthetadt(k) = 0.0
+   end if
+   if (z(k).lt.300.) then
+     dqvdt(k) = -1.2d-08
+   elseif (z(k).ge.300. .and. z(k).lt.500.) then
+     dqvdt(k) = -1.2d-08 + (z(k)-300.) * 1.2d-08/200.
+   else
+     dqvdt(k) = 0.0
+   end if
+   ug(k) = 7.
+   vg(k) = -5.5  
+   u(k)     = 6.
+   v(k)     = -4.25
+   tke(k)   = 0.
+   qcl(k)   = 0.
+   qpl(k)   = 0.
+   qci(k)   = 0.
+   qpi(k)   = 0.
+
+   
+end do
+
 elseif (trim(case).eq.'BOMEX') then
 
 
