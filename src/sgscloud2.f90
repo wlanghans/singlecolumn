@@ -39,7 +39,7 @@ qsl=qsl/(qsl+1.)
 betaf = fac_cond*lcond/(tl**2*rv)
 lambdaf =  (1. + betaf*qsl )**(-1.)                                                       ! Bechtold Eq (14)
 alphaf = qsl * totheta * lcond/(tl**2*rv)
-sigmas = 250.*(max(0.0,qtgrad(k) + alphaf**2*thetalgrad(k) - 2. * alphaf * thetalgrad(k)*qtgrad(k)))**(0.5)    ! Bechtold Eq (15)
+sigmas = 250.*(max(0.0,qtgrad(k)**2. + alphaf**2*thetalgrad(k)**2. - 2. * alphaf * thetalgrad(k)*qtgrad(k)))**(0.5)    ! Bechtold Eq (15)
 q1(k)= min(10.,max(-10.,1000.*(qt-qsl)/(1000.*sigmas+1.e-7)))
 
 

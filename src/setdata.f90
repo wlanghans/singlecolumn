@@ -149,7 +149,7 @@ presi(1)    = 1017.8
 fcor        = 2. * omega * sin(31.5 * pi/180.)
 
 w(1)  = 0.
-w(nz) = 0.
+w(nz) = -3.75e-06 * zi(nz)
 do k = 1,nzm
    if (z(k).le.zinvbottom) then
       theta(k) = theta0 

@@ -40,14 +40,14 @@ betaf = fac_cond*lcond/(tl**2*rv)
 lambdaf =  (1. + betaf*qsl )**(-1.)                                                       ! Bechtold Eq (14)
 alphaf = qsl * totheta * lcond/(tl**2*rv)
 sigmas = (max(0.0,varqt + alphaf**2*varthetal - 2. * alphaf * covarqtthetal))**(0.5)    ! Bechtold Eq (15)
-q1(k)= (qt-qsl)/(sigmas+1.e-09)
+q1(k)=min(10.,max(-10.,1000.*(qt-qsl)/(1000.*sigmas+1.e-9)))
 
 
 !----------------------------------------------------
 ! get cloud fraction and mean liquid water content
 !----------------------------------------------------
-cfrac = 0.5 * (1. + erf(q1(k)/1.41))                            ! Bechtold Eq (20)
-ql    = sigmas * lambdaf  * (cfrac * q1(k) + exp(-q1(k)**2/2.)/2.51 )  ! Bechtold Eq (21)
+cfrac = 0.5 * (1. + erf(q1(k)/1.41))                            ! Bechtold Eq (20) and Sommeria 29b
+ql    = sigmas * lambdaf  * (cfrac * q1(k) + exp(-(q1(k)**2)/2.)/2.51 )  ! Bechtold Eq (21)
 
 !----------------------------------------------------
 ! get buoyancy flux

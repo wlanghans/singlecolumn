@@ -26,7 +26,7 @@ real, target :: pblh, wstar, Cthetav, Cm, Crv, Ctheta
 real, allocatable,dimension(:), target :: sumM, sumMrv, sumMu, sumMv, sumMtke, sumMthetav, buoy_sgs, smix, sumMqt, sumMthetal
 real,allocatable,dimension(:), target :: sgs_sens_heat_flux, sgs_lat_heat_flux, sgs_thv_flux, taux, tauy, sgs_tke_flux
 real,allocatable,dimension(:), target :: qlsgs_mf, qlsgs_ed, cfrac_mf, cfrac_ed, tke_thvflx
-real,allocatable,dimension(:), target :: thvflux_ed,thvflux_mf, q1, qtgrad, thetalgrad, radlwdn
+real,allocatable,dimension(:), target :: thvflux_ed,thvflux_mf, q1, qtgrad, thetalgrad, radlwup
 
 real, parameter :: t00 = 300.   ! constant offset for sstxy 
 real :: sst=0.                   ! perturbation from t00

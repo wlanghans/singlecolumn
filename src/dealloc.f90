@@ -20,7 +20,7 @@ deallocate(tend_sgs_rho_qv, tend_sgs_rho, tend_sgs_rho_thetav, &
      tend_sub_rho, tend_sub_rho_qv,tend_rad_rho_thetav, &
      tend_sub_rho_thetav, tend_sub_rho_u, tend_sub_rho_v, tend_sub_rho_tke, &
      tend_force_rho, tend_force_rho_qv, tend_force_rho_u, tend_force_rho_v, tend_force_rho_tke, &
-     tend_force_rho_thetav,dqvdt,dthetadt,radlwdn )
+     tend_force_rho_thetav,dqvdt,dthetadt,radlwup )
 
 deallocate(sgs_sens_heat_flux, sgs_lat_heat_flux, sgs_thv_flux, taux, tauy, sgs_tke_flux)
 deallocate(UPM,UPW,UPTHL,UPQT,UPQC,UPA,UPU,UPV,UPTHV,UPT,ENT,BUOY,DET,UPTHD)

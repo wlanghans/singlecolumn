@@ -24,7 +24,7 @@ allocate(tend_sgs_rho_qv(nzm), tend_sgs_rho(nzm), tend_sgs_rho_thetav(nzm), &
      tend_force_rho(nzm), tend_force_rho_qv(nzm), tend_force_rho_u(nzm), tend_force_rho_v(nzm), tend_force_rho_tke(nzm), &
      tend_force_rho_thetav(nzm), dqvdt(nzm), dthetadt(nzm))
 
-allocate(sgs_sens_heat_flux(nzm), sgs_lat_heat_flux(nzm), sgs_thv_flux(nzm), taux(nzm), tauy(nzm), sgs_tke_flux(nzm), radlwdn(nz))
+allocate(sgs_sens_heat_flux(nzm), sgs_lat_heat_flux(nzm), sgs_thv_flux(nzm), taux(nzm), tauy(nzm), sgs_tke_flux(nzm), radlwup(nz))
 
 allocate(UPM(nz,nup),UPW(nz,nup),UPTHL(nz,nup),UPQT(nz,nup),UPQC(nz,nup),UPA(nz,nup),UPU(nz,nup),UPV(nz,nup),&
           UPTHV(nz,nup),UPT(nz,nup))

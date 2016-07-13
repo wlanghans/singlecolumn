@@ -349,6 +349,20 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => tkdimless(1:nzm)
             end if
+   
+            if (trim(field_name) .eq. 'tend_rad_rho_thetav') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'tend_rad_rho_thetav', &
+                  ! Long name
+                                           'rhothetav tendency from radiation', &
+                  ! Units
+                                           'kg/m3 K/s', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => tend_rad_rho_thetav(1:nzm)
+            end if
 
             if (trim(field_name) .eq. 'tend_mix_rhotke') then
                call fill_fields_snapshot( &
@@ -548,7 +562,33 @@ module snapshot
             end if
 
 
-
+            if (trim(field_name) .eq. 'radlwup') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'radlwup', &
+                  ! Long name
+                                           'LW radiative flux up', &
+                  ! Units
+                                           'W/m2', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => radlwup (1:nz)
+            end if
+    
+            if (trim(field_name) .eq. 'cfrac_ed') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'cfrac_ed', &
+                  ! Long name
+                                           'Cloud fraction from ED estimate', &
+                  ! Units
+                                           '1', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => cfrac_ed (1:nzm)
+            end if
          
             if (trim(field_name) .eq. 'vaporflx') then
                call fill_fields_snapshot( &

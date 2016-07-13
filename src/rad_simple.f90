@@ -31,7 +31,7 @@ f0=3.75e-6
 xk=85.
 
 do k=1,nz
-radlwdn(k) =0.
+radlwup(k) =0.
 enddo
 
 do k = 1,nzm
@@ -95,10 +95,11 @@ end do
    ! compute radiative heating as divergence of net upward lw flux.
    do k=1,nzm
       FTHRL(k)=-(flux(k+1)-flux(k))/cpmassl(k)
-      radlwdn(k) = flux(k)
+      radlwup(k) = flux(k)
       tend_rad_rho_thetav(k) = (1.+epsv*qv(k)/(1.+qv(k))) * & 
       (p00/pres(k))**(rgas/cp)*FTHRL(k) 
    enddo
+   radlwup(nz) = flux(nz)
    
 
 end 

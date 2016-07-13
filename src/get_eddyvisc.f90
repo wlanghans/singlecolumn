@@ -97,12 +97,13 @@ do k=1,nzm
    if (doteixpbl.or.dowitekpbl.or.dolanghanspbl) then 
    ! always use Teixeira's mixing length (Witek's is very similar)
       if (fixedtau) then
-         tketau=400.
+         if (doteixpbl)  tketau=600.
+         if (dowitekpbl) tketau=400.
       else
-         tketau= max(0.5 * pblh /  ((ggr/thetav(1)*sgs_sens_heat_flux(1)*pblh)**(1./3.)),0.0)
+         tketau= max(0.5 * pblh /  ((ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.)),0.0)
       end if
       l23 =    (tketau*sqrt(tke(k)))**(-1) 
-      if (buoy_sgs(k).gt.0.0) l23 = l23 + (0.7*sqrt(tke(k))/sqrt(buoy_sgs(k)))**(-1)
+      if (buoy_sgs(k).gt.0.0.and.dowitekpbl) l23 = l23 + (0.7*sqrt(tke(k))/sqrt(buoy_sgs(k)))**(-1)
       l23 = l23**(-1)
       smix(k)=  l23 +(xkar*z(k)-l23)*exp(-z(k)/100.)
    else
@@ -172,6 +173,7 @@ do k=1,nzm
      qtt = (qv(k+1) + qcl(k+1))/(1.+qv(k+1))
      qtk = (qv(k)   + qcl(k))/(1.+qv(k))
      qtl = (qv(k-1) + qcl(k-1))/(1.+qv(k-1))
+     tk(k) = Ck*smix(k)*sqrt(tke(k))
      thetalflux = -(tk(k)+0.001) * Pr * thetalgrad(k)
      qtflux = -(tk(k)+0.001) * Pr * qtgrad(k)
 
@@ -191,6 +193,7 @@ do k=1,nzm
      else
        cfrac_ed(k) = 0.
        qlsgs_ed(k) = qcl(k)
+       tk(k) = Ck*smix(k)*sqrt(tke(k))
        tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr
      end if
 

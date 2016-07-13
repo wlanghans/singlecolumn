@@ -28,21 +28,21 @@
 
 For any prognostic variable $\rho\psi$ we seek to represent its tendency due to unresolved turbulent transport. Thereby, $\psi$ is one of $u$, $v$, $\theta_v$, $q_v$, and eventually $e$ (i.e., TKE).\footnote{Turbulent kinetic energy $e$ is included here since -- depending on the applied eddy-diffusivity model -- a prognostic equation for $e$ has eventually to be solved.} Here, $q_v$ is defined as the mass of water vapor per mass of moist air, as $q_v=\rho_v/(\rho_d+\rho_v)$. It is common in GCMs and mesoscale models to assume that the vertical velocity $w$ has no tendency from subgrid-scale transport. On top of that, subgrid transport is assumed to be vertical only. 
 
-The air density $\rho=\rho_d+\rho_v$ is affected from turbulent mixing since the moisture content changes. The updated values of $\rho$, $\rho_v$, and any other variable $\rho \psi$ are obtained as 
+The air density $\rho=\rho_d+\rho_v$ is affected by turbulent mixing since its moisture content changes. The updated values of $\rho$, $\rho_v$, and any other variable $\rho \psi$ are consistently obtained as 
 \begin{eqnarray}
 \rho^{n+1}&=&\rho^n + \Delta t \frac{\partial \rho}{\partial t}=\rho^n + \Delta t \frac{\partial \rho_v}{\partial t}=\rho^n + \Delta t \rho_d^n\left(\frac{\partial r_v}{\partial t}\right)_{turb} \\
 \rho_v^{n+1}&=&\rho_v^n + \Delta t \rho_d^n\left(\frac{\partial r_v}{\partial t}\right)_{turb}\\
  (\rho\psi)^{n+1} &=& \rho^{n+1}\left[\psi^n + \Delta t \left(\frac{\partial \psi}{\partial t}\right)_{turb}\right]\\
 \end{eqnarray}
-whereby we used the fact that the density of dry air $\rho_d=\frac{1-q_v}{q_v}\rho_v$ remains unchanged (i.e., we are only adding/removing water vapor molecules). Here $r_v=q_v/(1-q_v)$ is the mixing ratio of water vapor.  
+whereby we used the fact that the density of dry air, $\rho_d=\frac{1-q_v}{q_v}\rho_v$, remains unchanged (i.e., we are only adding/removing water vapor molecules). Here $r_v=q_v/(1-q_v)$ is the mixing ratio of water vapor.  
 
-The tendency for any variable $\psi$ (other than $r_v$) is then obtained from the EDMF equation as
+The tendency for any variable $\psi$ (other than a mixing ratio) is then obtained from the EDMF equation as
 \begin{equation}\label{eqn:tendency}
  \left(\frac{\partial \psi}{\partial t}\right)_{turb} =-\frac{1}{\rho}\frac{\partial }{\partial z} \rho \left( ED^{\psi} + MF^{\psi}\right) = -\frac{1}{\rho}\frac{\partial }{\partial z} \rho\left( -K_{\psi}(z)\frac{\partial \psi(z)}{\partial z} + \sum_i M_i(z) (\psi^{up}_i(z) - \psi(z) )\right)
 \end{equation}
-and the tendency for $r_v$ is analogously obtained with $\rho$ replaced by $\rho_d$. Here, ED is the eddy-diffusivity part and MF the mass-flux part of the turbulent flux. Closure is provided by specifying $K_{\psi}$ and $a_i$, $w^{up}_i$, and $\psi^{up}_i$ for each updraft $i$.
+and the tendency for a mixing ratio (e.g., $r_v$) is analogously obtained with $\rho$ replaced by $\rho_d$. Here, ED is the eddy-diffusivity part and MF the (multiplume) mass-flux part of the turbulent flux. Closure is provided by specifying $K_{\psi}$, $M_i$, and $\psi^{up}_i$ for each updraft $i$.
 
-The necessary/provided input to the EDMF parameterization is listed in section \ref{sec:input}. The closure is described in section \ref{sec:closure}. The numerical procedure to solve Eq. (\ref{eqn:tendency}) is outlined in section \ref{sec:solve}. One key advantage of this multiplume EDMF parameterization is that PBL mixing and shallow cumulus cloud cover are parameterized in a unified fashion. For this reason, several versions of EDMF also provide a subgrid-scale cloud cover (cumulus and eventually strato-cumulus) and cloud liquid water content which is then passed on to the radiative transfer code. The approach taken in this implementation is described in section \ref{sec:clouds}.
+The necessary/provided input to the EDMF parameterization is listed in section \ref{sec:input}. The closure is described in section \ref{sec:closure}. The numerical procedure to solve Eq. (\ref{eqn:tendency}) is outlined in section \ref{sec:solve}. One key advantage of this multiplume EDMF parameterization is that PBL mixing and shallow cumulus cloud cover are parameterized in a unified fashion since plumes might eventually get saturated. For this reason, several versions of EDMF also provide a subgrid-scale cloud cover (shallow cumulus and eventually also strato-cumulus) and unresolved cloud liquid water content which is then passed on to the radiative transfer code. The approach taken in this direction is described in section \ref{sec:clouds}.
 
 \section{Input}\label{sec:input}
 
@@ -81,44 +81,71 @@ C_{\theta_v}=(C_h\Delta \theta [1+0.61q_{v1}] + 0.61 C_e\theta_1\Delta r_v)/ \De
 
 \section{EDMF closure}\label{sec:closure}
 
-The task of the parameterization is to provide the eddy diffusivities $K_{\psi}$ and $a_i$, $w^{up}_i$, and $\psi^{up}_i$ for each updraft $i$. For this implemetation, we decided to start by parameterizing the eddy diffusivities using 1-dimensional closures, either a Smagorinsky or a TKE closure. Both have been adapted and modified from SAM. The updraft properties are obtained through a multiplume model that was kindly provided by Kay Suselj/JPL.
+The task of the parameterization is to provide the eddy diffusivities $K_{\psi}$ and $M_i$ and $\psi^{up}_i$ for each updraft $i$. A variety of flavors of the 1.5 TKE closure are implemented and described below. The updraft properties are obtained through a multiplume model that was kindly provided by Kay Suselj/JPL and somewhat modified here.
 
 
 \subsection{Eddy-diffusivity models}
 
-Same as in SAM, the eddy diffusivities are computed at cell centers and averaging provides $K_{\psi}^{k\pm 1/2}$ at cell interfaces. 
+The eddy diffusivities are computed at cell centers and averaging provides $K_{\psi}^{k\pm 1/2}$ at cell interfaces. 
 
-\subsubsection{Smagorinsky closure}
+% \subsubsection{Smagorinsky closure}
+% 
+% This LES closure relates the eddy diffusivity for momentum to the characteristic rate of strain $\overline{D}$, as
+% \begin{equation}\label{eqn:viscosity}
+% K_m=(c_s l)^2 \overline{D}\sqrt{\max\left(0,1-\frac{\mathrm{Ri}}{\mathrm{Ri}_{c}}\right)}
+% \end{equation}
+% with the Richardson number defined as 
+% \begin{equation}
+%  \mathrm{Ri}=\left\{
+% \begin{array}{ll}
+% N_m^2/\overline{D}^2&\mathrm{for~saturated~air}\\
+% N^2/\overline{D}^2&\mathrm{for~unsaturated~air}.
+% \end{array}
+% \right.  
+% \end{equation} 
+% and $\mathrm{Ri}_c=1.0$ a critical Richardson number and $N$ and $N_m$ the Brunt-V\"{a}is\"{a}l\"{a} frequencies in unsaturated and saturated air, respectively. Air is defined saturated if the mixing ratio of non-precipitating condensate is larger than a certain threshold. Equation (\ref{eqn:viscosity}) can be rewritten as 
+% \begin{equation}
+% K_m=(c_s l)^2 \sqrt{\max\left(0,\overline{D}^2-\frac{N^2}{\mathrm{Ri}_{c}}\right)}
+% \end{equation}
+% and equivalently using $N_m^2$ in case of saturated air (only $N^2$ is used for brevity below). The mixing length scale $l$ is stability dependent and expressed as
+% \begin{equation}\label{eqn:lmixsmag}
+%  l=\left\{ 
+%  \begin{array}{ll}
+%  \min(\Delta z, \max(0.1\Delta z, 0.76 \sqrt{(e/N^2)}))&\quad \mathrm{if}\quad N^2>0\\
+%  \Delta z &\quad \mathrm{if}\quad N^2\leq 0.
+%  \end{array}
+% \right.  
+% \end{equation}
+% with $e$ the TKE distribution from the previous timestep that (ideally) got advected by the Dycore. TKE is then diagnosed as 
+% \begin{equation}
+%  e = (K_m/(c_kl))^2.
+% \end{equation}
+% The constant $c_s$ is given through the relation $c_s^4=c_k^3/c_e$ with $c_k=0.1$ and $c_e=0.54+1.44 l/\Delta z$. The eddy diffusivity for scalar transport is obtained as $K_h=\mathrm{Pr}K_m$ with the Prandtl number set to $\mathrm{Pr}=1/\mathrm{Ri}_c=1$. 
+% 
+% The square of the characteristic rate of strain $\overline{D}^2$ is defined as $\overline{D}^2=2D_{ij}D_{ij}$ with element $(i,j)$ of the tensor given as
+% \begin{equation}
+%  D_{ij}=\frac{1}{2}(\frac{\partial U_i}{\partial x_j}+\frac{\partial U_j}{\partial x_i})
+% \end{equation}
+% with capital $U$ indicating the grid-scale velocity and indices $i$ and $j$ are one of the three coordinate directions. After summation one obtains 
+% \begin{equation}\label{eqn:def2}
+%  \overline{D}^2=2\{D_{11}^2+D_{22}^2+D_{33}^2\}+4\{D_{12}^2+D_{13}^2+D_{23}^2 \}
+% \end{equation}
+% which is provided from the Dycore at cell centers. 
 
-This LES closure relates the eddy diffusivity for momentum to the characteristic rate of strain $\overline{D}$, as
-\begin{equation}\label{eqn:viscosity}
-K_m=(c_s l)^2 \overline{D}\sqrt{\max\left(0,1-\frac{\mathrm{Ri}}{\mathrm{Ri}_{c}}\right)}
-\end{equation}
-with the Richardson number defined as 
-\begin{equation}
- \mathrm{Ri}=\left\{
-\begin{array}{ll}
-N_m^2/\overline{D}^2&\mathrm{for~saturated~air}\\
-N^2/\overline{D}^2&\mathrm{for~unsaturated~air}.
-\end{array}
-\right.  
-\end{equation} 
-and $\mathrm{Ri}_c=1.0$ a critical Richardson number and $N$ and $N_m$ the Brunt-V\"{a}is\"{a}l\"{a} frequencies in unsaturated and saturated air, respectively. Air is defined saturated if the mixing ratio of non-precipitating condensate is larger than a certain threshold. Equation (\ref{eqn:viscosity}) can be rewritten as 
-\begin{equation}
-K_m=(c_s l)^2 \sqrt{\max\left(0,\overline{D}^2-\frac{N^2}{\mathrm{Ri}_{c}}\right)}
-\end{equation}
-and equivalently using $N_m^2$ in case of saturated air (only $N^2$ is used for brevity below). The mixing length scale $l$ is stability dependent and expressed as
-\begin{equation}\label{eqn:lmixsmag}
- l=\left\{ 
- \begin{array}{ll}
- \min(\Delta z, \max(0.1\Delta z, 0.76 \sqrt{(e/N^2)}))&\quad \mathrm{if}\quad N^2>0\\
- \Delta z &\quad \mathrm{if}\quad N^2\leq 0.
- \end{array}
-\right.  
-\end{equation}
-with $e$ the TKE distribution from the previous timestep that (ideally) got advected by the Dycore. TKE is diagnosed as $e = (K_m/(c_kl))^2$. The constant $c_s$ is given through the relation $c_s^4=c_k^3/c_e$ with $c_k=0.1$ and $c_e=0.54+1.44 l/\Delta z$. The eddy diffusivity for scalar transport is obtained as $K_h=\mathrm{Pr}K_m$ with the Prandtl number set to $\mathrm{Pr}=1/\mathrm{Ri}_c=1$. 
 
-The square of the characteristic rate of strain $\overline{D}^2$ is defined as $\overline{D}^2=2D_{ij}D_{ij}$ with element $(i,j)$ of the tensor given as
+\subsubsection{Teixeira TKE closure}
+The formulation of the TKE boundary layer scheme follows the description given by \cite{teixeira04} and is specifically designed here to model the evolution of the dry convective boundary layer. The prognostic equation for $e$, the sgs kinetic energy per unit dry air, is
+\begin{eqnarray}\label{eqn:tkebudget}
+ \frac{\partial e}{\partial t}&=& \mathrm{ADV} + \mathrm{TRANS} + \mathrm{SHEAR} + \mathrm{BUOY} - \mathrm{DISS}
+\end{eqnarray}
+and in this parameterization the individual sources/sinks are closed as
+\begin{eqnarray}
+ \mathrm{TRANS} &=& \frac{1}{\rho_d}\frac{\partial}{\partial z} (\rho_d K_m  \frac{\partial e}{\partial z})\\
+ \mathrm{SHEAR} &=& K_m \overline{D}^2 \\
+ \mathrm{BUOY} &=& \frac{g}{\theta_v}\overline{w'\theta_v'}\\
+ \mathrm{DISS}&=& c_{\epsilon}\sqrt{e}/l_{\epsilon}
+\end{eqnarray}
+with $K_m=c_k l e^{1/2}$, $l_{\epsilon}=l/2.5$, $c_{\epsilon}=0.16$, and $c_k=0.5$. The square of the characteristic rate of strain $\overline{D}^2$ is defined as $\overline{D}^2=2D_{ij}D_{ij}$ with element $(i,j)$ of the tensor given as
 \begin{equation}
  D_{ij}=\frac{1}{2}(\frac{\partial U_i}{\partial x_j}+\frac{\partial U_j}{\partial x_i})
 \end{equation}
@@ -126,25 +153,19 @@ with capital $U$ indicating the grid-scale velocity and indices $i$ and $j$ are 
 \begin{equation}\label{eqn:def2}
  \overline{D}^2=2\{D_{11}^2+D_{22}^2+D_{33}^2\}+4\{D_{12}^2+D_{13}^2+D_{23}^2 \}
 \end{equation}
-which is provided from the Dycore at cell centers. 
+which is provided from the Dycore at cell centers. In the 1D case this reduces to $\overline{D}^2=\frac{dU}{dz}^2+\frac{dV}{dz}^2$.
 
-
-\subsubsection{TKE closure}
-The formulation of the TKE boundary layer scheme follows the description given by \cite{teixeira04} and is specifically designed here to model the evolution of the convective boundary layer (and not as a LES closure). The prognostic equation for $e$, the sgs kinetic energy per unit dry air, is
-\begin{eqnarray}\label{eqn:tkebudget}
- \frac{\partial e}{\partial t}&=& \mathrm{ADV} + \mathrm{TRANS} + \mathrm{SHEAR} + \mathrm{BUOY} - \mathrm{DISS}\\
- \mathrm{TRANS} &=& \frac{1}{\rho_d}\frac{\partial}{\partial z} (\rho_d K_m  \frac{\partial e}{\partial z})\\
- \mathrm{SHEAR} &=& K_m \overline{D}^2 \\
- \mathrm{BUOY} &=& \frac{g}{\theta_v}\overline{w'\theta_v'}\\
- \mathrm{DISS}&=& 0.16\cdot 2.5\sqrt{e}/l.
-\end{eqnarray}
-The virtual potential temperature flux is the sum of the ED and MF parts and computed at the end of the previous time step. The advective term is eventually computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required (i.e., analogous to the water vapor mixing ratio). The eddy diffusivity for momentum is obtained as $K_m=0.5 l \sqrt{e}$ and $K_h=\mathrm{Pr} K_m$ with $\mathrm{Pr}=1$. The mixing length is obtained as
+The eddy diffusivity for heat and moisture fluxes is $K_h=\mathrm{Pr} K_m$ with $\mathrm{Pr}=1$. The mixing length is obtained as
 \begin{eqnarray}
  l &=& \tau \sqrt{e} + (\kappa z - \tau \sqrt{e}) e^{-z/\alpha}
 \end{eqnarray}
-with $\alpha=100\mathrm{~m}$ and $\tau$ taken to be either 600 sec or $\tau=h/w^*$ with $w^*=(hg/\theta_{v0} \overline{w'\theta_v'})^{1/3}$. The boundary layer height $h$ is defined as the level where the buoyancy flux is minimized. The TRANS diffusion term is solved in the same way as for any other scalar. Note that to obtain a standard LES TKE closure the mixing length can be defined same as in (\ref{eqn:lmixsmag}) and the coefficients in DISS can be adopted. 
+with $\alpha=100\mathrm{~m}$ and $\tau$ taken to be either 600 sec or $\tau=0.5 h/w^*$ with $w^*=(hg/\theta_{v0} \overline{w'\theta_v'}|_0)^{1/3}$. The boundary layer height $h$ is defined as the level where the buoyancy flux is minimized. The TRANS diffusion term is solved in the same way as for any other scalar. The advective term ADV is eventually computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required (i.e., analogous to the water vapor mixing ratio). 
 
-The numerical implementation to advance $e$ from step $n$ to step $n+1$ is as follows. SHEAR, BUOY, and DISS are treated explicitly with an Euler step. Thereby, $K_m$ at step $n$ is diagnosed from $e$ at step $n$. In case the boundary layer height $h$ (defined as the level where the buoyancy flux is minimized) and $w^*$ are needed to evaluate mixing length $l$, the required buoyancy flux is obtained from the implicit computation for the previous time step. The three tendencies will be limited in magnitude to ensure their sum is not smaller than $-\frac{e}{\Delta t}$. Then, TRANS is computed as described below (general formulation allowing for an implicit solver) again based on the $e$ distribution at step $n$. That means that TRANS may still cause some negative $e$ at step $n+1$ since the solver for TRANS is not necessarily positive definite. Negative $e$ will be clipped at the beginning of the next step.   
+The numerical implementation to advance $e$ from step $n$ to step $n+1$ is as follows. SHEAR, BUOY, and DISS are treated explicitly with an Euler step. Thereby, $K_m$ at step $n$ is diagnosed from $e$ at step $n$. In case the boundary layer height $h$ (defined as the level where the buoyancy flux is minimized) and $w^*$ are needed to evaluate mixing length $l$, the required buoyancy flux is obtained from the implicit computation for the previous time step. The three tendencies will be limited in magnitude to ensure their sum is not smaller than $-\frac{e}{\Delta t}$. Then, TRANS is computed as described below (general formulation allowing for an implicit solver) again based on the $e$ distribution at step $n$. That means that TRANS may still cause some negative $e$ at step $n+1$ since the solver for TRANS is not necessarily positive definite. Negative $e$ will be clipped at the beginning of the next step.
+
+\subsubsection{Witek TKE closure}
+
+\subsubsection{Langhans TKE closure}
 
 \subsection{Multiplume model}
 
@@ -258,7 +279,7 @@ with $\beta_1^+=1-\beta_1^-$ and $\beta_2^+=1-\beta_2^-$ the implicit weights. A
       d_k &=  -\frac{\psi^{n,k}}{\Delta t} - \frac{1}{\rho^{n,k}\Delta z^k} \left\{ \frac{K^{n,k+1/2}\rho^{n,k+1/2}}{\Delta z^{k+1/2}}\beta_1^{-}\left[\psi^{n,k+1} - \psi^{n,k}\right]\right.   \\   
           & \left. -\rho^{n,k+1/2}\left[\sum_iM_i^{n,k+1/2}\psi_i^{up~n,k+1/2} -\beta_2^{-}\psi^{n,k+1}\sum_iM_i^{n,k+1/2} \right] \right\} +|\mathbf{v_{h1}}|\frac{C^n_{\psi}}{\Delta z^k}\left[\beta^-\psi^{n,k} - \psi_s\right]    
 \end{align*}
-This formulation with Dirichlet boundary conditions makes use of the drag coefficients computed in the surface scheme and through (\ref{eqn:dragvirtual}). The user can, however, also decide to use a Neuman boundary condition ({\tt doneuman=.true.}) using the fluxes from the surface scheme and from (\ref{eqn:wthetav}). In this case, the last rhs term in $b_k$ is dropped and the last term in $d_k$ becomes $- \overline{\psi'w'}^n/\Delta z^k$ makeing the surface fluxes fully explicit. This explicit Neuman boundary condition is also used if surface fluxes are prescribed ({\tt sfc\_tau\_fxd} or {\tt sfc\_flx\_fxd} respectively). Same as in SAM, the surface flux of $e$ is assumed to be zero and the explicit Neuman condition is always used. 
+This formulation with Dirichlet boundary conditions makes use of the drag coefficients computed in the surface scheme and through (\ref{eqn:dragvirtual}). The user can, however, also decide to use a Neuman boundary condition ({\tt doneuman=.true.}) using the fluxes from the surface scheme and from (\ref{eqn:wthetav}). In this case, the last rhs term in $b_k$ is dropped and the last term in $d_k$ becomes $- \overline{\psi'w'}^n/\Delta z^k$ makeing the surface fluxes fully explicit. This explicit Neuman boundary condition is also used if surface fluxes are prescribed ({\tt sfc\_tau\_fxd} or {\tt sfc\_flx\_fxd} respectively). Same as in SAM, the surface flux of $e$ is assumed to be zero and the explicit Neuman condition is always used. Zero tke fluxes at the surface are in line with findings presented by \cite{mcbean75} (see arguments given along with Eqn. (13)) and \cite{lenschow74} (see their Fig. 8).
 
 The boundary condition at the top for $k=N_k$ is given as
 \begin{align*}
@@ -294,6 +315,7 @@ W.L. would like to thank Joao Teixeira and Kay Suselj for providing the code of 
 
 
 \bibliographystyle{ametsoc}
+%\bibliography{/home/wolfi/Bibliography/wolfil_jab.bib}
 \input{documentation.bbl}
 
  

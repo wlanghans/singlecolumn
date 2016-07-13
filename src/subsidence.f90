@@ -18,8 +18,8 @@ integer :: k
    tend_sub_rho_thetav = advect_mass_fraction2(thetav,rho,limiter=dothuburn)
    tend_sub_rho_qv     = advect_mass_fraction2(qv,rho,limiter=dothuburn)
    tend_sub_rho_tke    = advect_mass_fraction2(tke,rho,limiter=dothuburn)
-   ! now assume that density doesn't change to due mass continuity. 
-   ! Only changes in water vapor mass then affect the density
+   ! now assume that dry air density doesn't change to due mass continuity. 
+   ! Only changes in water vapor mass affect the density
    tend_sub_rho        = tend_sub_rho_qv
    
 
