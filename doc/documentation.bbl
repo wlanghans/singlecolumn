@@ -1,4 +1,4 @@
-\begin{thebibliography}{16}
+\begin{thebibliography}{17}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
@@ -29,6 +29,11 @@ Collins, W.~D., P.~J. Rasch, B.~A. Boville, J.~J. Hack, J.~R. McCaa, D.~L.
 Deardorff, J.~W., 1974: Three-dimensional numerical study of the height and
   mean structure of a heated planetary boundary layer. \textit{Boundary-Layer
   Meteorology}, \textbf{7~(1)}, 81--106.
+
+\bibitem[{Fuhrman et~al.(2010)Fuhrman, Dixen, and Jacobsen}]{fuhrmann10}
+Fuhrman, D.~R., M.~Dixen, and N.~G. Jacobsen, 2010: Physically-consistent wall
+  boundary conditions for the $k-\omega$ turbulence model. \textit{Journal of
+  Hydraulic Research}, \textbf{48~(6)}, 793--800.
 
 \bibitem[{Han(2015)}]{han15}
 Han, J., 2015: Implementation in the {NCEP GFS} of a hybrid eddy-diffusivity
