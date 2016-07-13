@@ -1,4 +1,4 @@
-\begin{thebibliography}{15}
+\begin{thebibliography}{16}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
@@ -24,6 +24,11 @@ Collins, W.~D., P.~J. Rasch, B.~A. Boville, J.~J. Hack, J.~R. McCaa, D.~L.
   Williamson, J.~T. Kiehl, and B.~Briegleb, 2004: Description of the {NCARG}
   {C}ommunity {A}tmosphere {M}odel ({CAM 3.0}). {NCAR} Technical note
   TN–464+STR, National Center for Atmospheric Research, USA.
+
+\bibitem[{Deardorff(1974)}]{deardorff74}
+Deardorff, J.~W., 1974: Three-dimensional numerical study of the height and
+  mean structure of a heated planetary boundary layer. \textit{Boundary-Layer
+  Meteorology}, \textbf{7~(1)}, 81--106.
 
 \bibitem[{Han(2015)}]{han15}
 Han, J., 2015: Implementation in the {NCEP GFS} of a hybrid eddy-diffusivity
