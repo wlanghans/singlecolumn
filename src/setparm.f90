@@ -146,7 +146,7 @@ if (dosgs.and.doteixpbl.and..not.fixedtau) then
    dopblh=.true.
    pblhfluxmin=.false.
    pblhthgrad=.true.
-   write(*,*) 'Setting dopblh = .true. and pblhfluxmin = .true.'
+   write(*,*) 'Setting dopblh = .true. and pblhfluxmin = .false.'
 end if
 if (dosgs.and.dowitekpbl) then
   if (doedmf) then
