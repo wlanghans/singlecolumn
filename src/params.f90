@@ -42,6 +42,7 @@ logical :: sfc_cs_fxd=.false.
 real :: Cs_in = 1.e-2
 real :: Cm_in = 1.e-3
 logical :: doneuman = .false.
+logical :: dotkedirichlet = .false.
 logical:: ocean =.true.! 
 logical:: land =.false.! 
 real:: windshear = 0.

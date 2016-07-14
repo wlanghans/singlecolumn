@@ -1,13 +1,13 @@
 &PARAMETERS
-dz = 10.
-nzm=300
+dz = 20.
+nzm=150
 doconstdz = .true.
 
 betap=1.0
 betam=0.0
 
-dt=10.
-nstop=2880  ! 8 hours
+dt=60.
+nstop=480  ! 8 hours
 
 dosgs=.true.
 dosmagor=.false.

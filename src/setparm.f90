@@ -17,7 +17,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      doteixpbl,dowitekpbl,dolanghanspbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
-                     doshortwave, dolongwave, doradsimple
+                     doshortwave, dolongwave, doradsimple, dotkedirichlet
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
