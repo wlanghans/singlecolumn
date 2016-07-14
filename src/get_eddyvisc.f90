@@ -103,7 +103,7 @@ do k=1,nzm
          tketau= max(0.5 * pblh /  ((ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.)),0.0)
       end if
       l23 =    (tketau*sqrt(tke(k)))**(-1) 
-      if (buoy_sgs(k).gt.0.0.and.dowitekpbl) l23 = l23 + (0.7*sqrt(tke(k))/sqrt(buoy_sgs(k)))**(-1)
+      if (buoy_sgs(k).gt.0.0.and.dowitekpbl) l23 = l23 + (max(0.7*sqrt(tke(k))/sqrt(buoy_sgs(k)),adz(k)*dz/2.))**(-1)
       l23 = l23**(-1)
       smix(k)=  l23 +(xkar*z(k)-l23)*exp(-z(k)/100.)
    else

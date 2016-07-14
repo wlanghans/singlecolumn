@@ -1,4 +1,4 @@
-\begin{thebibliography}{17}
+\begin{thebibliography}{18}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
@@ -90,6 +90,11 @@ Teixeira, J. and S.~Cheinet, 2004: A simple mixing length formulation for the
 Tiedtke, M., 1989: A comprehensive mass flux scheme for cumulus
   parameterization in large-scale models. \textit{Mon. Wea. Rev.},
   \textbf{117}, 1779--1800.
+
+\bibitem[{Witek et~al.(2011)Witek, Teixeira, and Matheou}]{witek11}
+Witek, M.~L., J.~Teixeira, and G.~Matheou, 2011: An integrated {TKE}-based eddy
+  diffusivity/mass flux boundary layer closure for the dry convective boundary
+  layer. \textit{J. Atmos. Sci.}, \textbf{68}, 1526--1540.
 
 \bibitem[{Wyngaard(2010)}]{wyngaard10}
 Wyngaard, J.~C., 2010: \textit{Turbulence in the Atmosphere}. Cambridge

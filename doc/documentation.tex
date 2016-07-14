@@ -134,6 +134,7 @@ The eddy diffusivities are computed at cell centers and averaging provides $K_{\
 
 
 \subsubsection{Teixeira TKE closure}
+
 The formulation of the TKE boundary layer scheme follows the description given by \cite{teixeira04} and is specifically designed here to model the evolution of the dry convective boundary layer. The prognostic equation for $e$, the sgs kinetic energy per unit dry air, is
 \begin{eqnarray}\label{eqn:tkebudget}
  \frac{\partial e}{\partial t}&=& \mathrm{ADV} + \mathrm{TRANS} + \mathrm{SHEAR} + \mathrm{BUOY} - \mathrm{DISS}
@@ -145,7 +146,9 @@ and in this parameterization the individual sources/sinks are closed as
  \mathrm{BUOY} &=& \frac{g}{\theta_v}\overline{w'\theta_v'}\\
  \mathrm{DISS}&=& c_{\epsilon}\sqrt{e}/l_{\epsilon}
 \end{eqnarray}
-with $K_m=c_k l e^{1/2}$, $l_{\epsilon}=l/2.5$, $c_{\epsilon}=0.16$, and $c_k=0.5$. The square of the characteristic rate of strain $\overline{D}^2$ is defined as $\overline{D}^2=2D_{ij}D_{ij}$ with element $(i,j)$ of the tensor given as
+with $K_m=c_k l e^{1/2}$, $l_{\epsilon}=l/2.5$, $c_{\epsilon}=0.16$, and $c_k=0.5$.
+
+The square of the characteristic rate of strain $\overline{D}^2$ is generally defined as $\overline{D}^2=2D_{ij}D_{ij}$ with element $(i,j)$ of the tensor given as
 \begin{equation}
  D_{ij}=\frac{1}{2}(\frac{\partial U_i}{\partial x_j}+\frac{\partial U_j}{\partial x_i})
 \end{equation}
@@ -153,19 +156,45 @@ with capital $U$ indicating the grid-scale velocity and indices $i$ and $j$ are 
 \begin{equation}\label{eqn:def2}
  \overline{D}^2=2\{D_{11}^2+D_{22}^2+D_{33}^2\}+4\{D_{12}^2+D_{13}^2+D_{23}^2 \}
 \end{equation}
-which is provided from the Dycore at cell centers. In the 1D case this reduces to $\overline{D}^2=(\frac{dU}{dz})^2+(\frac{dV}{dz})^2$.
+which is provided from the Dycore at cell centers. In the here relevant 1D case this reduces to $\overline{D}^2=(dU/dz)^2+(dV/dz)^2$.
 
 The eddy diffusivity for heat and moisture fluxes is $K_h=\mathrm{Pr} K_m$ with $\mathrm{Pr}=1$. The mixing length is obtained as
 \begin{eqnarray}
  l &=& \tau \sqrt{e} + (\kappa z - \tau \sqrt{e}) e^{-z/\alpha}
 \end{eqnarray}
 with $\alpha=100\mathrm{~m}$ and $\tau$ taken to be either 600 sec or $\tau=0.5 h/w^*$ with $w^*=(hg/\theta_{v0} \overline{w'\theta_v'}|_0)^{1/3}$. 
-% The boundary layer height $h$ is defined as the level where the buoyancy flux is minimized. 
-The TRANS diffusion term is solved in the same way as for any other scalar. The advective term ADV is eventually computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required (i.e., analogous to the water vapor mixing ratio). 
 
-The numerical implementation to advance $e$ from step $n$ to step $n+1$ is as follows. SHEAR, BUOY, and DISS are treated explicitly with an Euler step. Thereby, $K_m$ at step $n$ is diagnosed from $e$ at step $n$. In case the boundary layer height $h$ (defined as the level where the buoyancy flux is minimized) and $w^*$ are needed to evaluate mixing length $l$, the required buoyancy flux is obtained from the implicit computation for the previous time step. The three tendencies will be limited in magnitude to ensure their sum is not smaller than $-\frac{e}{\Delta t}$. Then, TRANS is computed as described below (general formulation allowing for an implicit solver) again based on the $e$ distribution (and $K$) at step $n$. That means that TRANS may still cause some negative $e$ at step $n+1$ since the solver for TRANS is not necessarily positive definite. Negative $e$ will be clipped at the beginning of the next step.
+The boundary layer height $h$ is defined as either the height where the buoyancy flux from the prvious step is minimized (a somewhat inconsistent numerical treatment) or as the height where the $\theta_v$ gradient is maximized. A third option to obtain $h$ is made available through code adapted from WRF and implies an evaluation of both $e$ and $\theta_v$ profiles. 
+
+There is no MF component in this model.
 
 \subsubsection{Witek TKE closure}
+
+The Witek closure follows mostly the description given by \cite{witek11}. It is an EDMF closure. The MF model is described below. The ED part is very similar to the above described Teixeira closure. Only the differences are described here.
+
+The MF part of the buoyancy flux is considered in the production term for TKE. This is argued to produce a proper buoyancy profile near the slightly stable parts of the BL and at the inversion. 
+Moreover, some constants and the disspiation length take different values/definitions:
+
+\begin{eqnarray}
+ c_k&=&0.425\\
+ Pr&=&0.5882\\
+ C_{\epsilon}&=&0.304\\
+ l_{\epsilon}&=&l
+\end{eqnarray}
+
+The definition of the length scale differs from Witek's paper and is closer to the proposal be \cite{suselj13}:
+
+\begin{eqnarray}
+ l &=&l_{23} + (\kappa z - l_{23}) e^{-z/\alpha} \\
+ l_{23}^{-1}&=&l_{2}^{-1} + l_{3}^{-1}\\
+ l_{2} &=& \tau \sqrt{e}\\
+ l_{3} &=& \left\{ 
+ \begin{array}{ll}
+  \max(\Delta z/2, 0.7 \sqrt{(e/N^2)})&\quad \mathrm{if}\quad N^2>0\\
+  \infty &\quad \mathrm{if}\quad N^2\leq 0.
+  \end{array}\right.
+\end{eqnarray}
+In neutral or unstable conditions it is the same as for the Teixeira closure as long as $\alpha$ and $\tau$ receive the same definitions (e.g., $\alpha=100$~m and $\tau=600$~s). Here, $\alpha$ may take a constant value of 400~s (same as in \cite{suselj13}) or be defined as in the Teixeira closure as $\tau=0.5 h/w^*$. We avoid the exact definition from \cite{witek11} since it would require the computation of the friction velocity based on similarity theory. It is more complicated to define the latter under calm conditions and thus avoided so far.
 
 \subsubsection{Langhans TKE closure}
 
@@ -249,7 +278,9 @@ where $\alpha=e^{-(b+c\epsilon^k)\Delta z^k}$ and $B_i^{up~k}=g(0.5(\theta_{vi}^
 \end{equation}
 with $\epsilon_d=0.1$, $L_0=100$~m, $a=2/3$, $b=0.002$~m$^{-1}$, $c=1.5$, and $\mathcal{P}$ a random number drawn from the Poisson distribution. The entrainment rate is thus so far formulated identically for the different updraft classes. 
 
-\section{Solving for the tendency}\label{sec:solve}
+\section{Solving for the tendencies}\label{sec:solve}
+
+\subsection{EDMF equation}
 
 Equation (\ref{eqn:tendency}) needs to be solved to obtain tentendy $T^{\psi}$. The spatial discretization of the equations is done using a centered scheme for the diffusion term and the mass-flux term. $K$, $M_i$, and $\psi^{up}_i$ are treated explicitly in time while other terms can be implicit. \footnote{If the prognostic TKE closure is used then SAM would use an intermediate $K$ obtained from an intermediate $e$ that got advanced through a truncated budget (\ref{eqn:tkebudget}) without the TRANS term. TRANS (i.e. mixing) is then computed based on the intermediate $e$ and $K$. We find, however, that this approach leads to strange instabilities in a CPBL test. Thus, we use a truly explicit approach for $e$ and $K$.} For brevity we drop index $_\psi$ here for eddy diffusivities $K$. The vertical grid structure and the indexing is illustrated in Fig.~\ref{fig:staggering} and is the same as used by \cite{tiedtke89}. An important stability criterion -- realized by \cite{tiedtke89} -- is that the environmental value of $\psi$ at the interface $k+1/2$ can not be taken as the average between $k$ and $k+1$. The interface value of $\psi$ is needed in the subsidence term $- \psi(z) \sum_i M_i(z)$ and in line with an upwind discretization has to be interpolated/taken from above. Since all prognostic variables are to a good approximation conserved along the unsaturated downdraft (besides detrainment effects) we simply say $\psi^{k+1/2}=\psi^{k+1}$ and  $\psi^{k-1/2}=\psi^{k}$. We find that taking the average indeed results in numerical instabilities, while this approach works fine. The discretized form of Eq. (\ref{eqn:tendency}) is then
 \begin{align*}
@@ -293,8 +324,14 @@ The boundary condition at the top for $k=N_k$ is given as
 \end{align*}
 Again, $\rho$ needs to be replaced by $\rho_d$ in case of $\psi=r_v$ or $\psi=e$. 
 
+\subsection{TKE equation}
 
- 
+The TRANS diffusion term is solved in the same way as described above for any other scalar (as a mixing ration to be precise). The advective term ADV is eventually computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required before passing over and receiving $e$ (i.e., analogous to the water vapor mixing ratio). 
+
+The numerical implementation to advance $e$ from step $n$ to step $n+1$ is as follows. SHEAR, BUOY, and DISS are treated explicitly with an Euler step. Thereby, $K_m$ at step $n$ is diagnosed from $e$ at step $n$. The three tendencies will be limited in magnitude to ensure their sum is not smaller than $-\frac{e}{\Delta t}$. Then, TRANS is computed as described below (general formulation allowing for an implicit solver) again based on the $e$ distribution (and $K$) at step $n$. That means that TRANS may still cause some negative $e$ at step $n+1$ since the solver for TRANS is not necessarily positive definite. Negative $e$ will be clipped at the beginning of the next step. 
+
+The buoyancy flux at time $n$ is needed in the buoyancy production term. The ED part of the flux requires knowledge about $K=C_k l e^{1/2}$. $e$ is available from the previous timestep (if a diagnostic scheme would be used then $e$ might still get advected by the Dycore and is thus treated like a prognostic variable) but $l$ needs to be re-evaluated at step $n$. To this end, the boundary layer height $h$ is required (since $l~ \tau e^{1/2}$ and $\tau ~ h/w^*$). It is computed either consistently at step $n$ if defined as the height where the $\theta_v$ gradient at step $n$ is maximized or somewhat inconsistently if defined as the height where the buoyancy flux at $n-1$ gets minimized.  Note that $h$ is also required as input to the mupliplume model and the same strategy is applied there. The MF fluxes at step $n$ might be included in the buoyancy flux of the buoyancy generation term (as done in the Witek scheme) and the plume model is thus called before evaluating the TKE sources.
+
 
 \begin{figure}[bthp]
 \centering
@@ -317,8 +354,8 @@ W.L. would like to thank Joao Teixeira and Kay Suselj for providing the code of 
 
 
 \bibliographystyle{ametsoc}
-%\bibliography{/home/wolfi/Bibliography/wolfil_jab.bib}
-\input{documentation.bbl}
+\bibliography{/home/wolfi/Bibliography/wolfil_jab.bib}
+%\input{documentation.bbl}
 
  
 \end{document}          
