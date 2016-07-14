@@ -164,14 +164,14 @@ if (progtke) then
   ! tke (input has to be dry air density rho_d and tke per mass of dry air) 
   ! use Neuman conditions right now, since Ctke unknown
   if (dotkedirichlet) then
-    call get_abcd(rho,tke,sumMtke,tk(1)/adz(1)/dz/vmag,tk,0.,a,b,c,d,.false.,.false.)
+    call get_abcd(rho,tke,sumMtke,2.* tk(1)/adz(1)/dz/vmag,tk,0.,a,b,c,d,.false.,.false.)
   else
     sgs_tke_flux(1) = 0.0   ! lower BC for tke transfer (questionable)
     call get_abcd(rho,tke,sumMtke,0.,tk,0.,a,b,c,d,.false.,.true.,sgs_tke_flux(1))
   end if
   call tridiag(a,b,c,d)
 
-  if (dotkedirichlet) sgs_tke_flux(1) = - tk(1)/adz(1)/dz * (betap*d(1)+betam*tke(1))
+  if (dotkedirichlet) sgs_tke_flux(1) = - 2.*tk(1)/adz(1)/dz * (betap*d(1)+betam*tke(1))
   !diagnose atm. fluxes
   !sgs_tke_flux(2:nzm) = 0.5*(rho(1:nzm-1)+rho(2:nzm))*(            &
   sgs_tke_flux(2:nzm) =    (-1.)/adzw(2:nzm)/dz * 0.5*(tk(1:nzm-1) + tk(2:nzm)) *                  &

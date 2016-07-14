@@ -1,4 +1,4 @@
-\begin{thebibliography}{18}
+\begin{thebibliography}{19}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
@@ -60,6 +60,12 @@ Lenschow, D.~H., J.~C. Wyngaard, and W.~T. Pennell, 1980: Mean-field and
 Mcbean, G.~A. and J.~A. Elliott, 1975: The vertical transports of kinetic
   energy by turbulence and pressure in the boundary layer. \textit{Journal of
   the Atmospheric Sciences}, \textbf{32~(4)}, 753--766.
+
+\bibitem[{Nieuwstadt et~al.(1993)Nieuwstadt, Mason, Moeng, and
+  Schumann}]{nieuwstadt93}
+Nieuwstadt, F. T.~M., P.~J. Mason, C.-H. Moeng, and U.~Schumann, 1993: A
+  comparison of four computer codes. \textit{Proceedings of the 8th Symposium
+  on Turbulent Shear Flows}, Springer, 343--367.
 
 \bibitem[{Stull(1994)}]{stull94}
 Stull, R.~B., 1994: A convective transport theory for surface fluxes.

@@ -166,6 +166,9 @@ with $\alpha=100\mathrm{~m}$ and $\tau$ taken to be either 600 sec or $\tau=0.5 
 
 The boundary layer height $h$ is defined as either the height where the buoyancy flux from the prvious step is minimized (a somewhat inconsistent numerical treatment) or as the height where the $\theta_v$ gradient is maximized. A third option to obtain $h$ is made available through code adapted from WRF and implies an evaluation of both $e$ and $\theta_v$ profiles. 
 
+A Dirichlet BC for $e$ is applied with $e(z=0)=0.$ The surface bulk transfer coefficient needed for the drag law is obtained from the eddy viscosity on the first mass level, as
+
+
 There is no MF component in this model.
 
 \subsubsection{Witek TKE closure}
@@ -194,7 +197,7 @@ The definition of the length scale differs from Witek's paper and is closer to t
   \infty &\quad \mathrm{if}\quad N^2\leq 0.
   \end{array}\right.
 \end{eqnarray}
-In neutral or unstable conditions it is the same as for the Teixeira closure as long as $\alpha$ and $\tau$ receive the same definitions (e.g., $\alpha=100$~m and $\tau=600$~s). Here, $\alpha$ may take a constant value of 400~s (same as in \cite{suselj13}) or be defined as in the Teixeira closure as $\tau=0.5 h/w^*$. We avoid the exact definition from \cite{witek11} since it would require the computation of the friction velocity based on similarity theory. It is more complicated to define the latter under calm conditions and thus avoided so far.
+In neutral or unstable conditions it is the same as for the Teixeira closure as long as $\alpha$ and $\tau$ receive the same definitions (e.g., $\alpha=100$~m and $\tau=600$~s). However, in locally stable conditions the length scale gets reduced. Here, $\alpha$ may take a constant value of 400~s (same as in \cite{suselj13}) or be defined as in the Teixeira closure as $\tau=0.5 h/w_*$. We avoid the exact definition from \cite{witek11} since it would require the computation of the friction velocity $u_*$ based on surface layer similarity theory. It is more complicated to define the latter under calm conditions and thus avoided so far. Another difference to \cite{witek11} is that we stick to $e(z=0)=0.$ as in the Teixeira closure to -- again -- avoiding the computation of $u^*$ needed for their $e(z=0)=3.75 u_*^2+0.2w_*^2$. 
 
 \subsubsection{Langhans TKE closure}
 
@@ -312,7 +315,7 @@ with $\beta_1^+=1-\beta_1^-$ and $\beta_2^+=1-\beta_2^-$ the implicit weights. A
       d_k &=  -\frac{\psi^{n,k}}{\Delta t} - \frac{1}{\rho^{n,k}\Delta z^k} \left\{ \frac{K^{n,k+1/2}\rho^{n,k+1/2}}{\Delta z^{k+1/2}}\beta_1^{-}\left[\psi^{n,k+1} - \psi^{n,k}\right]\right.   \\   
           & \left. -\rho^{n,k+1/2}\left[\sum_iM_i^{n,k+1/2}\psi_i^{up~n,k+1/2} -\beta_2^{-}\psi^{n,k+1}\sum_iM_i^{n,k+1/2} \right] \right\} +|\mathbf{v_{h1}}|\frac{C^n_{\psi}}{\Delta z^k}\left[\beta^-\psi^{n,k} - \psi_s\right]    
 \end{align*}
-This formulation with Dirichlet boundary conditions makes use of the drag coefficients computed in the surface scheme and through (\ref{eqn:dragvirtual}). The user can, however, also decide to use a Neuman boundary condition ({\tt doneuman=.true.}) using the fluxes from the surface scheme and from (\ref{eqn:wthetav}). In this case, the last rhs term in $b_k$ is dropped and the last term in $d_k$ becomes $- \overline{\psi'w'}^n/\Delta z^k$ makeing the surface fluxes fully explicit. This explicit Neuman boundary condition is also used if surface fluxes are prescribed ({\tt sfc\_tau\_fxd} or {\tt sfc\_flx\_fxd} respectively). Same as in \cite{deardorff74}, the surface flux of $e$ is assumed to be zero and the explicit Neuman condition is always used. Zero tke fluxes at the surface are in line with findings presented by \cite{mcbean75} (see arguments given along with Eqn. (13)) and \cite{lenschow74} (see their Fig. 8). Or, as \cite{fuhrmann10} nicely put it:  ``\dots a zero-gradient condition for $k$ [here $e$] can be interpreted physically as specifying a zero flux of turbulent kinetic energy normal to a wall. This condition should in fact hold quite generally, as a wall (be it rough or smooth) is neither a direct source nor a sink of turbulent kinetic energy.''
+This formulation with Dirichlet boundary conditions makes use of the drag coefficients computed in the surface scheme and through (\ref{eqn:dragvirtual}). The user can, however, also decide to use a Neuman boundary condition ({\tt doneuman=.true.}) using the fluxes from the surface scheme and from (\ref{eqn:wthetav}). In this case, the last rhs term in $b_k$ is dropped and the last term in $d_k$ becomes $- \overline{\psi'w'}^n/\Delta z^k$ makeing the surface fluxes fully explicit. This explicit Neuman boundary condition is also used if surface fluxes are prescribed ({\tt sfc\_tau\_fxd} or {\tt sfc\_flx\_fxd} respectively). 
 
 The boundary condition at the top for $k=N_k$ is given as
 \begin{align*}
@@ -339,7 +342,35 @@ The buoyancy flux at time $n$ is needed in the buoyancy production term. The ED 
 \caption{Locations of prognostic variable $\psi$, the updraft mass fluxes $M_i$, the updraft properties $\psi^{up}_i$, and eddy-diffusivities $K^{\psi}$ on the 1D vertical grid. } \label{fig:staggering}
 \end{figure}
 
+\section{Sensitivities}
+\subsection{ED closures}
 
+The dry CPBL case as described in \cite{nieuwstadt93} and \cite{witek11} is utilized here to test several sensitivities of the ED closures. 
+
+\subsubsection{Lower BC on TKE}
+
+Two BCs are compared: Neumann condition with zero flux of TKE at the surface and a Dirichlet condition with zero TKE at the surface (same as in \cite{teixeira04}). The zero-flux condition follows the LES model used by \cite{deardorff74} and is also in line with findings presented by \cite{mcbean75} (see arguments given along with Eqn. (13)) and \cite{lenschow74} (see their Fig. 8). This BC is further justified by \cite{fuhrmann10} who states that:  ``\dots a zero-gradient condition for $k$ [here $e$] can be interpreted physically as specifying a zero flux of turbulent kinetic energy normal to a wall. This condition should in fact hold quite generally, as a wall (be it rough or smooth) is neither a direct source nor a sink of turbulent kinetic energy.''
+
+The zero TKE condition $e(z=0)=0$ follows \cite{teixeira04} and could easily be modified to something like  $e(z=0)=3.75 u_*^2+0.2w_*^2$. The Dirichlet condition still makes use of the bulk drag law which formulates the kinematic flux as 
+\begin{equation}
+ F_e=\mathbf{v_h}_1| C_{\mathbf{tke}} (e_{1/2}-e_1)
+\end{equation}
+and thus an appropriate transfer coefficient $C_{\mathbf{tke}}$ has to be found. Since the surface value is generally smaller than the lowest atmospheric level, the emerging surfaces fluxes correpsond to a $e$ sink. 
+
+If $e$ and $K$ were located on half-levels then a downward extrapolation of $K$ would be necessary. To illustrate this, let us write down the tendency for an atmosphere with a constant $e$ profile and a surface value $e_s$. Since there are no ED fluxes within the atmosphere, the tendency within a first model layer of thickness $\Delta z_1$ is 
+
+\begin{eqnarray}
+ \frac{\partial e}{\partial t}_1 &=& F_e/\Delta z_1=|\mathbf{v_h}_1| C_{\mathbf{tke}} (e_{1/2}-e_1)/\Delta z_1
+\end{eqnarray}
+If $e$ was located on half-levels the equivalent tendency for the same layer would be obtained, as
+\begin{eqnarray}
+ \frac{\partial e}{\partial t}_1 &=& K_{1/2} (e_{1/2}-e_{3/2})/\Delta z_1^2= 2 K_{1/2} (e_{1/2}-e_{1})/\Delta z_1^2 
+\end{eqnarray}
+whereby we used the common linear interpolation $e_{1}=1/2(e_{1/2}+e_{3/2})$. From this it follows that $C_{\mathbf{tke}}$ has to take on the value 
+\begin{equation}
+ C_{\mathbf{tke}}= 2 K_{1/2}/ (|\mathbf{v_h}_1|  \Delta z_1)
+\end{equation}
+in order to yield the same tendency within that layer such that downward extrapolation (e.g., $K_{1/2}=K_{1}$) is necessary. Cleary, -- unless $e_{1/2}=e_{1}$ -- the two BCs yield different fluxes. 
 
 \section{Cloud cover and interaction with radiation}\label{sec:clouds}
 
