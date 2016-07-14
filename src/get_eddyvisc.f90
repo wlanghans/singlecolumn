@@ -221,7 +221,7 @@ do k=1,nzm
        a_diss    = dtkedtsum * a_diss
      end if
      if (dosequential) tke(k)=tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss)
-     wstar=max(0.,(ggr/thetav(1)**pblh)**(1./3.))
+     wstar=max(0.,(ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.))
 
    elseif (dowitekpbl) then
    ! ==================================

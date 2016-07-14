@@ -30,5 +30,5 @@ snapshot_start = 0
 snapshot_period =  2 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .true.
-snapshot_fields = 'B,upthv,upt,upthl,upw,upa,upqt,upqc,sumM,sumMthetav,rho,th,tke,heatflx,n2,lmix,tend_mix_rhothetav,tend_diss_rhotke,tend_buoy_rhotke,tend_mix_rhotke,tend_shear_rhotke,pres,tk,tkeflx,pblh,upm,ent,det'
+snapshot_fields = 'B,upthv,upt,upthl,upw,upa,upqt,upqc,sumM,sumMthetav,rho,th,tke,heatflx,n2,lmix,tend_mix_rhothetav,tend_diss_rhotke,tend_buoy_rhotke,tend_mix_rhotke,tend_shear_rhotke,pres,tk,tkeflx,pblh,upm,ent,det,wstar'
 /
