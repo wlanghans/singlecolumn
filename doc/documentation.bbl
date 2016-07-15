@@ -1,4 +1,4 @@
-\begin{thebibliography}{19}
+\begin{thebibliography}{21}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
@@ -66,6 +66,15 @@ Mcbean, G.~A. and J.~A. Elliott, 1975: The vertical transports of kinetic
 Nieuwstadt, F. T.~M., P.~J. Mason, C.-H. Moeng, and U.~Schumann, 1993: A
   comparison of four computer codes. \textit{Proceedings of the 8th Symposium
   on Turbulent Shear Flows}, Springer, 343--367.
+
+\bibitem[{Simpson and Wiggert(1969)}]{simpson69a}
+Simpson, J. and V.~Wiggert, 1969: Models of precipitating cumulus towers.
+  \textit{Mon. Wea. Rev.}, \textbf{97}, 471--489.
+
+\bibitem[{Sorbjan(1991)}]{sorbjan91}
+Sorbjan, Z., 1991: Evaluation of local similarity functions in the convective
+  boundary layer. \textit{Journal of Applied Meteorology}, \textbf{30~(12)},
+  1565--1583.
 
 \bibitem[{Stull(1994)}]{stull94}
 Stull, R.~B., 1994: A convective transport theory for surface fluxes.
