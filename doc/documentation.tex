@@ -355,7 +355,7 @@ The zero TKE condition $e(z=0)=0$ follows \cite{teixeira04} and could easily be 
 \begin{equation}
  F_e=\mathbf{v_h}_1| C_{\mathbf{tke}} (e_{1/2}-e_1)
 \end{equation}
-and thus an appropriate transfer coefficient $C_{\mathbf{tke}}$ has to be found. Since the surface value is generally smaller than the lowest atmospheric level, the emerging surfaces fluxes correpsond to a $e$ sink. 
+and thus an appropriate transfer coefficient $C_{\mathbf{tke}}$ has to be found. Since the surface value is generally smaller than the lowest atmospheric level, the emerging surfaces fluxes correpsond to a TKE sink. 
 
 If $e$ and $K$ were located on half-levels then a downward extrapolation of $K$ would be necessary. To illustrate this, let us write down the tendency for an atmosphere with a constant $e$ profile and a surface value $e_s$. Since there are no ED fluxes within the atmosphere, the tendency within a first model layer of thickness $\Delta z_1$ is 
 
@@ -366,11 +366,54 @@ If $e$ was located on half-levels the equivalent tendency for the same layer wou
 \begin{eqnarray}
  \frac{\partial e}{\partial t}_1 &=& K_{1/2} (e_{1/2}-e_{3/2})/\Delta z_1^2= 2 K_{1/2} (e_{1/2}-e_{1})/\Delta z_1^2 
 \end{eqnarray}
-whereby we used the common linear interpolation $e_{1}=1/2(e_{1/2}+e_{3/2})$. From this it follows that $C_{\mathbf{tke}}$ has to take on the value 
+whereby we used the common linear interpolation $e_{1}=1/2(e_{1/2}+e_{3/2})$ and $K_{1/2}$ would be the eddy viscosity at the surface. From this it follows that $C_{\mathbf{tke}}$ has to take on the value 
 \begin{equation}
  C_{\mathbf{tke}}= 2 K_{1/2}/ (|\mathbf{v_h}_1|  \Delta z_1)
 \end{equation}
-in order to yield the same tendency within that layer such that downward extrapolation (e.g., $K_{1/2}=K_{1}$) is necessary. Cleary, -- unless $e_{1/2}=e_{1}$ -- the two BCs yield different fluxes. 
+in order to yield the same tendency within that layer. To obtain $K_{1/2}$ a downward extrapolation (e.g., $K_{1/2}=K_{1}$) is necessary. Cleary, -- unless $e_{1/2}=e_{1}$ -- the two BCs yield different fluxes. 
+
+To illustrate this the Witek closure is used without MF contribution and with the two different formulations for the surface BC. Results are shown in Fig.~\ref{fig:BC}.  A negative flux results from the Dirichlet condition. Since TKE has a sink at the surface, TKE values are smaller in this run and the tke flux more negative near the surface. The $\theta$ profiles are thus less well mixed and the CPBL less deep. Note that the TKE profiles are closer to observed values. However, the increased negative fluxes of TKE are in stark contrast to the upward TKE fluxes found throughout the CPBL by \cite{lenschow74} (see their Fig.~8). Clearly, with ED fluxes alone the model is unable to maintain both positive fluxes and an upward increase of TKE. {\color{blue} Could we fix this by adding a MF part to the tke transport? Do recent MF models include tke transport?}
+
+\begin{figure}[bthp]
+\centering
+ \includegraphics[width=0.9\textwidth]{figures/CPBL_BC.eps}
+\caption{Comparison of the influence of the lower BC for the CPBL after 6 hours. The Witek closure is used without MF fluxes. Black (red) curves show results from the zero-flux (zero $e$) condition. } \label{fig:BC}
+\end{figure}
+
+\subsubsection{Mixing length scale}
+
+Four different experiemnts are carried out to test the influence of the mixing length formulation within the Witek TKE closure. The reference formulation is the one described above for the Witek closure and follows \cite{suselj13}. In this reference formulation we choose a length scale that is proportional to $\tau = 0.5 h/w_*$. Two experiemnts are carried out for which $\tau$ is fixed at 400 and 600~s, respectively. The fourth run is same as the reference but the correction (shortening) of the length scale in stable regions is dropped. This yields the formulation proposed by \cite{teixeira04}. 
+
+Results are shown in Fig.~\ref{fig:lmix}. In general, a reduction in the mixing lengths yields less well mixed profile of $\theta$. Fixing $\tau$ at 600 s (blue curve) reproduces well the profiles obtained by the reference run (shown in black). A reduction to 400~s, however, yields a significantly less mixed CPBL that is also slightly more shallow.  
+
+Switching off the stability correction of the length scale results in larger entrainment into the CPBL at the stable inversion. For this reason, the CPBL deepends faster. Interestingly, the length scale becomes larger also in the unstable parts of the CPBL even though the formulation has technically no influence in this part of the CPBL. For this reason, this forcmulation yields the most well mixed CPBL of all four experiments. The increase of $l$ within the unstable parts of the CPBL can be understood by considering the fractional change of the mixing length $l \sim \tau e^{1/2} \sim h/w_*^2 (w_*^2 e/w_*^2)^{1/2} \sim h (e/w_*^2)^{1/2}$, given by
+\begin{equation}
+ \delta \ln l = \delta \ln h + 1/2 \delta \ln e/w_*^2.
+\end{equation}
+An increase in the boundary layer depth and increase in the dimensionless TKE increases $l$. Figure \ref{fig:lmix} shows that the latter decreases, but TKE itself is almost unchanged. Therefore, we can use the definition of $w_*\sim h^{1/3}$ to rewrite
+\begin{equation}
+\delta \ln e/w_*^2 = \delta \ln e - \delta \ln w_*^2 = \delta \ln e - 2/3 \delta \ln h
+\end{equation}
+which -- after subsituting in the equation above -- finally yields
+\begin{equation}
+ \delta \ln l = 2/3 \delta \ln h + 1/2 \delta \ln e.
+\end{equation}
+The peak value of $e$ is almost unchanged such that the last term can be dropped. The CPBL depth $h$ increases by 10\% yielding a 6\% increase in the mixing length $l$. This is in good agreement with Fig.~\ref{fig:lmix}. The physical interpretation is that a larger size of entraining eddies near the inversion results in a deeper CPBL which in turn promotes larger eddies within the unstable parts of the CPBL.   
+
+This brings us to the question wether a larger increase of $\tau$ could yield a similary well mixed layer as obtained when dropping the stability-correction (i.e., shortening) of the length scale in the stable part? To explore this, the range of simulations has ben extended with $\tau$ ranging from 600 s to 2200 s in 400 s increments.
+
+These five simulations together with the one without stability correction are shown in Fig.~\ref{fig:taus}.  Cleary, with increasing $\tau$ the $\theta$ profile converges toward a well-mixed CPBL. However, the entrainment flux converges to a value smaller than the one from the simulation without stability correction. As a consequence, the stable part near the inversion is more shallow in all of these simulations and the curvature of the $\theta$ profile larger (i.e., sharper inversion). {\color{blue} Is this good or bad in comparison to LES? What's better suited for a combination with MF? Why?}
+
+\begin{figure}[bthp]
+\centering
+ \includegraphics[width=0.9\textwidth]{figures/CPBL_lmix.eps}
+\caption{Comparison of different formulations of mixing length scales for the CPBL. The closure used is the Witek closure which here applies the length scale described by \cite{suselj13}. The reference run (black) uses a variables $\tau$ proportional to CPBL depth. The sensitivy experiments differ in that $\tau$ is fixed at (red) 400 and (blue) 600 seconds or in that the stability correction is dropped (green). The latter results in the length scale described by \cite{teixeira04}. Profiles are shown after 6 hours if not mentioned otherwise.} \label{fig:lmix}
+\end{figure}
+\begin{figure}[bthp]
+\centering
+ \includegraphics[width=\textwidth]{figures/CPBL_taus.eps}
+\caption{Extension of the comparison of different formulations of mixing length scales for the CPBL. The range of $\tau$ is increased from (light gray) 600 s to (dark gray) 2200 s in 400 s increments. These runs are compared against the formulation without the mixing length correction in stable parts of the CPBL (green).} \label{fig:taus}
+\end{figure}
 
 \section{Cloud cover and interaction with radiation}\label{sec:clouds}
 
