@@ -1,4 +1,4 @@
-\begin{thebibliography}{21}
+\begin{thebibliography}{24}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\urlprefix}{URL }
@@ -7,6 +7,11 @@
   \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
   \urlstyle{rm}\Url}\fi
 \providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Angevine et~al.(2010)Angevine, Jiang, and Mauritsen}]{angevine10}
+Angevine, W.~M., H.~Jiang, and T.~Mauritsen, 2010: Performance of an eddy
+  diffusivity-mass flux scheme for shallow cumulus boundary layers.
+  \textit{Mon. Wea. Rev.}, \textbf{138}, 2895--2912.
 
 \bibitem[{Bryan et~al.(2003)Bryan, Wyngaard, and Fritsch}]{bryan03}
 Bryan, G.~H., J.~C. Wyngaard, and J.~M. Fritsch, 2003: Resolution requirements
@@ -61,6 +66,11 @@ Mcbean, G.~A. and J.~A. Elliott, 1975: The vertical transports of kinetic
   energy by turbulence and pressure in the boundary layer. \textit{Journal of
   the Atmospheric Sciences}, \textbf{32~(4)}, 753--766.
 
+\bibitem[{Neggers et~al.(2002)Neggers, Siebesma, and Jonker}]{neggers02}
+Neggers, R. A.~J., A.~P. Siebesma, and H.~J.~J. Jonker, 2002: A multiparcel
+  model for shallow cumulus convection. \textit{J. Atmos. Sci.}, \textbf{59},
+  1655--1668.
+
 \bibitem[{Nieuwstadt et~al.(1993)Nieuwstadt, Mason, Moeng, and
   Schumann}]{nieuwstadt93}
 Nieuwstadt, F. T.~M., P.~J. Mason, C.-H. Moeng, and U.~Schumann, 1993: A
@@ -70,6 +80,13 @@ Nieuwstadt, F. T.~M., P.~J. Mason, C.-H. Moeng, and U.~Schumann, 1993: A
 \bibitem[{Simpson and Wiggert(1969)}]{simpson69a}
 Simpson, J. and V.~Wiggert, 1969: Models of precipitating cumulus towers.
   \textit{Mon. Wea. Rev.}, \textbf{97}, 471--489.
+
+\bibitem[{Soares et~al.(2004)Soares, Miranda, Siebesma, and
+  Teixeira}]{soares04}
+Soares, P. M.~M., P.~M.~A. Miranda, A.~P. Siebesma, and J.~Teixeira, 2004: An
+  eddy-diffusivity/mass-flux parametrization for dry and shallow cumulus
+  convection. \textit{Quart. J. Roy. Met. Soc.}, \textbf{130~(604)},
+  3365--3383.
 
 \bibitem[{Sorbjan(1991)}]{sorbjan91}
 Sorbjan, Z., 1991: Evaluation of local similarity functions in the convective

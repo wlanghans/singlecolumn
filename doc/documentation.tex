@@ -254,8 +254,8 @@ with $N(w)$ the number density [(m~s$^{-1}$)$^{-1}$] of plumes as a function of 
 To obtain initial conditions, we follow \cite{lenschow80} and diagnose the standard deviations of $w$, $\theta$, and $q_v$ from the surface layer similarty relations
 \begin{eqnarray}
  \sigma_w&=&1.34 w^*(z_s/h)^{1/3} (1-0.8z_s/h)\\
-   \sigma_{q_t}&=&1.34 q_v^* (z_s/h)^{-1/3}\\
-  \sigma_{\theta}&=&1.34\theta^* (z_s/h)^{-1/3}
+   \sigma_{q_t}&=&1.34 q_v^* (z_s/h)^{-1/3}\\\label{eqn:sigmaq}
+  \sigma_{\theta}&=&1.34\theta^* (z_s/h)^{-1/3}\label{eqn:sigmath}
 \end{eqnarray}
 with 
 \begin{eqnarray}
@@ -263,8 +263,8 @@ with
   q_v^*&=&\overline{w'q_v'}/w^*\\
   \theta^*&=&\overline{w'\theta'}/w^*\\
 \end{eqnarray}
-and $z_s$ is set to be 50 meter and supposed to be in the surface layer. As shown by \cite[][see their Fig.~12]{sorbjan91}, the correlation coefficient between water vapor and potential temperature is $r_{q_v\theta}\approx 0.75$ {\color{blue}(note that \cite{cheinet03a} gets this number wrong)} in the surface layer such that the standard deviation of virtual potential temperature can be obtained after linearization of $\theta_v$, as  
-\begin{equation}
+and $z_s$ is set to be 50 meter and supposed to be in the surface layer. As shown by \cite[][see their Fig.~12]{sorbjan91}, the correlation coefficient between water vapor and potential temperature is $r_{q_v\theta}\approx 0.75$ {\color{blue}(note that \cite{cheinet03a} gets this number wrong)} in the surface layer such that the standard deviation of virtual potential temperature can be obtained, as  
+\begin{equation}\label{eqn:sigmathv}
  \sigma_{\theta_v}= (\sigma_{\theta}^2 + 0.61^2 \theta^2\sigma_{q_t}^2+2\cdot 0.61\theta r_{q_v\theta} \sigma_{\theta} \sigma_{q_t} )^{1/2}.
 \end{equation}
 {\color{blue}The correlation coefficient $r_{q_v\theta}$ might be different over water, right? (even negative: cold pools picking up vapor from ocean)}
@@ -277,6 +277,13 @@ Finally, the perturbations to the mean values are obtained -- again using correl
   \theta_{li}&=&\theta_{vi}/(1+\epsilon q_{vi})=\theta_i \quad\mathrm{since}~q_{li}=0.
 \end{eqnarray}
 
+
+If we decide to use a single plume model ($N^{up}=1$), then we might alternatively opt for the initial conditions defined in \cite{soares04} and \cite{witek11}. Therein, 
+\begin{equation}
+ \theta_{v1} =  \theta_{v}+\beta \overline{\theta_v'w'}/e^{1/2}
+\end{equation}
+with $\beta$ typically set to 0.3 \citep{soares04,witek11}. An analogous relation is used to relate $q_v$ to the surface latent heat flux. The intial vertical velocity is zero. Note that $\beta$ will set the intial plume buoyancy. The fractional area of the plume is assumed to be $s_i=0.1$.
+
 Steady-state entraining plumes are then used to describe the vertical thermodynamic and dynamic profiles. A conserved quantity $\psi$ follows the vertical profile given by
 \begin{eqnarray}\label{eqn:conserved}
  \frac{d\psi_i^{up} }{d z } &=& - \epsilon(\psi_i^{up} - \psi)
@@ -285,8 +292,17 @@ with entrainment rate $\epsilon$ and the environmental value $\psi$. The parcel 
 \begin{eqnarray}\label{eqn:w}
  1/2\frac{d (w_i^{up})^2 }{d z } &=& aB^{up}_i- (b+c\epsilon)(w_i^{up})^2
 \end{eqnarray}
-with buoyancy $B_i^{up}=g(\theta_v^{up}/\theta_v-1)$, the environmental profile $\theta_v$, and constants $a$, $b$, and $c$. The three acceleration terms are buoyancy, form drag, and mixing drag. 
+with buoyancy $B_i^{up}=g(\theta_v^{up}/\theta_v-1)$, the environmental profile $\theta_v$, and constants  $a=2/3$, $b=0.002$~m$^{-1}$, $c=1.5$. The three acceleration terms are buoyancy, form drag, and mixing drag. 
 
+Entrainment is described by either a Poisson process (see next section), by a fixed fractional entrainment rate $\epsilon=\epsilon0$, by \cite{witek11}'s formulation
+\begin{equation}
+ \epsilon=\frac{0.7}{l}
+\end{equation}
+or by \cite{neggers02}'s formulation
+\begin{equation}
+ \epsilon=\frac{\alpha_n}{\tau w}
+\end{equation}
+with $\tau=h/w_*$ the eddy turnover time as defined before and $\alpha_n$ a tuning parameter.
 
 The conserved variables used in the plume equations are liquid water potential temperature $\theta_l$ and total water mass fraction $q_t=q_v+q_l$. Equation (\ref{eqn:conserved}) is solved for these two variables until the vertical velocity in a plume turns zero. At each height a saturation adjustment scheme is used to infer the liquid water content $q_l$, $q_v$, and $\theta_v$. 
 
@@ -304,7 +320,8 @@ where $\alpha=e^{-(b+c\epsilon^k)\Delta z^k}$ and $B_i^{up~k}=g(0.5(\theta_{vi}^
 \begin{equation}
  \epsilon(\Delta z^k) = \frac{1}{\Delta z^k} \epsilon_d \mathcal{P}(\frac{\Delta z^k}{L_0})
 \end{equation}
-with $\epsilon_d=0.1$, $L_0=100$~m, $a=2/3$, $b=0.002$~m$^{-1}$, $c=1.5$, and $\mathcal{P}$ a random number drawn from the Poisson distribution. The entrainment rate is thus so far formulated identically for the different updraft classes. 
+with $\epsilon_d=0.1$, $L_0=100$~m, and $\mathcal{P}$ a random number drawn from the Poisson distribution. The entrainment rate is thus so far formulated identically for the different updraft classes. 
+
 
 \section{Solving for the tendencies}\label{sec:solve}
 
@@ -395,7 +412,7 @@ whereby we used the common linear interpolation $e_{1}=1/2(e_{1/2}+e_{3/2})$ and
 \end{equation}
 in order to yield the same tendency within that layer. To obtain $K_{1/2}$ a downward extrapolation (e.g., $K_{1/2}=K_{1}$ or $K_{1/2}=K_{3/2}$) is necessary. {\color{blue} The formulation of the Dirichlet condition is still somewhat arbitrary due to the extrapolation. Do you guys have better guidelines on this? Use similarity theory to derive $K$ at the surface? }Cleary, -- unless $e_{1/2}=e_{1}$ -- the two BCs yield different fluxes. 
 
-To illustrate this the Witek closure is used without MF contribution and with the two different formulations for the surface BC. Results are shown in Fig.~\ref{fig:BC}.  A negative flux results from the Dirichlet condition. Since TKE has a sink at the surface, TKE values are smaller in this run and the tke flux more negative near the surface. The $\theta$ profiles are thus less well mixed and the CPBL less deep. Note that the TKE profiles are closer to observed values. However, the increased negative fluxes of TKE are in stark contrast to the upward TKE fluxes found throughout the CPBL by \cite{lenschow74} (see their Fig.~8). Clearly, with ED fluxes alone the model is unable to maintain both positive fluxes and an upward increase of TKE. {\color{blue} Could we fix this by adding a MF part to the tke transport? Do recent MF models include tke transport?}
+To illustrate this the Witek closure is used without MF contribution and with the two different formulations for the surface BC. Results are shown in Fig.~\ref{fig:BC}.  A negative flux results from the Dirichlet condition. Since TKE has a sink at the surface, TKE values are smaller in this run and the tke flux more negative near the surface. The $\theta$ profiles are thus less well mixed and the CPBL less deep. Note that the TKE profiles are closer to observed values. However, the increased negative fluxes of TKE are in stark contrast to the upward TKE fluxes found throughout the CPBL by \cite{lenschow74} (see their Fig.~8). Clearly, with ED fluxes alone the model is unable to maintain both positive fluxes and an upward increase of TKE. {\color{blue} Could we fix this by adding a MF part to the tke transport? Do recent MF models include tke transport? \cite{angevine10} seems to have an MF term for $e$. Haven't read the paper in detail yet. \cite{witek11} also reports the lack of transport of $e$.}
 
 \begin{figure}[bthp]
 \centering
@@ -442,7 +459,69 @@ These five simulations (see gray curves) together with the one without stability
 
 The MF flux has been parameterized by a variety of different closures. Both single plume and multiplume versions have been used with different flavors of entrainment rates and initial conditions. To start with we here test the sensitivity of a single plume model with respect to initial conditions and entrainment rates. We employ the same CPBL case \citep{nieuwstadt93,witek11} as was already used above.
 
+\subsubsection{Initial conditions}
 
+We introduced two different formulations for the plume's initial conditions (IC). If the multiplume model version is used (but for one plume) then some intial $w_i$ will be assigned to the plume. Let's call these Cheinet conditions. Its thermodynamic properties follow through the correlations with $w$. In the other singleplume version $\theta_v'$ is directly related to the surface buoyancy flux through $\beta$ and $w_i$ is assumed to be zero. Let's call these Soares conditions. Are the two formulations comparable?
+
+To answer this let's ask the following question: What $\beta$ yields intial conditions such that the initial plume buoyancy is the same in the Cheinet formulation? In other words, under what conditions is 
+\begin{equation}\label{eqn:equality}
+ 0.58 w_i\sigma_{\theta_v}/\sigma_w=\beta \overline{w'\theta_v'}/e^{1/2}
+\end{equation}
+satisfied?
+
+To answer that, let's plug the definitions of $\sigma_{q_v}$ and $\sigma_{\theta}$, Eqs. (\ref{eqn:sigmaq}) and (\ref{eqn:sigmath}), into $\sigma_{\theta_v}$ (Eq. (\ref{eqn:sigmathv})). If we then assume that $r_{\theta q_v}=1$, we yield the simple expression
+\begin{equation}
+ \sigma_{\theta_v}=1.34 \theta_v^*(z_s/h)^{-1/3} 
+\end{equation}
+with $\theta_v^*=\overline{w'\theta_v'}/w^*$. Then, we take $w_i$ as a fraction of its standard deviation $w_i=a_w \sigma_w$. Plugging this and the simple form of $\sigma_{\theta_v}$ in the equality (\ref{eqn:equality}), and further assuming that $e=0.2w*^2$, then we obtain the condition 
+\begin{equation}
+ \beta = 0.58\cdot 1.34 \sqrt{0.2}a_w (z_s/h)^{-1/3}.
+\end{equation}
+
+{\color{blue} For typical values of $z_s=50$~m and $h=2000$~m, $\sigma_w$ takes on a value of around 0.6~m/s such that a 1~m/s inital updraft would have the same initial buoyancy in the two formulations if $\beta$ is around 2. If $\beta=0.3$ then equal buoyancies are assigned to an initial updraft if $w_i=0.15~$m/s in Cheinet's model. This estimate will be somewhat sensitive to the actually obtained $e$.}
+
+To test this estimate, we employ the same CPBL case \citep{nieuwstadt93,witek11} as been used already above. The entrainment rate is fixed at $\epsilon=1$~km$^{-1}$ and we do not allow for plume saturation for now. Also, we fix $e=0.2w_*^2$ in the definition of the Soares condition. The effect of using the actual $e$ will be tested later. Further, we say both the Cheinet and Soares model assume a plume fraction of 0.1 (even though the average $w_i$ computed in the Cheinet model is for a larger fractional area of 0.3).
+
+We then run the Cheinet multiplume model with a single plume and compare it against the single-plume model after Soares for a variety of $\beta$. The resulting profiles of plume buoyancy and vertical velocity are shown in Fig.~\ref{fig:ICs}. For the Cheinet run $w_1\approx0.7$~m/s such that -- based on the estimate above -- we would expect the two formulations to yield the same buoyancies if $\beta=1.4$. This is indeed the case, such that the vertical velocity profiles, the $\theta$ profile, and the buoyancy flux profile (and its partitioning into ED and MF) arrive at a great match for $\beta=1.4$. 
+
+With larger $\beta$ the plume buoyancy and velocity increases. While the total buoyancy flux remains fairly constant, the MF contribution more and more replaces the ED contribution as $\beta$ increases. Despite seemingly small changes in the flux profile, increasing $\beta$ yields more well-mixed profiles of $\theta$. {\color{blue} Note that none of the profiles agrees with the slightly stable stratification seen in LES \citep{witek11}. This will be explored in the next section. }
+
+
+\begin{figure}[bthp]
+\centering
+ \includegraphics[width=0.9\textwidth]{figures/CPBL_EDMF_ICs.eps}
+\caption{Comparison of the Cheinet initial condition (IC) with the Soares initial condition for a single-plume version of the MF together with the Witek TKE closure. The focus is on the influence of $\beta$ in the Soares IC such that we ensure that all other assumptions are the same in the two models (i.e., we fix $s_1=0.1$ and assumed $e=0.2w_*^2$ in the Soares formulation of the IC). Shown are profiles of plume buoyancy, plume vertical velocity, the mean $\theta$ profile, and the total, MF and ED buoyancy fluxes. All profiles are obtained after 6 hours of simulation.} \label{fig:ICs}
+\end{figure}
+
+\subsubsection{Plume equation and mixing length}
+
+In an attamept to reconstruct \cite{witek11}'s findings, who showed considerably more stable $\theta$ profiles thanks due to the inclusion of MF from a single plume, we here departed from \cite{suselj13}'s plume and length scale formulation and test \cite{witek11}'s ``faster'' plumes and the Teixeira length scale (which doesn't have \cite{suselj13}'s stability correction). Plumes have larger acceleration rates due to different coefficients in the $w$ equation. Results are also compared against two ED versions for reference. Figure~\ref{fig:abcl} shows results from these test. Note that for now we stick with the Soares IC ($\beta=0.3$ and $s_1=\sigma=0.1$) but fix $e=0.2w_*^2$ in its definition. We so far also use a constant entrainment rate of $\epsilon=1$~km$^{-1}$.
+
+It can be seen that the red and green profiles of $\theta$ are the most stable ones. These are the simulations with the Witek plume. The plume velocities are considerable larger and thus the MF flux is larger. Comparing green and orange (same length scale, different plume model) shows that the faster plumes lead to more entrainment at the top of the CPBL. Note how the fraction of the buoyancy flux carried by MF is larger in the Witek model throughout the CPBL. The same observation is made from comparing the red and blue curves (which uses the Suselj length scale).
+
+The main influence of the difference in length scale formulation is as described above for the ED-only version (now comparing blue with orange and green with red). Without the stability correction the PBL height is deeper due to a larger entrainment flux through the top. Moreover, with the Teixeira length scale the CPBL is more well mixed because larger eddies are supported in a deeper CPBL (larger mixing length). Also, (comparing green and red) the entrainment flux is mostly due to MF if the stability correction suppresses ED mixing at the inversion.   
+
+{\color{blue} Note that instead of changing the plume formulation, changing the entrainment formulation might have the same positive effect on the $\theta$ profile. This has to be tested.}
+
+\begin{figure}[bthp]
+\centering
+ \includegraphics[width=0.9\textwidth]{figures/CPBL_EDMF_abc_l.eps}
+\caption{Comparison of Suselj's plume equation ($a=2/3$, $b=0.002$, $c=1.5$) and Witek's plume equation ($a=2$, $b=0$, $c=1$). The overall effect is a faster acceleration in the Witek plume. Also evaluated is the effect of the stability correction/shortening term in the length-scale formulation. Two ED versions are shown as reference.} \label{fig:abcl}
+\end{figure}
+
+\subsubsection{Entrainment rate}
+
+Three formulations of the entrainment rate are compared next. Fixed entrainment rate, Witek's formulation, and Neggers' formulation. IF the \cite{suselj13} plume coefficients are used then we employ $\alpha_n=2/3$ which is a third of the value proposed by \cite{witek11} since updraft velocities are smaller. If \cite{witek11}'s plume coefficients are used then we choose $\alpha_n=4/3$, for reasons explained below.
+
+Figure~\ref{fig:entrain} show that for the slow plumes (on the right) the influence of the entrainment rate on mixing is generally small, simply because the fluxes are dominated by the ED part. For the fast plumes, larger entrainment rates lead smaller plume velocities. For this reason, the larger entrainment rates lead fo more unstable $\theta$ profiles. The positiv eeffect of the MF is lost if entrainment becomes large. We tuned the coefficient in the $\epsilon=1/w$ formulation such that the entrainment rate becomes close to the one from the $\epsilon=1/l$ and $\epsilon=1$~km$^{-1}$ formulation. The resulting vertical velocities are very similar for this reason. The gradients in the $\theta$ profiles are also very similar for these runs. The actual magnitude of $\theta$ differs only because the $\epsilon~1/l$ simulation (blue) kills the MF and its top-down entrainment.   
+
+\begin{figure}[bthp]
+\centering
+ \includegraphics[width=0.7\textwidth]{figures/CPBL_EDMF_entrain.eps}
+\caption{The influence of different entrainment rate formulations is demonstrated for two different versions of the plume equation: (left) Witek's fast plumes, (right) Suselj's slow plumes. } \label{fig:entrain}
+\end{figure}
+
+\subsubsection{Plume-eddy interactions}
 
 \section{Cloud cover and interaction with radiation}\label{sec:clouds}
 

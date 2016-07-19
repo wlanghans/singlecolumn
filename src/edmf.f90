@@ -43,9 +43,18 @@ implicit none
 
 ! w parameters
       REAL,PARAMETER :: &
-        &Wa=2./3., &
-        &Wb=0.002,&
-        &Wc=1.5
+        ! witek
+        !&Wa=2.,& 
+        !&Wb= 0.0 , & 
+        !&Wc= 1.0 
+        ! de roode
+        &Wa=0.5,& 
+        &Wb= 0.0 , & 
+        &Wc= 0.4 
+        ! suselj
+        !&Wa=2./3.,& 
+        !&Wb= 0.002 , & 
+        !&Wc= 1.5 
 
 ! entrainment parameters
       REAL,PARAMETER :: &
@@ -142,8 +151,8 @@ implicit none
        ! note that tke here is fully explicit only (at step n) if dosequential=.false., otherwise
        ! the tendency from buoyancy production, shear production, and dissipation have been added.
        ! This, if dosequential=.false., tke could be 0 and we simply add 0.01  to avoid division by zero
-       UPQT(1,1)=qv(1)/(1.+qv(1))+12.*wqt/(sqrt(tke(1)) + 0.01 )
-       UPTHV(1,1)=thetav(1)+12.*wthv/(sqrt(tke(1)) + 0.01 )
+       UPQT(1,1)=qv(1)/(1.+qv(1))+beta*wqt/(sqrt(0.2)*wstar) !(sqrt(tke(1)) + 0.001 )
+       UPTHV(1,1)=thetav(1)+beta*wthv/ (sqrt(0.2)*wstar) ! (sqrt(tke(1)) + 0.001 )
        UPTHL(1,1)=UPTHV(1,1)/(1.+epsv*UPQT(1,1))     ! liquid water pot. temp = pot. temp since no condensate at sfc yet
        UPT(1,1) = UPTHL(1,1) * (pres(1)/p00)**(rgas/cp)
 
@@ -186,9 +195,10 @@ implicit none
           if (fixedeps) then
             ENT(k-1,i) = eps0
           elseif (neggerseps) then
-            ENT(k-1,i) = 1./(UPW(k-1,i)*500.) + 0.4/z(k-1)
+            ENT(k-1,i) = min(1.e-2,1.2 * 2.*wstar/(UPW(k-1,i)*pblh)) 
+            !ENT(k-1,i) = min(1.e-2,1./(600.*UPW(k-1,i))) 
           elseif (witekeps) then
-            ENT(k-1,i) = 0.7/smix(k-1)
+            ENT(k-1,i) = min(1.e-02,0.7/smix(k-1))
           elseif (randomeps) then
             ! not implemented yet
           end if
@@ -229,6 +239,10 @@ implicit none
 
           ! all-or-nothing condensation scheme
             call condensation_edmf(QTn,THLn,presi(k),THVn,QCn)
+            if (donoplumesat) then
+              QCn=0.0
+              THVn = THLn*(1.+0.61*QTn) 
+            end if
 
 !          end if
        
