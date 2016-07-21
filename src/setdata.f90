@@ -170,20 +170,8 @@ do k = 1,nzm
    rho(k) = pres(k)/rgas/tabs(k)/(1.+epsv*qv(k))*100.
    
    w(k) = -3.75e-06 * zi(k)
-   if (z(k).lt.1500.) then
-     dthetadt(k) = -2./(24.*3600.) 
-   elseif (z(k).ge.1500..and.z(k).lt.3000.)  then
-     dthetadt(k) = (-2. + (z(k)-1500.) * 2.0/1500.)/(24.*3600.)
-   else
-     dthetadt(k) = 0.0
-   end if
-   if (z(k).lt.300.) then
-     dqvdt(k) = -1.2d-08
-   elseif (z(k).ge.300. .and. z(k).lt.500.) then
-     dqvdt(k) = -1.2d-08 + (z(k)-300.) * 1.2d-08/200.
-   else
-     dqvdt(k) = 0.0
-   end if
+   dthetadt(k) = 0.0
+   dqvdt(k) = 0.0
    ug(k) = 7.
    vg(k) = -5.5  
    u(k)     = ug(k)
@@ -200,6 +188,7 @@ end do
 elseif (trim(case).eq.'BOMEX') then
 
 
+fcor        = 0.376e-04
 zinvbottom  = 520.
 theta0      = 298.7
 qv0         = 17.0e-03
@@ -268,7 +257,7 @@ do k = 1,nzm
    else
      dqvdt(k) = 0.0
    end if
-   ug(k) = -10. + 1.3e-03*z(k)
+   ug(k) = -10. + 1.8e-03*z(k)
    vg(k) = 0.   
    if (z(k).lt.700.) then
      u(k)     = -8.75
@@ -278,6 +267,7 @@ do k = 1,nzm
      u(k)     = 0.0
    end if
    v(k)     = 0.
+   u(k)     = 0.
    tke(k)   = 0.
    qcl(k)   = 0.
    qpl(k)   = 0.

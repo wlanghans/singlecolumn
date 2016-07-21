@@ -55,17 +55,18 @@ logical:: doedmf = .false.
 logical:: donoplumesat=.false.
 logical:: fixedeps=.true.
 logical:: neggerseps=.false.
+real:: nuneggers=1.
 logical:: randomeps=.false.
 logical :: fixedfa=.true.
 real   :: eps0=1.e-03
 real   :: del0=1.e-03
 logical:: dosmagor = .true.
 logical:: dopblh = .false.
+real :: fixedpblh = 1000.
 logical:: pblhfluxmin=.true.
 logical:: pblhthgrad=.false.
 logical:: doconsttk = .false.
 logical:: dosurface = .true.
-logical:: dolargescale = .false.
 real   :: tkconst = 10.
 logical :: doteixpbl=.false.
 logical :: fixedtau=.true.
@@ -93,7 +94,7 @@ integer:: snapshot_start = 0
 integer:: snapshot_period =1
 integer:: snapshot_end = 1000
 logical:: snapshot_as_double = .false.
-character(400) :: snapshot_fields = 'u,v,th,thv,tabs,tke,rho,qv,qcl,qci,vaporflx,heatflx,virtheatflx,cthetav,crv,ctheta,cm'
+character(800) :: snapshot_fields = 'u,v,th,thv,tabs,tke,rho,qv,qcl,qci,vaporflx,heatflx,virtheatflx,cthetav,crv,ctheta,cm'
 
 
 end module params

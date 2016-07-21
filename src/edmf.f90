@@ -120,7 +120,7 @@ implicit none
 
 ! set initial conditions for updrafts
     zs=50.
-    pwmin=0.5
+    pwmin=1.
     pwmax=3.
 
 ! see Lenschow et al. (1980), JAS
@@ -195,10 +195,10 @@ implicit none
           if (fixedeps) then
             ENT(k-1,i) = eps0
           elseif (neggerseps) then
-            ENT(k-1,i) = min(1.e-2,1.2 * 2.*wstar/(UPW(k-1,i)*pblh)) 
+            ENT(k-1,i) = 2.*nuneggers*wstar/(UPW(k-1,i)+1.0e-6)/pblh 
             !ENT(k-1,i) = min(1.e-2,1./(600.*UPW(k-1,i))) 
           elseif (witekeps) then
-            ENT(k-1,i) = min(1.e-02,0.7/smix(k-1))
+            ENT(k-1,i) = 0.7/(smix(k-1)+1.0e-06)
           elseif (randomeps) then
             ! not implemented yet
           end if
@@ -252,7 +252,7 @@ implicit none
           Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))
 
  
-          IF (Wn2 >0) THEN
+          IF (Wn2 >0.) THEN
              UPW(k,i)=sqrt(Wn2) 
              if (.not.fixedfa) then 
                 UPA(k,i) = UPM(k,i) / UPW(k,i) 
@@ -315,6 +315,8 @@ implicit none
         sumMqt(k)    =sumMqt(k)    +UPA(K,i)*UPW(K,I)* UPQT(k,i)
         !sumMu(k)  =sumMu(k)+UPA(K,i)*UPW(K,I)*UPU(K,I)
         !sumMv(k)  =sumMv(k)+UPA(K,i)*UPW(K,I)*UPV(K,I)
+        qlsgs_mf(k) = qlsgs_mf(k) + UPA(K,i)*UPQC(k,i)
+        if (UPQC(k,i).gt.0.0) cfrac_mf(k) = cfrac_mf(k) + UPA(K,i)
       ENDDO
     ENDDO
 

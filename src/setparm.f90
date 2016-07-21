@@ -8,7 +8,7 @@ implicit none
 
 integer :: ierr
 
-NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dolargescale, &
+NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
                      fluxt0,fluxq0,tau0,dt,nstop, dosmagor, doedmf, &
                      betam, betap, z0, sfc_flx_fxd, sfc_tau_fxd, & 
                      ocean, land, nup, dopblh, windshear, &
@@ -17,7 +17,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, dola
                      doteixpbl,dowitekpbl,dolanghanspbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
-                     doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta
+                     doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh
 
 open(8,file='./CaseName',status='old',form='formatted')
 read(8,'(a)') case
@@ -152,8 +152,6 @@ if (dosgs.and.dowitekpbl) then
   if (doedmf) then
     !dosingleplume=.true.
     fixedfa=.true.
-    nup=1
-    witekeps=.true.
   end if
   dopblh=.true.
   pblhthgrad=.true.

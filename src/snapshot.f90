@@ -105,6 +105,34 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => u(1:nzm)
             end if
+
+            if (trim(field_name) .eq. 'ug') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'ug', &
+                  ! Long name
+                                           'Geostrophic wind in x', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => ug(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'vg') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'vg', &
+                  ! Long name
+                                           'Geostrophic wind in y', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => vg(1:nzm)
+            end if
          
          
             if (trim(field_name) .eq. 'v') then
@@ -192,6 +220,20 @@ module snapshot
                ncsnap%field(field_count)%data1 => tabs(1:nzm)
             end if
 
+            if (trim(field_name) .eq. 'qlsgs_mf') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qlsgs_mf', &
+                  ! Long name
+                                           'SSG qc for small scale MF flux ', &
+                  ! Units
+                                           'g/g', &
+                  ! Dimensions
+                                           (/z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qlsgs_mf(1:nz)
+            end if
+
             if (trim(field_name) .eq. 'qlsgs_ed') then
                call fill_fields_snapshot( &
                   ! Short name
@@ -208,7 +250,34 @@ module snapshot
 
             
          
+            if (trim(field_name) .eq. 'tend_force_rho_u') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'tend_force_rho_u', &
+                  ! Long name
+                                           'Coriolis forcing u', &
+                  ! Units
+                                           'kg/m3 m/s2', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => tend_force_rho_u(1:nzm)
+            end if
          
+            if (trim(field_name) .eq. 'tend_force_rho_v') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'tend_force_rho_v', &
+                  ! Long name
+                                           'Coriolis forcing v', &
+                  ! Units
+                                           'kg/m3 m/s2', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => tend_force_rho_v(1:nzm)
+            end if
+
             if (trim(field_name) .eq. 'p') then
                call fill_fields_snapshot( &
                   ! Short name
@@ -576,6 +645,20 @@ module snapshot
                ncsnap%field(field_count)%data1 => radlwup (1:nz)
             end if
     
+            if (trim(field_name) .eq. 'cfrac_mf') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'cfrac_mf', &
+                  ! Long name
+                                           'Cloud fraction from MF', &
+                  ! Units
+                                           '1', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => cfrac_mf (1:nz)
+            end if
+
             if (trim(field_name) .eq. 'cfrac_ed') then
                call fill_fields_snapshot( &
                   ! Short name

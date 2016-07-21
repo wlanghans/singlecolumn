@@ -29,6 +29,7 @@ implicit none
     REAL, PARAMETER :: sbl_damp = 400. !transition length for blending (m).
     INTEGER :: I,J,K,kthv,ktke
 
+    IF (fixedpblh.gt.0.0) return
 
     IF (pblhfluxmin) then ! compute cpbl top as level with flux minimum
 
@@ -150,5 +151,6 @@ implicit none
     pblh=PBLH_TKE*(1.-wt) + pblh*wt
 
     END IF  
+
 
 end subroutine get_pblh

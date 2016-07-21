@@ -1,0 +1,56 @@
+&PARAMETERS
+dz = 10.
+nzm=200
+doconstdz = .true.
+
+betap=1.0
+betam=0.0
+
+dt=30.
+nstop=720  ! 6 hours
+
+dosgs=.true.
+dosmagor=.false.
+dowitekpbl = .true.
+fixedtau=.false.
+doedmf = .true.
+dosingleplume=.false.
+beta =2.0
+nup=100
+fixedfa=.true.
+fixedeps = .false.
+witekeps = .false.
+neggerseps = .true.
+nuneggers= 1.
+donoplumesat=.false.
+eps0=5.e-03
+doconsttk = .false.
+dopblh = .true.
+pblhfluxmin = .false.
+pblhthgrad=.true.
+dosurface=.true.
+sfc_flx_fxd=.false. 
+sfc_tau_fxd=.true. 
+doneuman= .false.
+dotkedirichlet=.true.
+tkconst = 0.0
+
+Cs_in=0.0011
+Cm_in=0.0011
+sst=-7.5
+doforcing=.false.
+dosubsidence=.true.
+dothuburn=.true.
+docoriolis=.true.
+dolongwave=.true.
+doradsimple=.true.
+
+tau0     = 0.0707
+
+snapshot_do = .true.
+snapshot_start = 0
+snapshot_period =  2 ! 45
+snapshot_end = 1000000000
+snapshot_as_double = .true.
+snapshot_fields = 'tabs,u,v,w,B,upthv,upt,upthl,upw,upa,upqt,upqc,sumM,sumMthetav,rho,th,thv,qv,tke,virtheatflx,vaporflx,heatflx,n2,lmix,tend_mix_rhothetav,tend_diss_rhotke,tend_buoy_rhotke,tend_mix_rhotke,tend_shear_rhotke,pres,tk,tkeflx,pblh,upm,ent,det,wstar,upthd,qlsgs_ed,qlsgs_mf,virtheatflx_mf,virtheatflx_ed,q1,thetalgrad,qtgrad,taux,tauy,def2,dthetadt,dqvdt,tend_rad_rho_thetav,radlwup,cfrac_ed,cfrac_mf,tend_force_rho_u,tend_force_rho_v,ug,vg'
+/

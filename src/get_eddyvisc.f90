@@ -98,7 +98,7 @@ do k=1,nzm
    ! always use Teixeira's mixing length (Witek's is very similar)
       if (fixedtau) then
          if (doteixpbl)  tketau=600.
-         if (dowitekpbl) tketau=400.
+         if (dowitekpbl) tketau=600.
       else
          tketau= max(0.5 * pblh /  ((ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.)),0.0)
       end if
@@ -233,11 +233,11 @@ do k=1,nzm
      a_prod_sh=(tk(k)+0.001)*def2(k)
      ! explicit fluxes are used here in the source term from buoyancy
      if (k.lt.nzm) then
-     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr  + 0.5 *&
-       (sumMthetav(k) - thetav(k) * sumM(k) + sumMthetav(k+1) - thetav(k+1) * sumM(k+1)) 
+     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr  !+ 0.5 *&
+!       (sumMthetav(k) - thetav(k) * sumM(k) + sumMthetav(k+1) - thetav(k+1) * sumM(k+1)) 
      else
-     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr  + 0.5 *&
-       (sumMthetav(k) - thetav(k) * sumM(k))
+     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr  !+ 0.5 *&
+!       (sumMthetav(k) - thetav(k) * sumM(k))
      end if
      a_prod_bu=  ggr/thetav(k) * tke_thvflx(k) 
      a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
