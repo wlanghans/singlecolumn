@@ -49,7 +49,7 @@ write(*,*) 'Working on timestep ', nstep
 
 ! ======================================= 
 ! compute tendencies from large scale forcing
-! coriolis and dqvdt, dthetadt
+! coriolis and dqtdt, dthetadt
 ! ======================================= 
    call forcing()
 
@@ -102,11 +102,11 @@ write(*,*) 'Working on timestep ', nstep
 
 ! ======================================= 
 ! call PDF condensation scheme to get sgs
-! cloud cover and condensed water
+! cloud cover and condensed water in stratiform part
 ! iterative solve also provides tabs, theta, thetav, etc.
 ! ======================================= 
   if (dosgscloud) then
-    call sgscloud2()
+    call sgscloud()
   end if
 
 ! ======================================= 

@@ -1,5 +1,5 @@
 
-subroutine sgscloud()
+subroutine sgscloudmf()
 
 !input:
 ! t      ... liquid/frozen moist static energy
@@ -38,10 +38,10 @@ integer k, kb, kc
 real dtabs, an, bn, ap, bp, om, ag, omp, omn
 real fac1,fac2
 real fff,dfff,dqsat
-real lstarn,dlstarn,lstarp,dlstarp
+real lstarn,dlstarn,lstarp,dlstarp, dtabsa, hlip, hlie, cfrac_mf2, qce, qie, qte, qtel, qne, tabse, qltot,qitot
 integer niter
 real :: lambdaf, alphaf, betaf, qsl, totheta, tl, sigmas
-real :: tabs1, tabs2
+real,dimension (2) :: tabs1, tabs2
 
 an = 1./(tbgmax-tbgmin) 
 bn = tbgmin * an
@@ -59,54 +59,51 @@ totheta=(pres(k)/p00)**(rgas/cp)
 if (k.eq.1.or.tke(k).eq.0.0) then
 
 ! no PDF scheme needed if no variability (or if in first layer)
-! since grid-scale saturation will not occur, no condensate can be present
- qn(k)       = 0.
- qcl(k)      = 0.
- qci(k)      = 0.
- qv(k)       = qt(k)
- tabs1=(t(k)-ggr*z(k))/cp
-! splitting qp into solid and liquid part
- tabs(k)=(tabs1+fac1*qp(k))/(1.+fac2*qp(k))
- thetali(k) = tabs2 / totheta 
- thetav(k)  = thetali(k) * (1.+epsv*qv(k)) 
- thetar(k)  = thetav(k)
+! if condensate is present, then it comes from all-or-nothing adjustment
+! and will not modified here
+ tabs(k)=(t(k)-ggr*z(k))/cp + fac_cond*(qcl(k)+qpl(k)) + fac_fus*(qci(k)+qpi(k)) 
+ thetali(k) = (tabs(k)- fac_cond*(qcl(k)) - fac_fus*(qci(k)) ) / totheta 
+ thetav(k)  = tabs(k)/totheta * (1.+epsv*qv(k)) 
+ ! density potential temperature will later be used in edmf to get buoyancy. 
+ ! since qp is thought to be spread out evenly over grid-box it will not contribute to B
+ thetar(k)  = thetav(k) - tabs(k)/totheta * qn(k)
  cfrac_pdf(k) = 0.
+ if (qn(k).gt.0.0) then
+   cfrac_tot(k) = 1.
+ else 
+   cfrac_tot(k) = 0.0
+ end if
 
 else
 
-! first guess: no condensate
- tabs1=(t(k)-ggr*z(k))/cp
-! second guess: splitting qp into solid and liquid part
- tabs2=(tabs1+fac1*qp(k))/(1.+fac2*qp(k))
+! get plume moist static energy
+ hlip = 0.5*(cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k) +&
+            cp*tabs_mf(k+1) + ggr*zi(k+1) - lcond * qcsgs_mf(k+1) - lsub * qisgs_mf(k+1))
+ cfrac_mf2 = 0.5*(cfrac_mf(k)+cfrac_mf(k+1))
 
-! Warm cloud:
-    if(tabs2.ge.tbgmax) then
-      tabs(k)=tabs1+fac_cond*qp(k)
-! Ice cloud:
-    elseif(tabs2.le.tbgmin) then
-      tabs(k)=tabs1+fac_sub*qp(k)
-! Mixed-phase cloud:
-    else
-      om = an*tabs2-bn
-      tabs(k)=tabs2
-    endif
+! moist static energy in environment 
+ hlie   = ((t(k)+lcond*qpl(k)+lsub*qpi(k)-cfrac_mf2*hlip))/(1.-cfrac_mf2)
+! total water in environment
+ qte = (qt(k) - cfrac_mf2*0.5*(qtsgs_mf(k)+qtsgs_mf(k+1)))/(1.-cfrac_mf2)
+! first guess for tabs in environment outside of plumes: no condensate in environment
+ tabse  = (hlie - ggr*z(k))/cp
+! thetali in environment
+ thetali(k) = tabs(k) / totheta 
+ 
+ niter=0
+ dtabs = 100.
+ do while(abs(dtabs).gt.0.01.and.niter.lt.20)
 
-    ! first guess for
-    ! frozen/liquid potential temperature thetali = theta*(1 - theta/t (Lv/cp*qcl + Ls/cp*qci )
-    thetali(k) = tabs(k) / totheta 
+ if (niter.gt.0) then 
+   tabse= tabse + 0.5 * dtabs
+   thetali(k) = tabs(k) / totheta - (lcond * qce - lsub*qie)/totheta
+ end if
 
-    niter=0
-    dtabs = 100.
-    do while(abs(dtabs).gt.0.01.and.niter.lt.20)
-
-    if (niter.gt.0) then 
-      thetali(k) = thetali(k) + 0.5 * dtabs 
-      tabs(k) = (t(k)-ggr*z(k))/cp + fac_cond*(qcl(k)+qpl(k)) + fac_sub*(qci(k)+qpi(k)) 
-    end if
+    ! environmental properties
 
     ! compute gradients of qt and thetali
     thetaligrad(k) = (thetali(k)-thetali(k-1))/(z(k)-z(k-1))
-    qtgrad(k)      = (qt(k)-qt(k-1))/(z(k)-z(k-1))
+    qtgrad(k)      = (qte-qtel)/(z(k)-z(k-1))
 
     ! get liquid water temperature Tl
     tl     = totheta * thetali(k)
@@ -119,35 +116,37 @@ else
     sigmas = 250.*(max(0.0,qtgrad(k)**2. + alphaf**2*thetaligrad(k)**2. - 2. * alphaf * thetaligrad(k)*qtgrad(k)))**(0.5)
 
     ! compute normalized saturation deficit
-    q1(k)= min(10.,max(-10.,1000.*(qt(k)-qsl)/(1000.*sigmas+1.e-7)))
+    q1(k)= min(10.,max(-10.,1000.*(qte-qsl)/(1000.*sigmas+1.e-7)))
 
     ! get cloud fraction and mean liquid water content
     cfrac_pdf(k) = min(1.0,max(0.,0.5 * (1. + erf(q1(k)/1.41))))                           ! Bechtold Eq (20)
-    qn(k) = max(0.0,sigmas * lambdaf  * (cfrac_pdf(k) * q1(k) + exp(-q1(k)**2/2.)/2.51 ))  ! Bechtold Eq (21)
-    qv(k) = qt(k) - qn(k)
+    qne = max(0.0,sigmas * lambdaf  * (cfrac_pdf(k) * q1(k) + exp(-q1(k)**2/2.)/2.51 ))  ! Bechtold Eq (21)
  
     ! partition condensate into liquid and ice using temperature
     omn = max(0.,min(1.,(tabs(k)-tbgmin)*an))
-    qcl(k) = qn(k)*omn
-    qci(k) = qn(k)*(1.-omn)
+    qce = qne*omn
+    qie = qne*(1.-omn)
 
-    ! partition precip into liquid and ice using temperature
-    omp = max(0.,min(1.,(tabs(k)-tprmin)*ap))
-    qpl(k) = qp(k)*omp
-    qpi(k) = qp(k)*(1.-omp)
-    
     ! get new estimates
     niter = niter+1
-    dtabs      = tabs(k) / totheta  - (fac_cond*qcl(k) + fac_sub*qci(k))/totheta &
-                 - thetali(k)
+    dtabs = (hlie - ggr*z(k) + lcond * qce + lsub*qie )/cp - tabse
 
     end do ! end of iteration
 
-    tabs(k) = (t(k)-ggr*z(k))/cp + fac_cond*(qcl(k)+qpl(k)) + fac_sub*(qci(k)+qpi(k)) 
+    qltot = (1.-cfrac_mf2) * qce + 0.5 * cfrac_mf2 * (qcsgs_mf(k)+qcsgs_mf(k+1))
+    qitot = (1.-cfrac_mf2) * qie + 0.5 * cfrac_mf2 * (qisgs_mf(k)+qisgs_mf(k+1))
+    cfrac_tot(k) = cfrac_mf2 + (1.-cfrac_mf2) * cfrac_pdf(k)
+    qn(k) = qltot + qitot
+    qv(k) = qt(k) - qn(k)
+    
+    tabs(k) = (t(k)-ggr*z(k))/cp + fac_cond*(qpl(k)+qltot) + fac_sub*(qpi(k)+qitot) 
     thetav(k) = tabs(k)/totheta  * (1.+epsv*qv(k))
-    thetar(k) = tabs(k)/totheta  * (1.+epsv*qv(k)-qn(k)-qp(k))
+    thetar(k) = tabs(k)/totheta  * (1.+epsv*qv(k)-qn(k))
 
 end if ! if tke is present
+
+! store qte for computation of gradient at next level higher up
+qtel=qte 
 
 end do ! loop over k
 
@@ -171,5 +170,5 @@ end do ! loop over k
 !end do
 
 
-end subroutine sgscloud
+end subroutine sgscloudmf
 

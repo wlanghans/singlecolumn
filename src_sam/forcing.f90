@@ -15,7 +15,7 @@ integer :: k
    if (doforcing) then
 
       tend_force_t      = cp * dthetadt
-      tend_force_qt     = dqvdt
+      tend_force_qt     = dqtdt
       tend_force_tke    = 0. 
 
    end if

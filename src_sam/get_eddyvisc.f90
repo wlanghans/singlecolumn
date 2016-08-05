@@ -11,7 +11,7 @@ implicit none
 real grd,betdz,Ck,Ce,Ces,Ce1,Ce2,Pr,Cee,Cs
 real ratio,a_prod_sh,a_prod_bu,a_diss
 real lstarn, lstarp, bbb, omn, omp, tketau
-real qsatt,dqsat, dtkedtsum, dtkedtmin, tke0(nzm), l23
+real qsatt,dqsat, dtkedtsum, dtkedtmin, l23
 real :: thetalt, thetalk, thetall, qtt, qtk, qtl, covarqtthetal, varqt, varthetal, thetalflux, qtflux
 integer i,j,k,kc,kb
 
@@ -28,7 +28,6 @@ Cs = 0.15
 Ce=Ck**3/Cs**4
 Ces=Ce/0.7*3.0	
 
-tke0=tke
 
 do k=1,nzm      
   kb=k-1
@@ -126,7 +125,7 @@ do k=1,nzm
    ! Use Teixeira CPBL closure; TKE is prognostic 
    ! ==================================
 
-     if (dosgscloud.and. k.gt.1.and.k.lt.nzm) then
+     !if (dosgscloud.and. k.gt.1.and.k.lt.nzm) then
      !thetalt = theta(k+1) - fac_cond * qcl(k+1)/(1.+qv(k+1)) * (pres(k+1)/p00)**(-rgas/cp)
      !thetalk = theta(k) - fac_cond * qcl(k)/(1.+qv(k)) * (pres(k)/p00)**(-rgas/cp)
      !thetall = theta(k-1) - fac_cond * qcl(k-1)/(1.+qv(k-1)) * (pres(k-1)/p00)**(-rgas/cp)

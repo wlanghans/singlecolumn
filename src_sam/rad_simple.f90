@@ -14,7 +14,7 @@ real f0, xk, coef, coef1
 integer i,k
 
 !pzhu
-real qq1,qq2,hfact,flux(nz),FTHRL(nzm),qt !bloss: flux(nz) rather than flux(nzm)
+real qq1,qq2,hfact,flux(nz),FTHRL(nzm) !bloss: flux(nz) rather than flux(nzm)
 integer j,kk,itop,item3
 !pzhu-end
 
@@ -35,8 +35,7 @@ radlwup(k) =0.
 enddo
 
 do k = 1,nzm
-   !WL: remove density here since prog var is density times thetav
-   cpmassl(k) = cp_spec*dz*adz(k) ! thermal mass of model layer.
+   cpmassl(k) = cp_spec*rho(k)*dz*adz(k) ! thermal mass of model layer.
 end do
 
    ! search for inversion height (highest level where qt=8 g/kg) 
@@ -48,12 +47,10 @@ end do
    do k = 1,nzm
       ! optical depth only includes that due to liquid water
       ! qlsgs_ed and qlsgs_mf need to be mixing ratios here too
-      if(qcl(k)+qci(k)+qlsgs_ed(k)+qlsgs_mf(k).gt.0.) deltaq(k) = xk*rho(k)*(qcl(k)+qci(k)+qlsgs_ed(k)+qlsgs_mf(k))*adz(k)*dz
+      if(qcl(k).gt.0.) deltaq(k) = xk*rho(k)*(qcl(k))*adz(k)*dz
 
       ! inversion height is top of highest layer w/q>8g/kg.
-      ! convert rt to qt
-      qt=(qv(k)+qcl(k)+qci(k)+qlsgs_ed(k)+qlsgs_mf(k))/(1.+qv(k))
-      if(qt.gt.0.008) itop=max(itop,k+1) ! note zi(k+1) is inversion hgt
+      if(qt(k).gt.0.008) itop=max(itop,k+1) ! note zi(k+1) is inversion hgt
 
       ! accumulate optical depth in qzinf
       qzinf = qzinf + deltaq(k) 
@@ -96,8 +93,7 @@ end do
    do k=1,nzm
       FTHRL(k)=-(flux(k+1)-flux(k))/cpmassl(k)
       radlwup(k) = flux(k)
-      tend_rad_rho_thetav(k) = (1.+epsv*qv(k)/(1.+qv(k))) * & 
-      (p00/pres(k))**(rgas/cp)*FTHRL(k) 
+      tend_rad_t(k) =  cp * FTHRL(k) 
    enddo
    radlwup(nz) = flux(nz)
    

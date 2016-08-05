@@ -9,8 +9,8 @@ real,allocatable,dimension(:), target ::  t, qt, qp, u, v, tke, &
 
 ! diagnostic variables
 real,allocatable,dimension(:), target ::  theta, thetav, thetar, thetali, pres, tabs, tabs0, &
-                    qv, qcl, qpl, qci, qpi, qn, tke, tkh, tk, def2, rho_i, w, ug, vg, &
-                    dqtdt, dtdt, rho, presi
+                    qv, qcl, qpl, qci, qpi, qn, tkh, tk, def2, rho_i, w, ug, vg, &
+                    dqtdt, dthetadt, rho, presi
 
 ! tendencies
 real, allocatable,dimension(:),target :: tend_sgs_qt, tend_sgs_t, &
@@ -25,7 +25,8 @@ real vmag, ustar, r_s, t_s, theta_s
 real, target :: pblh, wstar, Cm, Crv, Ctheta
 real, allocatable,dimension(:), target :: sumM, sumMu, sumMv, sumMtke, sumMt, sumMrt, sumMrp, buoy_sgs, smix
 real,allocatable,dimension(:), target :: sgs_t_flux, sgs_qt_flux, sgs_thv_flux, taux, tauy, sgs_tke_flux
-real,allocatable,dimension(:), target :: qcsgs_pdf, qcsgs_mf, qisgs_pdf, qisgs_mf, cfrac_mf, cfrac_pdf, tke_thvflx
+real,allocatable,dimension(:), target :: qcsgs_pdf, qcsgs_mf, tabs_mf, qisgs_pdf, qisgs_mf, qtsgs_mf, &
+                                            cfrac_mf, cfrac_pdf, cfrac_tot, tke_thvflx
 real,allocatable,dimension(:), target :: q1, qtgrad, thetaligrad, radlwup
 
 real, parameter :: t00 = 300.   ! constant offset for sstxy 

@@ -12,7 +12,7 @@ deallocate(t,qt,qp,u,v,tke)
 deallocate(theta, thetav, thetar, thetali, pres, tabs, tabs0, &
                     qv, qcl, qpl, qci, qpi, qn, &
                     tkh, tk, def2,  &
-                    rho_i, w, ug, vg,dqtdt, dtdt, presi)
+                    rho_i, w, ug, vg,dqtdt, dthetadt, presi)
 
 deallocate(tend_sgs_qt, tend_sgs_t,  &
      tend_sgs_u,tend_sgs_v,tend_sgs_tke, tend_sgs_qp, &
@@ -27,13 +27,12 @@ deallocate(sumM, sumMu, sumMv, sumMrt,sumMrp,sumMt,sumMtke, &
 
 deallocate(sgs_t_flux, sgs_qt_flux, sgs_thv_flux, taux, tauy, sgs_tke_flux)
 
-deallocate(qcsgs_mf, qcsgs_pdf,qisgs_mf, qisgs_pdf, cfrac_mf, cfrac_pdf, tke_thvflx)
+deallocate(qcsgs_mf, tabs_mf, qcsgs_pdf,qisgs_mf, qtsgs_mf, qisgs_pdf, cfrac_mf, cfrac_tot, cfrac_pdf, tke_thvflx)
 deallocate(q1,thetaligrad,qtgrad,radlwup)
 
 deallocate(UPM,UPW,UPT,UPQT,UPQCL,UPQCI,&
          UPA,UPU,UPV,UPTHV,UPTABS,ENT,&
-         BUOY,DET,UPTHD,ENT,BUOY,DET,&
-         UPTHD,UPCF)
+         BUOY,DET,UPTHD,UPCF)
 
 
 end subroutine dealloc

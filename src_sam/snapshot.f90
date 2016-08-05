@@ -505,18 +505,18 @@ module snapshot
                ncsnap%field(field_count)%data1 => buoy_sgs(1:nzm)
             end if
 
-            if (trim(field_name) .eq. 'dtdt') then
+            if (trim(field_name) .eq. 'dthetadt') then
                call fill_fields_snapshot( &
                   ! Short name
                                            'dtdt', &
                   ! Long name
-                                           'large scale hli forcing', &
+                                           'large scale theta forcing', &
                   ! Units
                                            'K/s', &
                   ! Dimensions
                                            (/ zID, timeID /) &
                )
-               ncsnap%field(field_count)%data1 => dtdt(1:nzm)
+               ncsnap%field(field_count)%data1 => dthetadt(1:nzm)
             end if
            
             if (trim(field_name) .eq. 'dqtdt') then

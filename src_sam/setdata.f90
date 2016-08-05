@@ -176,7 +176,7 @@ do k = 1,nzm
    
    w(k) = -3.75e-06 * zi(k)
    dthetadt(k) = 0.0
-   dqvdt(k) = 0.0
+   dqtdt(k) = 0.0
    ug(k) = 7.
    vg(k) = -5.5  
    u(k)     = ug(k)
@@ -256,11 +256,11 @@ do k = 1,nzm
      dthetadt(k) = 0.0
    end if
    if (z(k).lt.300.) then
-     dqvdt(k) = -1.2d-08
+     dqtdt(k) = -1.2d-08
    elseif (z(k).ge.300. .and. z(k).lt.500.) then
-     dqvdt(k) = -1.2d-08 + (z(k)-300.) * 1.2d-08/200.
+     dqtdt(k) = -1.2d-08 + (z(k)-300.) * 1.2d-08/200.
    else
-     dqvdt(k) = 0.0
+     dqtdt(k) = 0.0
    end if
    ug(k) = -10. + 1.8e-03*z(k)
    vg(k) = 0.   
@@ -392,7 +392,7 @@ do k = 1,nzm
    ! get rho from gas law
    rho(k) = pres(k)/rgas/tabs(k)/(1.+epsv*qv(k))*100.
 
-   u(k)     = 0.G
+   u(k)     = 0.
    v(k)     = 0.
    tke(k)   = 0.
    qcl(k)   = 0.
@@ -420,7 +420,7 @@ t=cp*tabs+ggr*z - fac_cond*cp * (qcl+qpl) - fac_sub*cp * (qci+qpi)
 qn=qcl + qci
 qt=qv + qn
 qp=qpl+qpi
-thetali = theta -(p00/pres)**(rgas/cp) * (frac_cond *qcl+frac_sub*qci) 
+thetali = theta -(p00/pres)**(rgas/cp) * (fac_cond *qcl+fac_sub*qci) 
 thetar=thetav - theta*(qn+qp)
 
 pblh = zi(2)

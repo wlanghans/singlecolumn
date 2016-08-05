@@ -82,6 +82,10 @@ implicit none
  DET=0.
  BUOY=0.
  UPTHD=0.
+ qcsgs_mf=0.
+ qisgs_mf=0.
+ qtsgs_mf=0.
+ cfrac_mf=0.
 
 
  
@@ -134,7 +138,7 @@ implicit none
  
 ! now get sigmaTHV from linearization of pot. temp. and using a corr. coeff between qv and theta of 0.75 (see Sobjan 1991)
     sigmaTHV=sqrt(sigmaTH**2+epsv**2*theta(1)**2*sigmaQT**2 &
-        + 2.*epsv*theta*0.75*sigmaTH*sigmaQT)
+        + 2.*epsv*theta(1)*0.75*sigmaTH*sigmaQT)
 
     wmin=sigmaW*pwmin
     wmax=sigmaW*pwmax
@@ -240,9 +244,10 @@ implicit none
 !          else
 
           ! all-or-nothing condensation scheme
-            call condensation_edmf(QTn,Tn,presi(k),zi(k),THVn,QCLn)
+            call condensation_edmf(QTn,Tn,presi(k),zi(k),THVn,QCLn,QCIn)
             if (donoplumesat) then
               QCLn=0.0
+              QCIn=0.0
               THVn = (Tn - ggr * zi(k))/cp * (p00/presi(k))**(rgas/cp) * (1.+epsv*QTn)
             end if
 
@@ -264,11 +269,11 @@ implicit none
              end if
              IF (fixedfa.or.(UPA(k,i).ge.facrit*UPA(1,i))) THEN
                UPTHV(k,i)=THVn
-               UPTABS  (k,i)=THVn/(1.+epsv*(QTn-QCn)-QCn)*(presi(k)/p00)**(rgas/cp)
+               UPTABS  (k,i)=THVn/(1.+epsv*(QTn-QCLn-QCIn)-QCLn-QCIn)*(presi(k)/p00)**(rgas/cp)
                UPT(k,i)=Tn
                UPQT(k,i)=QTn
-               UPQCL(k,i)=QCn
-               UPQCI(k,i)=0.0
+               UPQCL(k,i)=QCLn
+               UPQCI(k,i)=QCIn
              !  UPU(k,i)=Un
              !  UPV(k,i)=Vn
              ELSE
@@ -276,8 +281,8 @@ implicit none
                 UPA(k,i)= 0.
                 EXIT
              END IF
-             UPTHD(k-1,i)=0.5*(UPTHV(k,i)/(1.+epsv*(UPQT(k,i)-UPQC(k,i))-UPQC(k,i))+&
-     UPTHV(k-1,i)/(1.+epsv*(UPQT(k-1,i)-UPQC(k-1,i))-UPQC(k-1,i)))-theta(k-1)
+             UPTHD(k-1,i)=0.5*(UPTHV(k,i)/(1.+epsv*(UPQT(k,i)-UPQCL(k,i)-UPQCI(k,i))-UPQCL(k,i)-UPQCI(k,i))+&
+     UPTHV(k-1,i)/(1.+epsv*(UPQT(k-1,i)-UPQCL(k-1,i)-UPQCI(k,i))-UPQCL(k-1,i)-UPQCI(k,i)))-theta(k-1)
           ELSE
             EXIT
           END IF 
@@ -288,57 +293,66 @@ implicit none
 
 ! mass flux is zero at surface and top
     sumM(1)       = 0.0
-    sumMthetav(1) = 0.0
-    sumMrv(1)     = 0.0
-    sumMqt(1)     = 0.0
-    sumMthetal(1) = 0.0
+    sumMt(1)      = 0.0
+    sumMrt(1)     = 0.0
+    sumMrp(1)     = 0.0
     sumMu(1)      = 0.0
     sumMv(1)      = 0.0
     sumMtke(1)    = 0.0
     sumM(nz)       = 0.0
-    sumMthetav(nz) = 0.0
-    sumMrv(nz)     = 0.0
-    sumMqt(nz)     = 0.0
-    sumMthetal(nz) = 0.0
+    sumMt(nz)      = 0.0
+    sumMrt(nz)     = 0.0
+    sumMrp(nz)     = 0.0
+    sumMu(nz)      = 0.0
+    sumMv(nz)      = 0.0
+    sumMtke(nz)    = 0.0
 
     sumMu      = 0.0
     sumMv      = 0.0
     sumMtke    = 0.0
+    sumMrp     = 0.0
 
     DO k=2,nzm
       DO i=1,nup
         sumM(k)      =sumM(k)      +UPA(K,I)*UPW(K,I)
-        ! WL and convert back to thetav
-        sumMthetav(k)=sumMthetav(k)+UPA(K,i)*UPW(K,I)*                   &
-        (UPTHL(K,I)+fac_cond*UPQC(k,i))*(1.+epsv*(UPQT(k,i)-UPQC(k,i)))
-        sumMthetal(k)=sumMthetal(k)+UPA(K,i)*UPW(K,I)*UPTHL(K,I)
-        ! WL and convert back to mixing ratio
-        sumMrv(k)    =sumMrv(k)    +UPA(K,i)*UPW(K,I)*                   & 
-        (UPQT(k,i)-UPQC(k,i))/(1.-(UPQT(k,i)-UPQC(k,i)))
-        sumMqt(k)    =sumMqt(k)    +UPA(K,i)*UPW(K,I)* UPQT(k,i)
+        sumMt(k)=sumMt(k)+UPA(K,i)*UPT(K,I)*UPW(K,I)
+        sumMrt(k)    =sumMrt(k)    +UPA(K,i)*UPQT(K,I)*UPW(K,I) 
         !sumMu(k)  =sumMu(k)+UPA(K,i)*UPW(K,I)*UPU(K,I)
         !sumMv(k)  =sumMv(k)+UPA(K,i)*UPW(K,I)*UPV(K,I)
-        qlsgs_mf(k) = qlsgs_mf(k) + UPA(K,i)*UPQC(k,i)
-        if (UPQC(k,i).gt.0.0) cfrac_mf(k) = cfrac_mf(k) + UPA(K,i)
+        qcsgs_mf(k) = qcsgs_mf(k) + UPA(K,i)*UPQCL(k,i)
+        qisgs_mf(k) = qisgs_mf(k) + UPA(K,i)*UPQCI(k,i)
+        qtsgs_mf(k) = qtsgs_mf(k) + UPA(K,i)*UPQT (k,i)
+        tabs_mf(k)  = tabs_mf(k)  + UPA(K,I)*UPTABS(k,i)
+        if (UPQCL(k,i)+UPQCI(k,i).gt.0.0) cfrac_mf(k) = cfrac_mf(k) + UPA(K,i)
       ENDDO
+      if (cfrac_mf(k).gt.0.) then
+         qcsgs_mf(k) = qcsgs_mf(k) / cfrac_mf(k)
+         qisgs_mf(k) = qisgs_mf(k) / cfrac_mf(k)
+         qtsgs_mf(k) = qtsgs_mf(k) / cfrac_mf(k)
+         tabs_mf(k)  = tabs_mf(k)  / cfrac_mf(k)
+      end if
     ENDDO
-
+    
 
 end subroutine edmf
 
-subroutine condensation_edmf(QT,HLI,P,zlev,THV,QC)
+subroutine condensation_edmf(QT,HLI,P,zlev,THV,QC,QI)
 !
-! zero or one condensation for edmf: calculates THV and QC
+! zero or one condensation for edmf: calculates THV and QC, and QI
 !
 use params
-use vars, only : qsatw
+use micro_params
+use vars, only : qsatw, qsati
 
 implicit none
-real,intent(in) :: QT,HLI,P
-real,intent(out):: THV,QC
+real,intent(in) :: QT,HLI,P, zlev
+real,intent(out):: THV,QC,QI
 
 integer :: niter,i
-real :: diff,t,qs,qcold
+real :: diff,t,qs,qnold, an, bn, qn, om
+
+an = 1./(tbgmax-tbgmin)
+bn = tbgmin * an
 
 ! number of iterations
 niter=100
@@ -346,26 +360,47 @@ niter=100
 diff=1.e-7
 
 QC=0.
+QI=0.
+QN=0.
 
 !print*, '+++++++++++++++++++++++++'
 !print*, '+++++++++++++qc=0++++++++'
 !print*, '+++++++++++++++++++++++++'
 do i=1,NITER
-T = (HLI - ggr * zlev+lcond*QC)/cp
+T = (HLI - ggr * zlev+lcond*QC+lsub*QI)/cp
 ! WL get saturation mixing ratio
-QS=qsatw(T,P)
-QCOLD=QC
-QC=max(0.5*QC+0.5*(QT-QS),0.)
+if (T.ge.tbgmax) then
+  QS=qsatw(T,P)
+elseif (T.le.tbgmin) then
+  QS=qsati(T,P)
+else
+  om = an*T-bn
+  QS=om*qsatw(T,P)+(1.-om)*qsati(T,P)
+end if
+QNOLD=QN
+QN=max(0.5*QN+0.5*(QT-QS),0.)
+QC= om * QN
+QI= (1.-om) * QN
 !write(*,'(5A)') ' tabs','  ','   qs','  ','   qc'
 !write(*,'(F5.1,2x,F5.2,2x,F5.2)'),T,qs*1000.,qc*1000.
-if (abs(QC-QCOLD)<Diff) exit
+if (abs(QN-QNOLD)<Diff) exit
 !print*, '+++++++++++++++++++++++++'
 enddo
 
-T = (HLI - ggr * zlev+lcond*QC)/cp
-QS=qsatw(T,P)
-QC=max(QT-QS,0.)
-THV = (HLI - ggr * zlev+lcond*QC)/cp * (p00/P)**(rgas/cp) * (1.+epsv*(QT-QC)-QC)
+T = (HLI - ggr * zlev+lcond*QC+lfus*QI)/cp
+if (T.ge.tbgmax) then
+  QS=qsatw(T,P)
+elseif (T.le.tbgmin) then
+  QS=qsati(T,P)
+else
+  om = an*T-bn
+  QS=om*qsatw(T,P)+(1.-om)*qsati(T,P)
+end if
+QN=max(QT-QS,0.)
+QC= om * QN
+QI= (1.-om) * QN
+
+THV = (HLI - ggr * zlev+lcond*QC+lfus*QI)/cp * (p00/P)**(rgas/cp) * (1.+epsv*(QT-QN)-QN)
 
 end subroutine condensation_edmf
 

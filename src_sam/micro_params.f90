@@ -71,11 +71,6 @@ real*4 gamr1      ! Gamma function of (3 + b_rain)
 real*4 gamr2      ! Gamma function of (5 + b_rain)/2
 real*4 gamr3      ! Gamma function of (4 + b_rain)
       
-real accrsc(nzm),accrsi(nzm),accrrc(nzm),coefice(nzm)
-real accrgc(nzm),accrgi(nzm)
-real evaps1(nzm),evaps2(nzm),evapr1(nzm),evapr2(nzm)
-real evapg1(nzm),evapg2(nzm)
-            
 real a_bg, a_pr, a_gr 
 
 

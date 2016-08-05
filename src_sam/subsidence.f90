@@ -5,13 +5,15 @@ subroutine subsidence()
 use vars
 use params
 use advect_mod
+use grid
 implicit none
 
 integer :: k
+real,dimension(nzm) :: hlp
 
    ! advect_rho needs to be called first since it sets rho
    ! on interfaces
-   call advect_rho(rho)
+   hlp          = advect_rho(rho)
    tend_sub_u   = advect_mass_fraction2(u,rho,limiter=.false.)
    tend_sub_v   = advect_mass_fraction2(v,rho,limiter=.false.)
    tend_sub_t   = advect_mass_fraction2(t,rho,limiter=dothuburn)

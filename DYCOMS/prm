@@ -26,6 +26,7 @@ donoplumesat=.false.
 eps0=5.e-03
 doconsttk = .false.
 dopblh = .true.
+fixedpblh=1000.
 pblhfluxmin = .false.
 pblhthgrad=.true.
 dosurface=.true.
