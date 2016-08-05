@@ -1,0 +1,47 @@
+This is BibTeX, Version 0.99d (TeX Live 2013/TeX Live for SUSE Linux)
+Capacity: max_strings=35307, hash_size=35307, hash_prime=30011
+The top-level auxiliary file: documentation.aux
+The style file: ametsoc.bst
+Database file #1: /home/wolfi/Bibliography/wolfil_jab.bib.bib
+Reallocated wiz_functions (elt_size=4) to 6000 items from 3000.
+You've used 20 entries,
+            3486 wiz_defined-function locations,
+            804 strings with 8397 characters,
+and the built_in function-call counts, 22833 in all, are:
+= -- 2827
+> -- 634
+< -- 11
++ -- 414
+- -- 156
+* -- 1158
+:= -- 2196
+add.period$ -- 40
+call.type$ -- 20
+change.case$ -- 154
+chr.to.int$ -- 20
+cite$ -- 20
+duplicate$ -- 2419
+empty$ -- 1170
+format.name$ -- 216
+if$ -- 4616
+int.to.chr$ -- 1
+int.to.str$ -- 1
+missing$ -- 212
+newline$ -- 70
+num.names$ -- 80
+pop$ -- 1001
+preamble$ -- 1
+purify$ -- 132
+quote$ -- 0
+skip$ -- 1505
+stack$ -- 0
+substring$ -- 1189
+swap$ -- 2052
+text.length$ -- 1
+text.prefix$ -- 0
+top$ -- 0
+type$ -- 180
+warning$ -- 0
+while$ -- 107
+width$ -- 0
+write$ -- 230

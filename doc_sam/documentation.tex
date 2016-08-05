@@ -1,0 +1,411 @@
+\documentclass[dvipdfmx,a4paper,10pt]{article}
+\usepackage[dvips]{graphicx}
+\usepackage{subfigure}
+\usepackage[small,bf]{caption}
+\usepackage{color}
+\usepackage{natbib,amsmath}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  citecolor=red,%
+  filecolor=red,%
+  linkcolor=red,%
+  urlcolor=red
+  pdfsubject = {Report},
+  pdfpagemode = UseNone
+}
+
+% Title Page
+\title{Implementation of an EDMF boundary-layer and shallow-cumulus parameterization into SAM}
+\author{Wolfgang Langhans}
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+
+
+\section{Introduction}\label{se:intro}
+
+For any prognostic variable $\psi$ we seek to represent its tendency due to unresolved turbulent transport. Thereby, $\psi$ is one of $u$, $v$, $h_{li}$, $q_t$, $q_p$, and $e$ (i.e., TKE). Here, mixing ratio $q_t$ is defined as the mass of water vapor and cloud condensate (liquid and frozen) per mass of dry air, as $q_t=q_v+q_n=q_v+q_c+q_i$. The mixing ratio for precipitating water is the sum of mixing ratios for rain, snow, and graupel, $q_p=q_r+q_s+q_g$. It is common in GCMs and mesoscale models to assume that the vertical velocity $w$ has no tendency from subgrid-scale transport. On top of that, subgrid transport is assumed to be vertical only. 
+
+The tendency for any variable $\psi$ is then obtained from the EDMF equation as
+\begin{equation}\label{eqn:tendency}
+ \left(\frac{\partial \psi}{\partial t}\right)_{turb} =-\frac{1}{\overline{\rho}}\frac{\partial }{\partial z} \overline{\rho} \left( ED^{\psi} + MF^{\psi}\right) = -\frac{1}{\overline{\rho}}\frac{\partial }{\partial z} \overline{\rho}\left( -K_{\psi}(z)\frac{\partial \psi(z)}{\partial z} + \sum_i M_i(z) (\psi^{up}_i(z) - \psi(z) )\right)
+\end{equation}
+with $\overline{\rho}$ the horizontally averaged density of dry air. Here, ED is the eddy-diffusivity part and MF the (multiplume) mass-flux part of the turbulent flux. Closure is provided by specifying $K_{\psi}$, $M_i$, and $\psi^{up}_i$ for each updraft $i$.
+
+The surface fluxes are a necessary input to the EDMF parameterization and the underlying scheme is described in section \ref{sec:sfcfluxes}. The EDMF closure is described in section \ref{sec:closure}. The implicit numerical procedure to solve Eq. (\ref{eqn:tendency}) is outlined in section \ref{sec:solve}. One key advantage of this multiplume EDMF parameterization is that PBL mixing and shallow cumulus cloud cover are parameterized in a unified way since plumes might eventually get saturated. For this reason, subgrid-scale cloud cover from shallow cumulus is also provided from the multiplume model. A large-scale saturation scheme based on a subgrid-scale PDF scheme is also implemented to represent effects of stratocumulus clouds (see section \ref{sec:clouds}).
+
+ \section{Surface flux parameterization}\label{sec:sfcfluxes}
+% 
+% \subsection{From SAM}
+% 
+% In this 1D framework let index $k$ represent the vertical center of cell $k$. Let indices $k-1/2$ and $k+1/2$ indicate the position of the bottom and top interface of cell $k$. Thus, the input is $u^k$, $v^k$, $w^k$, $h_{li}^k$, $q_v^k$, and $e^k$ with $k$ ranging from $1$ to the total number of cells $N_k$ in the 1D column. On top of that, $\overline{\rho}^k$ and $\overline{\rho}^{k\pm 1/2}$ will be needed. 
+% 
+% Also needed for the parameterization of eddy diffusivities is the squared characteristic rate of strain $\overline{D}^2$ (based on grid-scale velocities) as defined in Eq.~(\ref{eqn:def2}) at cell centers. Note that SAM uses an Arakawa-C grid but let's for ease of documentation assume that all variables are located at cell centers. 
+% 
+% \subsection{From surface flux parameterization}\label{sec:sfcfluxes}
+
+The parameterization of surface fluxes over ocean surface is based on \cite{bryan03} and has been used also in SAM \citep{khairou03} and CAM \citep[see][section 4.10.2]{collins04}. A formulation for fluxes over land is also available but not yet included. The formulation is adapted here to our needs as explained below. A bulk drag/transfer law is used for the surface turbulent fluxes of $u$, $v$, $\theta$, and $q_v$, given as
+\begin{equation}\label{eqn:fluxes}
+ (\mathbf{\tau}, E, H)=-\rho_1|\mathbf{v_h}_1| (C_d \mathbf{v_h}_1, C_e \Delta q_v, C_{\theta} \Delta \theta )
+\end{equation}
+with $\Delta q_v=q_{v1}-q_v^*(T_s)$, $\Delta \theta=\theta_{1}-\theta_{s}$, $\mathbf{v_h}$ the horizontal wind vector, and $C_d$, $C_e$, and $C_{\theta}$ the transfer coefficients for momentum, $q_v$, and $\theta$. $T_s$ is the surface temperature and $q_v^*(T_s)$ the saturation mixing ratio at the surface temperature. Index ``$1$'' indicates values on the first model level. 
+
+Turbulent velocity scales $u_*$, $q_{v*}$, and $\theta_{*}$ are introduced in the formulation of these fluxes as 
+\begin{eqnarray}
+ u_*&=& (\overline{u'w'}^2+\overline{v'w'}^2)^{1/4} = C_d^{1/2} | \mathbf{v_h}_1 |\\
+ q_{v*}&=& -\overline{q_v'w'}/u_*=C_e |\mathbf{v_h}_1| \Delta q_v / u_*\label{eqn:velqv}
+\end{eqnarray}
+
+The parameterization characterizes the surface layer stability based on the Monin-Obukhov length and then distinguishes between flux profiles for stable and unstable conditions. The parameterization proceeds by utilizing similarity theory to determine the drag coefficients $C_d$, $C_e$, and $C_{\theta}$ and the respective fluxes. That is, the parameterization provides the momentum and sensible and latent heat fluxes. The required flux of $h_{il}$ in kinematic units is obtained as 
+\begin{equation}\label{eqn:whli}
+ \overline{h_{il}'w'} = c_p H.
+\end{equation} 
+
+\section{EDMF closure}\label{sec:closure}
+
+The task of the parameterization is to provide the eddy diffusivities $K_{\psi}$ and $M_i$ and $\psi^{up}_i$ for each updraft $i$. A variety of flavors of a 1.5 TKE closure are implemented and described below. The updraft properties are obtained through a multiplume model that was kindly provided by Kay Suselj/JPL and is somewhat modified here.
+
+
+\subsection{Eddy-diffusivity models}
+
+The eddy diffusivities are computed at cell centers and averaging provides $K_{\psi}^{k\pm 1/2}$ at cell interfaces. 
+
+\subsubsection{Teixeira TKE closure}
+
+The formulation of the TKE boundary layer scheme follows the description given by \cite{teixeira04} and is specifically designed here to model the evolution of the dry convective boundary layer. The prognostic equation for $e$, the sgs kinetic energy per unit dry air, is
+\begin{eqnarray}\label{eqn:tkebudget}
+ \frac{\partial e}{\partial t}&=& \mathrm{ADV} + \mathrm{TRANS} + \mathrm{SHEAR} + \mathrm{BUOY} - \mathrm{DISS}
+\end{eqnarray}
+and in this parameterization the individual sources/sinks are closed as
+\begin{eqnarray}
+ \mathrm{TRANS} &=& \frac{1}{\overline{\rho}}\frac{\partial}{\partial z} (\overline{\rho_d} K_m  \frac{\partial e}{\partial z})\\
+ \mathrm{SHEAR} &=& K_m \overline{D}^2 \\
+ \mathrm{BUOY} &=& \frac{g}{\theta_v} \overline{w'\theta_v'}\\
+ \mathrm{DISS}&=& c_{\epsilon}\sqrt{e}/l_{\epsilon}
+\end{eqnarray}
+with $K_m=c_k l e^{1/2}$, $l_{\epsilon}=l/2.5$, $c_{\epsilon}=0.16$, and $c_k=0.5$. The buoyancy flux $\overline{w'\theta_v'}$ is generally taken to be the ED part (even if a MF part exists).
+
+The square of the characteristic rate of strain $\overline{D}^2$ is generally defined as $\overline{D}^2=2D_{ij}D_{ij}$ with element $(i,j)$ of the tensor given as
+\begin{equation}
+ D_{ij}=\frac{1}{2}(\frac{\partial u_i}{\partial x_j}+\frac{\partial u_j}{\partial x_i})
+\end{equation}
+with capital $u_i$ indicating the grid-scale velocity in direction $i$ of the cartesian coordinate system. After summation one obtains 
+\begin{equation}\label{eqn:def2}
+ \overline{D}^2=2\{D_{11}^2+D_{22}^2+D_{33}^2\}+4\{D_{12}^2+D_{13}^2+D_{23}^2 \}.
+\end{equation}
+In the here relevant 1D case this reduces to $\overline{D}^2=(du/dz)^2+(dv/dz)^2$.
+
+The eddy diffusivity for heat and moisture is $K_h=\mathrm{Pr} K_m$ with $\mathrm{Pr}=1$. The mixing length is obtained as
+\begin{eqnarray}
+ l &=& \tau \sqrt{e} + (\kappa z - \tau \sqrt{e}) e^{-z/\alpha}
+\end{eqnarray}
+with $\alpha=100\mathrm{~m}$ and $\tau$ taken to be either 600 sec or $\tau=0.5 h/w^*$ with $w^*=(hg/\theta_{v0} \overline{w'\theta_v'}|_0)^{1/3}$. 
+
+The boundary layer height $h$ is defined as either the height where the buoyancy flux from the previous step is minimized (a somewhat inconsistent numerical treatment) or as the height where the $\theta_v$ gradient at step $n$ is maximized. A third option to obtain $h$ is made available through code adapted from WRF and implies an evaluation of both $e$ and $\theta_v$ profiles. 
+
+
+\subsubsection{Witek TKE closure}
+
+The Witek closure follows mostly the description given by \cite{witek11}. However, it is an EDMF closure. The MF model is described below. The ED part is very similar to the above described Teixeira closure. Only the differences are described here.
+
+The MF part of the buoyancy flux is considered in the buoyancy production term for TKE. This is argued to produce a proper buoyancy profile near the slightly stable parts of the BL and at the inversion. 
+Moreover, some constants and the disspiation length take different values/definitions:
+
+\begin{eqnarray}
+ c_k&=&0.425\\
+ Pr&=&0.5882\\
+ C_{\epsilon}&=&0.304\\
+ l_{\epsilon}&=&l
+\end{eqnarray}
+
+The definition of the length scale differs from Witek's paper and is closer to the proposal be \cite{suselj13}:
+
+\begin{eqnarray}
+ l &=&l_{23} + (\kappa z - l_{23}) e^{-z/\alpha} \\
+ l_{23}^{-1}&=&l_{2}^{-1} + l_{3}^{-1}\\
+ l_{2} &=& \tau \sqrt{e}\\
+ l_{3} &=& \left\{ 
+ \begin{array}{ll}
+  \max(\Delta z/2, 0.7 \sqrt{(e/N^2)})&\quad \mathrm{if}\quad N^2>0\\
+  \infty &\quad \mathrm{if}\quad N^2\leq 0.
+  \end{array}\right.
+\end{eqnarray}
+In neutral or unstable conditions it is the same as for the Teixeira closure as long as $\alpha$ and $\tau$ receive the same definitions (i.e., $\alpha=100$~m and $\tau=0.5h/w_*$). However, in locally stable conditions the length scale gets reduced. Here, $\tau$ may take a constant value of 400~s (same as in \cite{suselj13}) or be defined as in the Teixeira closure as $\tau=0.5 h/w_*$. We avoid the exact definition from \cite{witek11} since it would require the computation of the friction velocity $u_*$ based on surface layer similarity theory. It is more complicated to define the latter under calm conditions and thus avoided so far.  
+
+\subsubsection{Emerging reference TKE closure}
+
+{\color{blue} Goal: Add description of emerging TKE closure that will be used in the Dycore. The keys to a successful (i.e., applicability in different PBLs, possibility to MF extension) TKE closure should be highlighted and reviewed.}
+
+\subsection{Multiplume model}
+
+\subsubsection{Description}
+
+The multiplume model provides updraft properties for a user-specified number of non-precipitating entraining plumes and thus the MF part in Eq.~(\ref{eqn:tendency}). It closely follows the proposed multiplume model of \cite{cheinet03a} but is formulated more generally to account for other existing formulations. Each plume represents one class of updrafts with the same initial thermodynamic and kinematic properties. Note that in Eq.~(\ref{eqn:tendency}) it has been assumed that $\psi$ of the undisturbed subsiding air in the environment equals the grid-box mean $\psi$. This is equivalent to assuming that the updraft/downdraft area is small. This assumption is not made in, e.g., \cite{cheinet03a}, but we stick to this for now. Following \cite{suselj12}, \cite{suselj13}, and \cite{suselj14} the MF part is assumed to be zero in case of $\psi$ equal to $u$, $v$, or $e$ {\color{blue}(Can we add these MF tendencies for $u$, $v$, or $e$?)}. This is generally justified by the smaller eddy viscosities for momentum than for heat and the general lack in knowledge about sources/sinks of momentum within a rising plume \citep[see, e.g., discussion in][]{han15}. Index $i$ identifies an individual updraft class among a total of $N^{up}$ (to be specified, e.g., $N^{up}=10$) updrafts. $M_i$ is defined as $s_i w^{up}_i$ with $s_i$ and $w^{up}_i$ the fractional weight and vertical velocity, respectively, of updraft class $i$. 
+
+
+Initial conditions are obtained as in \cite{cheinet03a} and \cite{lenschow80}. Through similarity theory the initial conditions are linked to surface fluxes, boundary layer depth, and an assumed PDF of the vertical velocity. The latter is assumed to be a Gaussian with a standard deviation $\sigma_w$, given as
+
+\begin{equation}
+ f_w(w) = \frac{1}{\sigma_w 2 \pi } e^{-\frac{w^2}{2\sigma_w^2}}.
+\end{equation}
+
+
+A fixed number of plume classes spans a discrete PDF for a selected range between $w_{\mathrm{min}}$ and $w_{\mathrm{max}}$. Thereby, $w_{\mathrm{min}}$ is typically thought to be larger than zero since weak eddies are accounted for by the ED part. Class $i$ covers all plumes with vertical velocities between
+
+\begin{eqnarray}
+ w_i^{\mathrm{min}}&=&w_{\mathrm{min}}+(i-1)(w_{\mathrm{max}}-w_{\mathrm{min}})/N^{up} \qquad\mathrm{and}\\
+ w_i^{\mathrm{max}}&=&w_{\mathrm{min}}+i(w_{\mathrm{max}}-w_{\mathrm{min}})/N^{up},
+\end{eqnarray}
+has a fractional weight
+\begin{equation}
+ s_i =\int\limits_{w_i^{\mathrm{min}}}^{w_i^{\mathrm{max}}} dw~f_w(w)=1/2(\mathrm{erf}(\frac{w_i^{\mathrm{max}}}{\sqrt{2}\sigma_w}) - \mathrm{erf}(\frac{w_i^{\mathrm{min}}}{\sqrt{2}\sigma_w})),
+\end{equation}
+and an average initial updraft velocity
+\begin{equation}
+ w_i =  1/s_i\int\limits_{w_i^{\mathrm{min}}}^{w_i^{\mathrm{max}}} dw~f(w)~ w =\frac{\sigma_w}{s_i \sqrt{2 \pi }} (e^{-\frac{{w_i^{\mathrm{min}}}^2}{2 \sigma_w^2}}- e^{-\frac{{w_i^{\mathrm{max}}}^2}{2 \sigma_w^2}}).
+\end{equation}
+{\color{blue} This initial average velocity has been modified here from the original $1/2(w_i^{\mathrm{min}}+w_i^{\mathrm{max}})$ used by Kay/JPL in order to make sure that the total upward mass flux $\int\limits_0^{\infty} dw~f_w w = \sum_{i=1,N_p} s_i w_i $ is independent of $N_p$. To illustrate the difference, if $w_{\mathrm{min}}=0$ and $w_{\mathrm{max}}\gg\sqrt{2}\sigma_w$ then the total area covered by the discretized updraft class spectrum is $A_tot=0.5$. Then, if only one plume was used the average initial velocity obtains the correct mean value $w_1=\sqrt{\frac{2}{\pi}} \sigma_w$. In contrast, the unmodified code gives $0.5 w_i^{\mathrm{max}}$ (which would be correct only if $w_i^{\mathrm{max}}=2\sqrt{2/\pi}\sigma_w$). This update should allow for better convergence characteristics with an increasing number of plumes.} 
+
+
+The actual physical area $a_i$ of one plume within a class spanned between $w_i^{\mathrm{min}}$ and $w_i^{\mathrm{max}}$ results from 
+\begin{equation}
+A_i/A_{tot} = s_i = \int_i dw~f(w) = 1/A_{tot} \int_i dw~N(w)a(w) 
+\end{equation}
+with $N(w)$ the number density [(m~s$^{-1}$)$^{-1}$] of plumes as a function of velocity and $a(w)$ the plume area size as function of vertical velocity. If we assume that each class has a mean number and mean size of plumes then we can rewrite this, as $ s_i=a_i/A_{tot} N_i$, such that 
+\begin{equation}
+ a_i= s_i A_{tot}/N_i.
+\end{equation}
+{\color{blue}Thus, specifying $N_i$ in addition is necessary in order to specify the size of plumes and thus their mass flux and eventually entrainment rates. The same weighting factor $s_i$ might correspond to a large number of plumes with small fractional area or to a small number of plumes with large fractional area. The outcome might be largely different. Let's discuss this.}
+
+
+% 
+% $\int\limits_{w_i^{\mathrm{min}}}^{w_i^{\mathrm{max}}} dw~ f(w) =\frac{1}{A_{tot}}\int\limits dA~N^*_i a_i$ with $N^*_i$ the number density (m$^{-2}$) and $a_i$ the areal extent of updrafts with velocities in the range $w_i^{\mathrm{min}}<w<w_i^{\mathrm{max}}$. The distributions $N^*_i(x,y)$ and $a_i(x,y)$ are defined to be zero whenever $w(x,y)$ falls outside of the specified range of the class. Of course, we can try and assume that all updrafts in one class have the same size such that 
+% 
+% \begin{equation}
+%  f_i = \frac{\int\limits_{w_i^{\mathrm{min}}}^{w_i^{\mathrm{max}}} dw~ f(w) }{ \int\limits_{A_{tot}} dA~N^*_i}= \frac{s_i }{ N_i}.
+% \end{equation}
+% 
+% Specifying $s_i$ thus leaves us to specify either the total number of updrafts represented by class $i$ or their fractional area $f_i$, but obviously not both.
+
+To obtain initial conditions, we follow \cite{lenschow80} and diagnose the standard deviations of $w$, $\theta$, and $q_v$ from the surface layer similarty relations
+\begin{eqnarray}
+ \sigma_w&=&1.34 w^*(z_s/h)^{1/3} (1-0.8z_s/h)\\
+   \sigma_{q_t}&=&1.34 q_v^* (z_s/h)^{-1/3}\\\label{eqn:sigmaq}
+  \sigma_{\theta}&=&1.34\theta^* (z_s/h)^{-1/3}\label{eqn:sigmath}
+\end{eqnarray}
+with 
+\begin{eqnarray}
+  w^*&=&(hg/\theta_v \overline{w'\theta_v'})^{1/3}\\
+  q_v^*&=&\overline{w'q_v'}/w^*\\
+  \theta^*&=&\overline{w'\theta'}/w^*\\
+\end{eqnarray}
+and $z_s$ is set to be 50 meter and supposed to be in the surface layer. As shown by \cite[][see their Fig.~12]{sorbjan91}, the correlation coefficient between water vapor and potential temperature is $r_{q_v\theta}\approx 0.75$ {\color{blue}(note that \cite{cheinet03a} gets this number wrong)} in the surface layer such that the standard deviation of virtual potential temperature can be obtained, as  
+\begin{equation}\label{eqn:sigmathv}
+ \sigma_{\theta_v}= (\sigma_{\theta}^2 + 0.61^2 \theta^2\sigma_{q_t}^2+2\cdot 0.61\theta r_{q_v\theta} \sigma_{\theta} \sigma_{q_t} )^{1/2}.
+\end{equation}
+{\color{blue}The correlation coefficient $r_{q_v\theta}$ might be different over a water surface, right? (even negative: cold pools picking up vapor from ocean)}
+
+Finally, the perturbations to the mean values are obtained -- again using correlation coefficients from \cite{cheinet03a} -- as 
+
+\begin{eqnarray}
+ q_{ti}&=&q_{v}+0.32 w_i  \sigma_{q_t}/\sigma_w\\
+ \theta_{vi}&=&\theta_{v}+0.58 w_i  \sigma_{\theta_v}/\sigma_w\\
+  h_{li}&=& c_p\frac{T}{\theta} \theta_{vi}/(1+\epsilon q_{vi}) \quad\mathrm{since}~q_{ci}=q_{ii}=0.
+\end{eqnarray}
+
+
+If we decide to use a single plume model ($N^{up}=1$), then we might alternatively opt for the initial conditions defined in \cite{soares04} and \cite{witek11}. Therein, 
+\begin{equation}
+ \theta_{v1} =  \theta_{v}+\beta \overline{\theta_v'w'}/e^{1/2}
+\end{equation}
+with $\beta$ typically set to 0.3 \citep{soares04,witek11}. An analogous relation is used to relate $q_v$ to the surface latent heat flux. The intial vertical velocity is zero. Note that $\beta$ will set the intial plume buoyancy. The fractional area of the plume is assumed to be $s_i=0.1$.
+
+Steady-state entraining plumes are then used to describe the vertical thermodynamic and dynamic profiles. A conserved quantity $\psi$ follows the vertical profile given by
+\begin{eqnarray}\label{eqn:conserved}
+ \frac{d\psi_i^{up} }{d z } &=& - \epsilon(\psi_i^{up} - \psi)
+\end{eqnarray}
+with entrainment rate $\epsilon$ and the environmental value $\psi$. The parcel rises until its vertical velocity reaches zero. The latter is given by \cite{simpson69a}'s parameterization
+\begin{eqnarray}\label{eqn:w}
+ 1/2\frac{d (w_i^{up})^2 }{d z } &=& aB^{up}_i- (b+c\epsilon)(w_i^{up})^2
+\end{eqnarray}
+with buoyancy $B_i^{up}=g(\theta_v^{up}/\theta_v-1)$, the environmental profile $\theta_v$, and constants  $a=2/3$, $b=0.002$~m$^{-1}$, $c=1.5$. The three acceleration terms are buoyancy, form drag, and mixing drag. 
+
+Entrainment is described by either a Poisson process (see next section), by a fixed fractional entrainment rate $\epsilon=\epsilon0$, by \cite{witek11}'s formulation
+\begin{equation}
+ \epsilon=\frac{0.7}{l}
+\end{equation}
+or by \cite{neggers02}'s formulation
+\begin{equation}
+ \epsilon=\frac{\alpha_n}{\tau w}
+\end{equation}
+with $\tau=h/w_*$ the eddy turnover time as defined before and $\alpha_n$ a tuning parameter.
+
+The conserved variables used in the plume equations are liquid/frozen moist static energy $h_{li}$ and total water mixing ratio $q_t=q_v+q_n$. Equation (\ref{eqn:conserved}) is solved for these two variables until the vertical velocity in a plume turns zero. At each height a saturation adjustment scheme is used to infer the condensed water content $q_c$ and $q_i$, $q_v$, and $\theta_v$. 
+
+\subsubsection{Emerging reference MF closure}
+
+{\color{blue} Goal: Add description of emerging MF closure that will be used in the Dycore. The keys to a successful (i.e., applicability in different PBLs, skill in representing cloud cover, match with ED closure) MF closure should be highlighted and reviewed.}
+
+\subsubsection{Discretization}
+Solving the vertical velocity and scalar equation in the vertical is accomplished as in \cite{suselj14} (see their appendix). Thereby we assume that $\epsilon$, the environment value $\psi$, and buoyancy $B$ can be considered constant in each layer (instead of, e.g., $\epsilon(\psi^{up}-\psi)$ being constant) to obtain an analytical expression for $\psi$ at the next level. This method has the numerical advantage that $\psi^{up}$ at the next higher level will be bound in between the value of $\psi^{up}$ at the lower level and the environmental value of $\psi$ in that layer. This provides the mass flux properties ($M_i^{k\pm 1/2}$ and $\psi^{up~k\pm 1/2}_i$) on cell interfaces. The discretized equations are 
+\begin{eqnarray}
+ \psi_i^{up~k+1/2}&=&\psi^{~k}(1-e^{-\epsilon^{k}\Delta z^k})+\psi_i^{up~k-1/2}e^{-\epsilon^{k}\Delta z^k}\\
+ (w_i^{up~k+1/2})^2&=&(\alpha w_i^{up~k-1/2})^2 + (1-\alpha^2) \frac{aB_i^{up~k}}{b+c\epsilon^k},
+\end{eqnarray}
+where $\alpha=e^{-(b+c\epsilon^k)\Delta z^k}$ and $B_i^{up~k}=g(0.5(\theta_{vi}^{up~k+1/2}+\theta_{vi}^{up~k-1/2})/\theta_v^{k}-1)$. IF a stochastic formulation is used then the entrainment rate (m$^{-1}$) in layer $\Delta z^k$ is computed as
+\begin{equation}
+ \epsilon(\Delta z^k) = \frac{1}{\Delta z^k} \epsilon_d \mathcal{P}(\frac{\Delta z^k}{L_0})
+\end{equation}
+with $\epsilon_d=0.1$, $L_0=100$~m, and $\mathcal{P}$ a random number drawn from the Poisson distribution; otherwise, one of the above mentioned deterministic formulations is used. 
+
+
+\section{Solving for the tendencies}\label{sec:solve}
+
+\subsection{EDMF equation}
+
+Equation (\ref{eqn:tendency}) needs to be solved to obtain the tentendy from mixing. The spatial discretization of the equations is done using a centered scheme for the diffusion term and the mass-flux term. $K$, $M_i$, and $\psi^{up}_i$ are treated explicitly in time while other terms can be implicit. 
+% \footnote{{\color{blue} If the prognostic TKE closure is used then SAM would use an intermediate $K$ obtained from an intermediate $e$ that got advanced through a truncated budget (\ref{eqn:tkebudget}) without the TRANS term. TRANS (i.e. mixing) is then computed based on the intermediate $e$ and $K$. We find, however, that this approach leads to strange instabilities in a CPBL test. Thus, we use a truly explicit approach for $e$ and $K$.}} 
+For brevity we drop index $_\psi$ here for eddy diffusivities $K$. The vertical grid structure and the indexing is illustrated in Fig.~\ref{fig:staggering} and is the same as used by \cite{tiedtke89}. An important stability criterion -- realized by \cite{tiedtke89} -- is that the environmental value of $\psi$ at the interface $k+1/2$ can not be taken as the average between $k$ and $k+1$. The interface value of $\psi$ is needed in the subsidence term $- \psi(z) \sum_i M_i(z)$ and in line with an upwind discretization has to be interpolated/taken from above. We simply assume $\psi^{k+1/2}=\psi^{k+1}$ and  $\psi^{k-1/2}=\psi^{k}$. We find that taking the average indeed results in numerical instabilities, while this approach works fine. The discretized form of Eq. (\ref{eqn:tendency}) is then
+\begin{align*}
+  &\frac{\psi^{n+1,k}- \psi^{n,k} }{\Delta t} =\\
+  &-\frac{1}{\rho^{n,k}\Delta z^{k}}\left\{ -\frac{K^{n,k+1/2}\rho^{n,k+1/2} }{\Delta z^{k+1/2}} [\beta_1^+(\psi^{n+1,k+1}-\psi^{n+1,k}) + \beta_1^-(\psi^{n,k+1}-\psi^{n,k})] \right. \\
+    & \left.+\frac{K^{n,k-1/2}\rho^{n,k-1/2} }{\Delta z^{k-1/2}} [\beta_1^+(\psi^{n+1,k}-\psi^{n+1,k-1}) + \beta_1^-(\psi^{n,k}-\psi^{n,k-1})] \right.\\
+    & \left. +\rho^{n,k+1/2}\left[\sum_i M_i^{n,k+1/2}\psi_i^{up~n,k+1/2} - (\beta_2^+\psi^{n+1,k+1}+\beta_2^-\psi^{n,k+1} )\sum_i M_i^{n,k+1/2} \right]\right.\\
+    &\left.-\rho^{n,k-1/2}\left[\sum_i M_i^{n,k-1/2}\psi_i^{up~n,k-1/2} -(\beta_2^+\psi^{n+1,k}+\beta_2^-\psi^{n,k} )\sum_i M_i^{n,k-1/2} \right] \right\}\\
+\end{align*}
+with $\beta_1^+=1-\beta_1^-$ and $\beta_2^+=1-\beta_2^-$ the implicit weights. A fully implicit solver, i.e., $\beta_1^{+}=\beta_2^{+}=1$, is mostly used here. Note that we dropped the averaging bars for density for the sake of brevity. A tridiagonal matrix solver is used to solve $\mathbf{A}\cdot\Psi^{n+1}=\mathbf{d}$ for $\Psi^{n+1}$. 
+
+\noindent For $2\leq k \leq N_k-1$ the coefficients are given as 
+
+\begin{align*}
+  a_k &=  \frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+ \frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}\right]\\
+    b_k &= -\frac{1}{\Delta t} + \frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k} \left[-\beta_1^+\frac{K^{n,k+1/2}}{\Delta z ^{k+1/2}} \right]-\frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+\frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}+\beta_2^+\sum_iM_i^{n,k-1/2} \right] \\
+      c_k &= \frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k}\left[\beta_1^+ \frac{K^{n,k+1/2}}{\Delta z ^{k+1/2}}+\beta_2^+\sum_iM_i^{n,k+1/2} \right] \\
+      d_k &=-\frac{\psi^{n,k}}{\Delta t} - \frac{1}{\rho^{n,k}\Delta z^k} \left\{ \frac{K^{n,k+1/2}\rho^{n,k+1/2}}{\Delta z^{k+1/2}}\beta_1^{-}\left[\psi^{n,k+1} - \psi^{n,k}\right]-\frac{K^{n,k-1/2}\rho^{n,k-1/2}}{\Delta z^{k-1/2}}\beta_1^{-}\left[\psi^{n,k} - \psi^{n,k-1}\right]\right.   \\   
+          & \left.+\rho^{n,k-1/2}\left[\sum_iM_i^{n,k-1/2}\psi_i^{up~n,k-1/2} - \beta_2^{-}\psi^{n,k}\sum_iM_i^{n,k-1/2} \right]\right.\\
+          & \left. -\rho^{n,k+1/2}\left[\sum_iM_i^{n,k+1/2}\psi_i^{up~n,k+1/2} - \beta_2^{-}\psi^{n,k+1}\sum_iM_i^{n,k+1/2} \right] \right\}.
+\end{align*}
+
+\noindent The boundary conditions at the surface are specified for $k=1$, as
+
+\begin{align*}
+  a_k &= 0 \\
+    b_k &= -\frac{1}{\Delta t} +\frac{\rho^{n,k+1/2}}{\rho^{n,k}\Delta z^k} \left[- \beta_1^+\frac{K^{n,k+1/2}}{\Delta z^{k+1/2}} \right]-\beta_1^+|\mathbf{v_{h1}}|C^n_{\psi}/\Delta z^k  \\
+      c_k &= \mathrm{same~as~for~}2\leq k \leq N_k-1 \\
+      d_k &=  -\frac{\psi^{n,k}}{\Delta t} - \frac{1}{\rho^{n,k}\Delta z^k} \left\{ \frac{K^{n,k+1/2}\rho^{n,k+1/2}}{\Delta z^{k+1/2}}\beta_1^{-}\left[\psi^{n,k+1} - \psi^{n,k}\right]\right.   \\   
+          & \left. -\rho^{n,k+1/2}\left[\sum_iM_i^{n,k+1/2}\psi_i^{up~n,k+1/2} -\beta_2^{-}\psi^{n,k+1}\sum_iM_i^{n,k+1/2} \right] \right\} +|\mathbf{v_{h1}}|\frac{C^n_{\psi}}{\Delta z^k}\left[\beta^-\psi^{n,k} - \psi_s\right]    
+\end{align*}
+This formulation with Dirichlet boundary conditions makes use of the drag coefficients computed in the surface scheme. The user can, however, also decide to use a Neuman boundary condition ({\tt doneuman=.true.}) using the fluxes from the surface scheme. In this case, the last rhs term in $b_k$ is dropped and the last term in $d_k$ becomes $- \overline{\psi'w'}^n/\Delta z^k$ makeing the surface fluxes fully explicit. This explicit Neuman boundary condition is also used if surface fluxes are prescribed ({\tt sfc\_tau\_fxd} or {\tt sfc\_flx\_fxd} respectively). 
+
+The boundary condition at the top for $k=N_k$ is given as
+\begin{align*}
+  a_k &= \mathrm{same~as~for~}2\leq k \leq N_k-1  \\
+    b_k &= -\frac{1}{\Delta t} - \frac{\rho^{n,k-1/2}}{\rho^{n,k}\Delta z^k} \left[\beta_1^+\frac{K^{n,k-1/2}}{\Delta z ^{k-1/2}}+\beta_2^+\sum_iM_i^{n,k-1/2} \right] \\
+      c_k &= 0 \\
+      d_k &= -\frac{\psi^{n,k}}{\Delta t} + \frac{1}{\rho^{n,k}\Delta z^k} \left\{ \frac{K^{n,k-1/2}\rho^{n,k-1/2}}{\Delta z^{k-1/2}}\beta_1^{-}\left[\psi^{n,k} - \psi^{n,k-1}\right]\right.   \\   
+          & \left.-\rho^{n,k-1/2}\left[\sum_iM_i^{n,k-1/2}\psi_i^{up~n,k-1/2} -\beta_2^{-}\psi^{n,k}\sum_iM_i^{n,k-1/2} \right]\right\}.    
+\end{align*}
+
+\subsection{TKE equation}
+
+The numerical implementation to advance $e$ from step $n$ to step $n+1$ is as follows. SHEAR, BUOY, and DISS are treated explicitly with an Euler step. Thereby, $K_m$ at step $n$ is diagnosed from $e$ at step $n$. {\color{blue} This is for example different in SAM where $K^n$ is obtained from an intermediate $e$. What's generally done here? Also is TRANS computed on the intermediate $e$ or $e$ at step $n$.} The three tendencies will be limited in magnitude to ensure their sum is not smaller than $-\frac{e}{\Delta t}$. Then, TRANS is computed as described below (general formulation allowing for an implicit solver) again based on the $e$ distribution (and $K$) at step $n$. That means that TRANS may still cause some negative $e$ at step $n+1$ since the solver for TRANS is not necessarily positive definite. Negative $e$ will be clipped at the beginning of the next step.  The advective term ADV is eventually computed by the Dycore which has TKE per mass of moist air as prognostic variable such that conversion is required before passing over and receiving $e$ (i.e., analogous to the water vapor mixing ratio). 
+
+The buoyancy flux at time $n$ is needed in the buoyancy production term. The ED part of the flux requires knowledge about $K=C_k l e^{1/2}$. $e$ is available from the previous timestep (if a diagnostic scheme would be used then $e$ might still get advected by the Dycore and is thus treated like a prognostic variable) but $l$ needs to be re-evaluated at step $n$. To this end, the boundary layer height $h$ is required (since $l\sim \tau e^{1/2}$ and $\tau \sim h/w^*$). It is computed either consistently at step $n$ if defined as the height where the $\theta_v$ gradient at step $n$ is maximized or somewhat inconsistently if defined as the height where the buoyancy flux at $n-1$ gets minimized.  Note that $h$ is also required as input to the mupliplume model and the same strategy is applied there. The MF fluxes at step $n$ might be included in the buoyancy flux of the buoyancy generation term (as done in the Witek scheme) and the plume model is thus called before evaluating the TKE sources.
+
+
+\begin{figure}[bthp]
+\centering
+ \includegraphics[width=0.5\textwidth]{staggering.eps}
+\caption{Locations of prognostic variable $\psi$, the updraft mass fluxes $M_i$, the updraft properties $\psi^{up}_i$, and eddy-diffusivities $K^{\psi}$ on the 1D vertical grid. } \label{fig:staggering}
+\end{figure}
+
+
+\section{Design strategy}
+
+SAM's prognostic variables are:
+\begin{itemize}
+ \item $h_{il}=c_pT +g z - L_v (q_c+q_r) - L_s (q_i+q_s+q_g)$
+ \item $q_t=q_v+q_n=q_v+q_c+q_i$
+ \item $u,v,w$
+ \item $e$
+\end{itemize}
+with $q$ indicating a mixing ratio per mass of dry air and $h_{il}$ the moist static energy conserved under mass-conserving phase changes including liquid and frozen water. The indices $c,i,r,s,g$ represent non-precipitating cloud liquid water and cloud ice and precipitating rain, snow, and graupel. Note that a flux of $h_{il}$ is related to a flux in $\theta_{il}$, the liquid/frozen water potential temperature, as 
+\begin{equation}
+ \overline{w'\theta_{il}'} = \frac{1}{c_p}\frac{\theta}{T}\overline{w'h_{il}'}
+\end{equation}
+with $\frac{\theta}{T}=(p_0/p)^{R_d/c_p}$.
+
+The idea here is to implement a PBL and shallow cumulus scheme into SAM. The commonly used Deardorff TKE closure is then switched off. Therefore, no explicit horizontal diffusion will be computed in this new version and vertical mixing will be applied only in the boundary layer. The mixing outside of the boundary layer is thus handled truly implicitly by the diffusive advection scheme. 
+
+The outline of a timestep to go from step $n$ (time $t$) to step $n+1$ (time $t+\Delta t$):
+
+
+\subsection{1) Get surface fluxes}
+
+Use existing scheme in SAM.
+
+\subsection{2) Run PDF condensation scheme }
+
+Given the mean prognostic variables for each grid cell we first run the PDF cloud scheme to retrieve the mean condensed water content $q_n=q_c+q_i$, an SGS cloud fraction, and the grid-scale buoyancy flux. The procedure follows closely the strategy outlined by \cite{sommeria77}, \cite{bougeault81}, and \cite{bechtold95} but is extended here to account for frozen water. In short, the PDF scheme requires as input the grid-scale mean values of $\theta^*_{il}=\theta  - \frac{\theta}{T}(L_v/c_p q_c + L_s/c_p q_i)$ and $q_t=q_v+q_c+q_i$ and the standard deviation $\sigma_s$ of the saturation deficit. 
+
+We derive $\sigma_s$ from vertical gradients in $\theta^*_{il}$ and $q_t$ following \cite{bechtold95}. Same as in \cite{cheinet03b}, we assume a constant length scale in the formulation of $\sigma_s$ (this will allow for a explicit formulation since the master length scale from the TKE scheme is unknown at this point). The condensation scheme is called only in the presence of turbulent kinetic energy.  
+
+Since only $q_t$ is known a priori, an iterative approach is used here to derive the potential temperature needed in  $\theta^*_{il}$. We use the same strategy that is applied in the all-or-nothing adjusment scheme that is called at the end of a time step in SAM (as long as SAM's default single moment microphysics scheme is used). Thereby, a first guess for $\theta^*_{il}$ is made by assuming no condensate at all such that  $h^*_{il}=h_{il}$. This gives a first guess on temperature $T$ which is then used to partition $q_p$ into $q_r$, $q_s$, and $q_g$ following the descriptions given by \cite{khairou03}. A second guess for $h^*_{il}$ is then possible by updating $h^*_{il}=h^*_{il}+L_v q_r + L_s (q_s+q_g)$. This yields a first guess for $\theta^*_{il}$.
+
+Then, the iterative procedure starts by computing the vertical gradient of $\theta^*_{il}$ to get $\sigma_s$ as input to the PDF condensation scheme. The latter returns the cloud condensate $q_n$ which can be partitioned by temperature into $q_c$ and $q_i$ following \cite{khairou03}. Given the partitioned cloud condensate the iteration loop ends by evaluating a new $\theta^*_{il}$ from $\theta_{il}$.
+
+This scheme will thus add an additional source for latent heat release based on SGS clouds to SAM. We keep the grid-scale all-or-nothing scheme at the end of the time step. As described in \cite{sommeria77}, we expect that the onset of cloud formation in the boundary layer is simulated less abruptly with this formulation since clouds form before saturation at the grid-scale occurs. More importantly, this way we account for unresolved condensation as found in stratocumulus layers.
+
+
+Note that we assumed in this procedure that the mean grid-scale values of the prognostic variables equal their environmental values outside of plumes. The stratiform cloud cover is usually thought to affect the environment around plumes only. This is ignored here.
+
+\subsection{3) Run plume model}
+
+Given the mean grid-scale potential temperature $\theta_v$, we can now solve the plume equations
+\begin{eqnarray}\label{eqn:conserved}
+ \frac{d\psi_i^{up} }{d z } &=& - \epsilon(\psi_i^{up} - \psi)
+\end{eqnarray}
+with entrainment rate $\epsilon$ and the environmental value $\psi$. The parcel rises until its vertical velocity reaches zero. The latter is given by \cite{simpson69a}'s parameterization
+\begin{eqnarray}\label{eqn:w}
+ 1/2\frac{d (w_i^{up})^2 }{d z } &=& aB^{up}_i- (b+c\epsilon)(w_i^{up})^2
+\end{eqnarray}
+with $\psi_i$ either $\theta_{il}$ or total water $q_t+q_p$ for plume $i$. Note that we assume that the plume environment is well represented by the grid-mean values and that the buoyancy is given as the potential temperature difference to the grid-scale mean (which we know from the previous adjustment).
+
+This yields the MF part of the vertical fluxes of the prognostic variables.
+
+\subsection{4) Evaluate mixing length and eddy diffusivities  }
+
+Thanks to the PDF scheme, we have the mean grid-scale potential temperature $\theta_v$ (which was unknown before the adjustment). Given $\theta_v$ and turbulent kinetic energy $e$ we can evaluate the stability dependent turbulent length scale $l$. In turn, we can derive the eddy diffusivities $K$.
+
+
+\subsection{5) Advection}
+
+SAM's advection of scalars and momentum. Solve for Poisson pressure.
+
+\subsection{6) Implicit solve for mixing tendencies}
+
+Given the eddy diffusivities and the mass fluxes we can advance the prognostic variables due to mixing.
+
+\subsection{5) Grid-scale microphysics and all-or-nothing adjustment}
+
+The simple 1-moment scheme described in \cite{khairou03} is used. It envokes the already mentioned adjustment scheme but in a all-or-nothing approach. Both cloud condensate and precipitating condensate are partitioned into subcategories based on temperature. Then, microphysical conversion rates are evaluated to update $q_n$ and $q_p$. A mean fall velocity is evaluated which is used for sedimentation (which is computed in section 5). Update the cloud fraction to one if saturated on the grid-scale.
+
+\subsection{6) Radiation}
+
+Use the liquid water and ice water path. Both now include contributions from the PDF scheme. Similary, the cloud fraction in the grid box might be larger than zero even if the grid-box is unsaturated on average. If saturated on average, then the cloud fraction in the box is one. 
+
+
+
+
+
+\bibliographystyle{ametsoc}
+\bibliography{/home/wolfi/Bibliography/wolfil_jab.bib}
+%\input{documentation.bbl}
+
+ 
+\end{document}          

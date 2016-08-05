@@ -1,0 +1,166 @@
+\documentclass[dvipdfmx,a4paper,10pt]{article}
+\usepackage[dvips]{graphicx}
+\usepackage{subfigure}
+\usepackage[small,bf]{caption}
+\usepackage{color}
+\usepackage{natbib,amsmath}
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{hyperref}
+\hypersetup{
+  colorlinks = true,
+  citecolor=red,%
+  filecolor=red,%
+  linkcolor=red,%
+  urlcolor=red
+  pdfsubject = {Report},
+  pdfpagemode = UseNone
+}
+
+% Title Page
+\title{Implementation of an EDMF boundary-layer and shallow-cumulus parameterization into SAM}
+\author{Wolfgang Langhans}
+
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+
+
+\section{Introduction}\label{se:intro}
+
+For any prognostic variable $\psi$ we seek to represent its tendency due to unresolved turbulent transport. Thereby, $\psi$ is one of $u$, $v$, $h_{li}$, $q_t$, $q_p$, and $e$ (i.e., TKE). Here, mixing ratio $q_t$ is defined as the mass of water vapor and cloud condensate (liquid and frozen) per mass of dry air, as $q_t=q_v+q_n=q_v+q_c+q_i$. The mixing ratio for precipitating water is the sum of mixing ratios for rain, snow, and graupel, $q_p=q_r+q_s+q_g$. It is common in GCMs and mesoscale models to assume that the vertical velocity $w$ has no tendency from subgrid-scale transport. On top of that, subgrid transport is assumed to be vertical only. 
+
+The tendency for any variable $\psi$ is then obtained from the EDMF equation as
+\begin{equation}\label{eqn:tendency}
+ \left(\frac{\partial \psi}{\partial t}\right)_{turb} =-\frac{1}{\overline{\rho}}\frac{\partial }{\partial z} \overline{\rho} \left( ED^{\psi} + MF^{\psi}\right) = -\frac{1}{\overline{\rho}}\frac{\partial }{\partial z} \overline{\rho}\left( -K_{\psi}(z)\frac{\partial \psi(z)}{\partial z} + \sum_i M_i(z) (\psi^{up}_i(z) - \psi(z) )\right)
+\end{equation}
+with $\overline{\rho}$ the horizontally averaged density of dry air. Here, ED is the eddy-diffusivity part and MF the (multiplume) mass-flux part of the turbulent flux. Closure is provided by specifying $K_{\psi}$, $M_i$, and $\psi^{up}_i$ for each updraft $i$.
+
+The necessary/provided input to the EDMF parameterization is listed in section \ref{sec:input}. The closure is described in section \ref{sec:closure}. The implicit numerical procedure to solve Eq. (\ref{eqn:tendency}) is outlined in section \ref{sec:solve}. One key advantage of this multiplume EDMF parameterization is that PBL mixing and shallow cumulus cloud cover are parameterized in a unified way since plumes might eventually get saturated. For this reason, subgrid-scale cloud cover from shallow cumulus is also provided from the multiplume model. A large-scale saturation scheme based on a subgrid-scale PDF scheme is also implemented to represent effects of stratocumulus clouds (see section \ref{sec:clouds}).
+
+\section{Input}\label{sec:input}
+
+\subsection{From SAM}
+
+In this 1D framework let index $k$ represent the vertical center of cell $k$. Let indices $k-1/2$ and $k+1/2$ indicate the position of the bottom and top interface of cell $k$. Thus, the input is $u^k$, $v^k$, $w^k$, $h_{li}^k$, $q_v^k$, and $e^k$ with $k$ ranging from $1$ to the total number of cells $N_k$ in the 1D column. On top of that, $\overline{\rho}^k}$ and $\overline{\rho}^{k\pm 1/2}$ will be needed. 
+
+Also needed for the parameterization of eddy diffusivities is the squared characteristic rate of strain $\overline{D}^2$ (based on grid-scale velocities) as defined in Eq.~(\ref{eqn:def2}) at cell centers. Note that SAM uses an Arakawa-C grid but let's for ease of documentation assume that all variables are located at cell centers. 
+
+\subsection{From surface flux parameterization}\label{sec:sfcfluxes}
+
+The parameterization of surface fluxes over ocean surface is based on \cite{bryan03} and has been used also in SAM \citep{khairou03} and CAM \citep[see][section 4.10.2]{collins04}. A formulation for fluxes over land is also available but not yet included. The formulation is adapted here to our needs as explained below. A bulk drag/transfer law is used for the surface turbulent fluxes of $u$, $v$, $\theta$, and $q_v$, given as
+\begin{equation}\label{eqn:fluxes}
+ (\mathbf{\tau}, E, H)=-\rho_1|\mathbf{v_h}_1| (C_d \mathbf{v_h}_1, C_e \Delta q_v, C_{\theta} \Delta \theta )
+\end{equation}
+with $\Delta q_v=q_{v1}-q_v^*(T_s)$, $\Delta \theta=\theta_{1}-\theta_{s}$, $\mathbf{v_h}$ the horizontal wind vector, and $C_d$, $C_e$, and $C_{\theta}$ the transfer coefficients for momentum, $q_v$, and $\theta$. $T_s$ is the surface temperature and $q_v^*(T_s)$ the saturation mixing ratio at the surface temperature. Index ``$1$'' indicates values on the first model level. 
+
+Turbulent velocity scales $u_*$, $q_{v*}$, and $\theta_{*}$ are introduced in the formulation of these fluxes as 
+\begin{eqnarray}
+ u_*&=& (\overline{u'w'}^2+\overline{v'w'}^2)^{1/4} = C_d^{1/2} | \mathbf{v_h}_1 |\\
+ q_{v*}&=& -\overline{q_v'w'}/u_*=C_e |\mathbf{v_h}_1| \Delta q_v / u_*\label{eqn:velqv}
+\end{eqnarray}
+
+The parameterization characterizes the surface layer stability based on the Monin-Obukhov length and then distinguishes between flux profiles for stable and unstable conditions. The parameterization proceeds by utilizing similarity theory to determine the drag coefficients $C_d$, $C_e$, and $C_{\theta}$ and the respective fluxes. That is, the parameterization provides the momentum and sensible and latent heat fluxes. The required flux of $h_{il}$ in kinematic units is obtained as 
+\begin{equation}\label{eqn:whli}
+ \overline{h_{il}'w'} = c_p H.
+\end{equation} 
+
+\section{EDMF closure}\label{sec:closure}
+
+The task of the parameterization is to provide the eddy diffusivities $K_{\psi}$ and $M_i$ and $\psi^{up}_i$ for each updraft $i$. A variety of flavors of a 1.5 TKE closure are implemented and described below. The updraft properties are obtained through a multiplume model that was kindly provided by Kay Suselj/JPL and is somewhat modified here.
+
+
+\subsection{Eddy-diffusivity models}
+
+The eddy diffusivities are computed at cell centers and averaging provides $K_{\psi}^{k\pm 1/2}$ at cell interfaces. 
+
+
+
+
+
+
+
+\section{Design strategy}
+
+SAM's prognostic variables are:
+\begin{itemize}
+ \item $h_{il}=c_pT +g z - L_v (q_c+q_r) - L_s (q_i+q_s+q_g)$
+ \item $q_t=q_v+q_n=q_v+q_c+q_i$
+ \item $u,v,w$
+ \item $e$
+\end{itemize}
+with $q$ indicating a mixing ratio per mass of dry air and $h_{il}$ the moist static energy conserved under mass-conserving phase changes including liquid and frozen water. The indices $c,i,r,s,g$ represent non-precipitating cloud liquid water and cloud ice and precipitating rain, snow, and graupel. Note that a flux of $h_{il}$ is related to a flux in $\theta_{il}$, the liquid/frozen water potential temperature, as 
+\begin{equation}
+ \overline{w'\theta_{il}'} = \frac{1}{c_p}\frac{\theta}{T}\overline{w'h_{il}'}
+\end{equation}
+with $\frac{\theta}{T}=(p_0/p)^{R_d/c_p}$.
+
+The idea here is to implement a PBL and shallow cumulus scheme into SAM. The commonly used Deardorff TKE closure is then switched off. Therefore, no explicit horizontal diffusion will be computed in this new version and vertical mixing will be applied only in the boundary layer. The mixing outside of the boundary layer is thus handled truly implicitly by the diffusive advection scheme. 
+
+The outline of a timestep to go from step $n$ (time $t$) to step $n+1$ (time $t+\Delta t$):
+
+
+\subsection{1) Get surface fluxes}
+
+Use existing scheme in SAM.
+
+\subsection{2) Run PDF condensation scheme }
+
+Given the mean prognostic variables for each grid cell we first run the PDF cloud scheme to retrieve the mean condensed water content $q_n=q_c+q_i$, an SGS cloud fraction, and the grid-scale buoyancy flux. The procedure follows closely the strategy outlined by \cite{sommeria77}, \cite{bougeault81}, and \cite{bechtold95} but is extended here to account for frozen water. In short, the PDF scheme requires as input the grid-scale mean values of $\theta^*_{il}=\theta  - \frac{\theta}{T}(L_v/c_p q_c + L_s/c_p q_i)$ and $q_t=q_v+q_c+q_i$ and the standard deviation $\sigma_s$ of the saturation deficit. 
+
+We derive $\sigma_s$ from vertical gradients in $\theta^*_{il}$ and $q_t$ following \cite{bechtold95}. Same as in \cite{cheinet03b}, we assume a constant length scale in the formulation of $\sigma_s$ (this will allow for a explicit formulation since the master length scale from the TKE scheme is unknown at this point). The condensation scheme is called only in the presence of turbulent kinetic energy.  
+
+Since only $q_t$ is known a priori, an iterative approach is used here to derive the potential temperature needed in  $\theta^*_{il}$. We use the same strategy that is applied in the all-or-nothing adjusment scheme that is called at the end of a time step in SAM (as long as SAM's default single moment microphysics scheme is used). Thereby, a first guess for $\theta^*_{il}$ is made by assuming no condensate at all such that  $h^*_{il}=h_{il}$. This gives a first guess on temperature $T$ which is then used to partition $q_p$ into $q_r$, $q_s$, and $q_g$ following the descriptions given by \cite{khairou03}. A second guess for $h^*_{il}$ is then possible by updating $h^*_{il}=h^*_{il}+L_v q_r + L_s (q_s+q_g)$. This yields a first guess for $\theta^*_{il}$.
+
+Then, the iterative procedure starts by computing the vertical gradient of $\theta^*_{il}$ to get $\sigma_s$ as input to the PDF condensation scheme. The latter returns the cloud condensate $q_n$ which can be partitioned by temperature into $q_c$ and $q_i$ following \cite{khairou03}. Given the partitioned cloud condensate the iteration loop ends by evaluating a new $\theta^*_{il}$ from $\theta_{il}$.
+
+This scheme will thus add an additional source for latent heat release based on SGS clouds to SAM. We keep the grid-scale all-or-nothing scheme at the end of the time step. As described in \cite{sommeria77}, we expect that the onset of cloud formation in the boundary layer is simulated less abruptly with this formulation since clouds form before saturation at the grid-scale occurs. More importantly, this way we account for unresolved condensation as found in stratocumulus layers.
+
+
+Note that we assumed in this procedure that the mean grid-scale values of the prognostic variables equal their environmental values outside of plumes. The stratiform cloud cover is usually thought to affect the environment around plumes only. This is ignored here.
+
+\subsection{3) Evaluate mixing length and eddy diffusivities  }
+
+Thanks to the PDF scheme, we have the mean grid-scale potential temperature $\theta_v$ (which was unknown before the adjustment). Given $\theta_v$ and turbulent kinetic energy $e$ we can evaluate the stability dependent turbulent length scale $l$. In turn, we can derive the eddy diffusivities $K$.
+
+\subsection{4) Run plume model}
+
+Given the mean grid-scale potential temperature $\theta_v$, we can now solve the plume equations
+\begin{eqnarray}\label{eqn:conserved}
+ \frac{d\psi_i^{up} }{d z } &=& - \epsilon(\psi_i^{up} - \psi)
+\end{eqnarray}
+with entrainment rate $\epsilon$ and the environmental value $\psi$. The parcel rises until its vertical velocity reaches zero. The latter is given by \cite{simpson69a}'s parameterization
+\begin{eqnarray}\label{eqn:w}
+ 1/2\frac{d (w_i^{up})^2 }{d z } &=& aB^{up}_i- (b+c\epsilon)(w_i^{up})^2
+\end{eqnarray}
+with $\psi_i$ either $\theta_{il}$ or total water $q_t+q_p$ for plume $i$. Note that we assume that the plume environment is well represented by the grid-mean values and that the buoyancy is given as the potential temperature difference to the grid-scale mean (which we know from the previous adjustment).
+
+This yields the MF part of the vertical fluxes of the prognostic variables.
+
+\subsection{5) Advection}
+
+SAM's advection of scalars and momentum. Solve for Poisson pressure.
+
+\subsection{6) Implicit solve for mixing tendencies}
+
+Given the eddy diffusivities and the mass fluxes we can advance the prognostic variables due to mixing.
+
+\subsection{5) Grid-scale microphysics and all-or-nothing adjustment}
+
+The simple 1-moment scheme described in \cite{khairou03} is used. It envokes the already mentioned adjustment scheme but in a all-or-nothing approach. Both cloud condensate and precipitating condensate are partitioned into subcategories based on temperature. Then, microphysical conversion rates are evaluated to update $q_n$ and $q_p$. A mean fall velocity is evaluated which is used for sedimentation (which is computed in section 5). Update the cloud fraction to one if saturated on the grid-scale.
+
+\subsection{6) Radiation}
+
+Use the liquid water and ice water path. Both now include contributions from the PDF scheme. Similary, the cloud fraction in the grid box might be larger than zero even if the grid-box is unsaturated on average. If saturated on average, then the cloud fraction in the box is one. 
+
+
+
+
+
+\bibliographystyle{ametsoc}
+\bibliography{/home/wolfi/Bibliography/wolfil_jab.bib}
+%\input{documentation.bbl}
+
+ 
+\end{document}          

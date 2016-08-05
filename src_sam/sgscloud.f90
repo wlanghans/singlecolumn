@@ -99,6 +99,11 @@ else
     dtabs = 100.
     do while(abs(dtabs).gt.0.01.and.niter.lt.20)
 
+    if (niter.gt.0) then 
+      thetali(k) = thetali(k) + 0.5 * dtabs 
+      tabs(k) = (t(k)-ggr*z(k))/cp + fac_cond*(qcl(k)+qpl(k)) + fac_sub*(qci(k)+qpi(k)) 
+    end if
+
     ! compute gradients of qt and thetali
     thetaligrad(k) = (thetali(k)-thetali(k-1))/(z(k)-z(k-1))
     qtgrad(k)      = (qt(k)-qt(k-1))/(z(k)-z(k-1))
@@ -135,13 +140,12 @@ else
     niter = niter+1
     dtabs      = tabs(k) / totheta  - (fac_cond*qcl(k) + fac_sub*qci(k))/totheta &
                  - thetali(k)
-    thetali(k) = thetali(k) + 0.5 * dtabs 
-    tabs(k) = (t(k)-ggr*z(k))/cp + fac_cond*(qcl(k)+qpl(k)) + fac_sub*(qci(k)+qpi(k)) 
 
     end do ! end of iteration
 
+    tabs(k) = (t(k)-ggr*z(k))/cp + fac_cond*(qcl(k)+qpl(k)) + fac_sub*(qci(k)+qpi(k)) 
     thetav(k) = tabs(k)/totheta  * (1.+epsv*qv(k))
-    thetar(k) = tabs(k)/totheta  * (1.+epsv*qv(k)-qn(k))
+    thetar(k) = tabs(k)/totheta  * (1.+epsv*qv(k)-qn(k)-qp(k))
 
 end if ! if tke is present
 

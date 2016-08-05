@@ -1,0 +1,117 @@
+\begin{thebibliography}{20}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\providecommand{\urlprefix}{URL }
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi:\discretionary{}{}{}#1}\else
+  \providecommand{\doi}{doi:\discretionary{}{}{}\begingroup
+  \urlstyle{rm}\Url}\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+
+\bibitem[{Bechtold et~al.(1995)Bechtold, Cuijpers, Mascart, and
+  Trouilhet}]{bechtold95}
+Bechtold, P., J.~W.~M. Cuijpers, P.~Mascart, and P.~Trouilhet, 1995: Modeling
+  of trade wind cumuli with a low-order turbulence model: Toward a unified
+  description of cu and se clouds in meteorological models. \textit{Journal of
+  the Atmospheric Sciences}, \textbf{52~(4)}, 455--463.
+
+\bibitem[{Bougeault(1981)}]{bougeault81}
+Bougeault, P., 1981: Modeling the trade-wind cumulus boundary layer. part {I}:
+  Testing the ensemble cloud relations against numerical data. \textit{Journal
+  of the Atmospheric Sciences}, \textbf{38~(11)}, 2414--2428.
+
+\bibitem[{Bryan et~al.(2003)Bryan, Wyngaard, and Fritsch}]{bryan03}
+Bryan, G.~H., J.~C. Wyngaard, and J.~M. Fritsch, 2003: Resolution requirements
+  for simulations of deep moist convection. \textit{Mon. Wea. Rev.},
+  \textbf{131}, 2394--2416.
+
+\bibitem[{Cheinet(2003)}]{cheinet03a}
+Cheinet, S., 2003: A multiple mass-flux parameterization for the
+  surface-generated convection. {P}art {I}: {D}ry plumes. \textit{J. Atmos.
+  Sci.}, \textbf{60}, 2313--2327.
+
+\bibitem[{Cheinet and Teixeira(2003)}]{cheinet03b}
+Cheinet, S. and J.~Teixeira, 2003: A simple formulation for the
+  eddy-diffusivity parameterization of cloud-topped boundary layers.
+  \textit{Geophys. Res. Lett.}, \textbf{30}, 1930.
+
+\bibitem[{Collins et~al.(2004)Collins, Rasch, Boville, Hack, McCaa, Williamson,
+  Kiehl, and Briegleb}]{collins04}
+Collins, W.~D., P.~J. Rasch, B.~A. Boville, J.~J. Hack, J.~R. McCaa, D.~L.
+  Williamson, J.~T. Kiehl, and B.~Briegleb, 2004: Description of the {NCARG}
+  {C}ommunity {A}tmosphere {M}odel ({CAM 3.0}). {NCAR} Technical note
+  TN–464+STR, National Center for Atmospheric Research, USA.
+
+\bibitem[{Han(2015)}]{han15}
+Han, J., 2015: Implementation in the {NCEP GFS} of a hybrid eddy-diffusivity
+  mass-flux ({EDMF}) boundary layer parameterization with dissipative heating
+  and modified stable boundary layer mixing. \textit{Wea. Forecasting},
+  submitted.
+
+\bibitem[{Khairoutdinov and Randall(2003)}]{khairou03}
+Khairoutdinov, M.~F. and D.~A. Randall, 2003: Cloud resolving modeling of the
+  {ARM} summer 1997 {IOP}: {M}odel formulation, results, uncertainties, and
+  sensitivities. \textit{J. Atmos. Sci.}, \textbf{60}, 607--625.
+
+\bibitem[{Lenschow et~al.(1980)Lenschow, Wyngaard, and Pennell}]{lenschow80}
+Lenschow, D.~H., J.~C. Wyngaard, and W.~T. Pennell, 1980: Mean-field and
+  second-moment budgets in a baroclinic, convective boundary layer. \textit{J.
+  Atmos. Sci.}, \textbf{37}, 1313--1326.
+
+\bibitem[{Neggers et~al.(2002)Neggers, Siebesma, and Jonker}]{neggers02}
+Neggers, R. A.~J., A.~P. Siebesma, and H.~J.~J. Jonker, 2002: A multiparcel
+  model for shallow cumulus convection. \textit{J. Atmos. Sci.}, \textbf{59},
+  1655--1668.
+
+\bibitem[{Simpson and Wiggert(1969)}]{simpson69a}
+Simpson, J. and V.~Wiggert, 1969: Models of precipitating cumulus towers.
+  \textit{Mon. Wea. Rev.}, \textbf{97}, 471--489.
+
+\bibitem[{Soares et~al.(2004)Soares, Miranda, Siebesma, and
+  Teixeira}]{soares04}
+Soares, P. M.~M., P.~M.~A. Miranda, A.~P. Siebesma, and J.~Teixeira, 2004: An
+  eddy-diffusivity/mass-flux parametrization for dry and shallow cumulus
+  convection. \textit{Quart. J. Roy. Met. Soc.}, \textbf{130~(604)},
+  3365--3383.
+
+\bibitem[{Sommeria and Deardorff(1977)}]{sommeria77}
+Sommeria, G. and J.~W. Deardorff, 1977: Subgrid-scale clouds in models of
+  nonprecipitating clouds. \textit{J. Atmos. Sci.}, \textbf{34}, 344--355.
+
+\bibitem[{Sorbjan(1991)}]{sorbjan91}
+Sorbjan, Z., 1991: Evaluation of local similarity functions in the convective
+  boundary layer. \textit{Journal of Applied Meteorology}, \textbf{30~(12)},
+  1565--1583.
+
+\bibitem[{Su\v{s}elj et~al.(2014)Su\v{s}elj, Hogan, and Teixeira}]{suselj14}
+Su\v{s}elj, K., T.~F. Hogan, and J.~Teixeira, 2014: Implementation of a
+  stochastic eddy-diffusivity/mass-flux parameterization into the {N}avy
+  {G}lobal {E}nvironmental {M}odel. \textit{Wea. Forecasting}, \textbf{29},
+  1374--1390.
+
+\bibitem[{Su\v{s}elj et~al.(2013)Su\v{s}elj, Teixeira, and Chung}]{suselj13}
+Su\v{s}elj, K., J.~Teixeira, and D.~Chung, 2013: A unified model for moist
+  convective boundary layers based on stochastic eddy-diffusivity/mass-flux
+  parameterization. \textit{J. Atmos. Sci.}, \textbf{70}, 1929--1953.
+
+\bibitem[{Su\v{s}elj et~al.(2012)Su\v{s}elj, Teixeira, and Matheou}]{suselj12}
+Su\v{s}elj, K., J.~Teixeira, and G.~Matheou, 2012: Eddy diffusivity/mass flux
+  and shallow cumulus boundary layer: {A}n updraft pdf multiple mass flux
+  scheme. \textit{J. Atmos. Sci.}, \textbf{69}, 1513--1533.
+
+\bibitem[{Teixeira and Cheinet(2004)}]{teixeira04}
+Teixeira, J. and S.~Cheinet, 2004: A simple mixing length formulation for the
+  eddy-diffusivity parameterization of dry convection. \textit{Bound.-Lay.
+  Meteor.}, \textbf{110~(3)}, 435--453.
+
+\bibitem[{Tiedtke(1989)}]{tiedtke89}
+Tiedtke, M., 1989: A comprehensive mass flux scheme for cumulus
+  parameterization in large-scale models. \textit{Mon. Wea. Rev.},
+  \textbf{117}, 1779--1800.
+
+\bibitem[{Witek et~al.(2011)Witek, Teixeira, and Matheou}]{witek11}
+Witek, M.~L., J.~Teixeira, and G.~Matheou, 2011: An integrated {TKE}-based eddy
+  diffusivity/mass flux boundary layer closure for the dry convective boundary
+  layer. \textit{J. Atmos. Sci.}, \textbf{68}, 1526--1540.
+
+\end{thebibliography}
