@@ -38,15 +38,6 @@ write(*,*) 'Working on timestep ', nstep
 ! ======================================= 
  call zero_stuff()
 
-
-! ======================================= 
-! compute tendencies from subsidence 
-! (subsidence vel has to be available on faces)
-! ======================================= 
- if (dosubsidence) then
-   call subsidence()
- end if
-
 ! ======================================= 
 ! compute tendencies from large scale forcing
 ! coriolis and dqtdt, dthetadt
@@ -64,12 +55,13 @@ write(*,*) 'Working on timestep ', nstep
 ! ======================================= 
   ! get PBL height
 ! ======================================= 
+  ! needs thetav as input
   if (dopblh) call get_pblh() 
 
 ! ======================================= 
   ! call edmf 
 ! ======================================= 
-  ! needs pblh and surface fluxes as input
+  ! needs pblh, surface fluxes, and thetar (density pot temp) as input
   if (dosgs.and.doedmf) then
       call edmf()
   end if
@@ -81,12 +73,18 @@ write(*,*) 'Working on timestep ', nstep
   if (dosgs) call get_eddyvisc()
 
 ! ======================================= 
+! compute tendencies from subsidence 
+! ======================================= 
+ if (dosubsidence) then
+   call subsidence()
+ end if
+
+! ======================================= 
   ! get sgs/diffusion tendencies (tridiagonal solver)
 ! ======================================= 
   if (dosurface.or.dosgs) then
        call sgs_tendencies()
   end if
-
 
 ! ======================================= 
   ! call radiative transfer scheme
@@ -106,7 +104,7 @@ write(*,*) 'Working on timestep ', nstep
 ! iterative solve also provides tabs, theta, thetav, etc.
 ! ======================================= 
   if (dosgscloud) then
-    call sgscloud()
+    call sgscloudmf()
   end if
 
 ! ======================================= 

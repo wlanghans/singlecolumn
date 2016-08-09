@@ -95,16 +95,26 @@ if (k.eq.1.or.tke(k).eq.0.0) then
 
 else
 
-! get plume moist static energy
- hlip = 0.5*(cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k) +&
-            cp*tabs_mf(k+1) + ggr*zi(k+1) - lcond * qcsgs_mf(k+1) - lsub * qisgs_mf(k+1))
 ! interpolate plume area fraction to mass level
  frac_mf2 = 0.5*(frac_mf(k)+frac_mf(k+1))
+if (frac_mf2.gt.0.0)  then
+  if (frac_mf(k+1).gt.0.0) then
+    ! get plume moist static energy
+    hlip = 0.5*(cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k) +&
+            cp*tabs_mf(k+1) + ggr*zi(k+1) - lcond * qcsgs_mf(k+1) - lsub * qisgs_mf(k+1))
+    ! total water in environment
+    qte = (qt(k) - frac_mf2*0.5*(qtsgs_mf(k)+qtsgs_mf(k+1)))/(1.-frac_mf2)
+  else
+    ! get plume moist static energy
+    hlip = cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k)
+    ! total water in environment
+    qte = (qt(k) - frac_mf2*qtsgs_mf(k))/(1.-frac_mf2)
+  end if
+end if
+   
 
 ! moist static energy in environment 
  hlie   = ((t(k)+lcond*qpl(k)+lsub*qpi(k)-frac_mf2*hlip))/(1.-frac_mf2)
-! total water in environment
- qte = (qt(k) - frac_mf2*0.5*(qtsgs_mf(k)+qtsgs_mf(k+1)))/(1.-frac_mf2)
 ! first guess for tabs in environment outside of plumes: assume no condensate in environment
  tabse  = (hlie - ggr*z(k))/cp
 ! thetali in environment: assume no condensate present

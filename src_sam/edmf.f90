@@ -152,8 +152,6 @@ implicit none
        UPM(1,1) = 0.0
        UPU(1,1)=u(1)
        UPV(1,1)=v(1)
-       UPQCL(1,1)=0.0
-       UPQCI(1,1)=0.0
        ! beta=0.3
        ! note that tke here is fully explicit only (at step n) if dosequential=.false., otherwise
        ! the tendency from buoyancy production, shear production, and dissipation have been added.
@@ -161,9 +159,11 @@ implicit none
        UPQT(1,1)=qt(1)+beta*wqt/(sqrt(0.2)*wstar) !(sqrt(tke(1)) + 0.001 )
        UPTHV(1,1)=thetav(1)+beta*wthv/ (sqrt(0.2)*wstar) !(sqrt(tke(1)) + 0.001 )
        UPTABS(1,1)=UPTHV(1,1)/(1.+epsv*UPQT(1,1)) * (pres(1)/p00)**(rgas/cp) 
-       UPT(1,1)= cp * UPTABS(1,1) + ggr * z(1)     
+       UPQCL(1,1)=qcl(1)
+       UPQCI(1,1)=qci(1)
+       UPT(1,1)= cp * UPTABS(1,1) + ggr * z(1) - lcond*(qcl(1)) - lsub*(qci(1))    
        UPCF(1,1) = 0.0
-       UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*UPQT(1,1)) - thetav(1)/(1.+epsv*qt(1))
+       UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*(UPQT(1,1)-UPQCL(1,1)-UPQCI(1,1))) - thetav(1)/(1.+epsv*qv(1))
 
     else
       ! following Cheinet
@@ -182,16 +182,16 @@ implicit none
          UPU(1,I)=u(1)
          UPV(1,I)=v(1)
 
-         UPQCL(1,I)=0.0
-         UPQCI(1,I)=0.0
          ! specific humidity needed (will be convert back in the end)
          UPQT(1,I)=qt(1)+0.32*UPW(1,I)*sigmaQT/sigmaW
          ! according to cheinet the 0.58 is for thetav, hence thetav is initialized (instead of theta)
          UPTHV(1,I)=thetav(1)+0.58*UPW(1,I)*sigmaTHV/sigmaW
          UPTABS(1,1)=UPTHV(1,1)/(1.+epsv*UPQT(1,1)) * (pres(1)/p00)**(rgas/cp) 
-         UPT(1,1)= cp * UPTABS(1,1) + ggr * z(1)     
+         UPQCL(1,1)=qcl(1)
+         UPQCI(1,1)=qci(1)
+         UPT(1,1)= cp * UPTABS(1,1) + ggr * z(1) - lcond*(qcl(1)) - lsub*(qci(1))    
          UPCF(1,1) = 0.0
-         UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*UPQT(1,1)) - thetav(1)/(1.+epsv*qt(1))
+         UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*(UPQT(1,1)-UPQCL(1,1)-UPQCI(1,1))) - thetav(1)/(1.+epsv*qv(1))
       ENDDO
 
     end if
@@ -235,14 +235,6 @@ implicit none
             UPM(k,i) = UPM(k-1,i) * EntExp
           end if
 
-
-          ! Bi-normal jpdf scheme for condensation
-          !  qtflux = 
-          !  call sgscloud(qtflux,thetalflux,varqt,varthetal,covarqtthetal,UPTHL(k-1,i),UPQT(k-1,i),presi(k-1),    & ! input
-          !               cfrac,QCn(),thetavflux)                                                  ! output
-          !  THVn=(THLn+frac_cond*QCn)*(1.+epsv*(QTn-QCn))
-! 
-!          else
 
           ! all-or-nothing condensation scheme
             call condensation_edmf(QTn,Tn,presi(k),zi(k),THVn,QCLn,QCIn)
@@ -316,7 +308,7 @@ implicit none
     DO k=2,nzm
       DO i=1,nup
         sumM(k)      =sumM(k)      +UPA(K,I)*UPW(K,I)
-        sumMt(k)=sumMt(k)+UPA(K,i)*UPT(K,I)*UPW(K,I)
+        sumMt(k)     =sumMt(k)     +UPA(K,i)*(UPT(K,I)-lcond*qpl(k)-lsub*qpi(k))*UPW(K,I)
         sumMrt(k)    =sumMrt(k)    +UPA(K,i)*UPQT(K,I)*UPW(K,I) 
         !sumMu(k)  =sumMu(k)+UPA(K,i)*UPW(K,I)*UPU(K,I)
         !sumMv(k)  =sumMv(k)+UPA(K,i)*UPW(K,I)*UPV(K,I)
@@ -327,7 +319,7 @@ implicit none
         frac_mf(k)  = frac_mf(k)  + UPA(K,i)
         if (UPQCL(k,i)+UPQCI(k,i).gt.0.0) cfrac_mf(k) = cfrac_mf(k) + UPA(K,i)
       ENDDO
-      if (cfrac_mf(k).gt.0.) then
+      if (frac_mf(k).gt.0.) then
          qcsgs_mf(k) = qcsgs_mf(k) / frac_mf(k)
          qisgs_mf(k) = qisgs_mf(k) / frac_mf(k)
          qtsgs_mf(k) = qtsgs_mf(k) / frac_mf(k)
@@ -389,7 +381,7 @@ if (abs(QN-QNOLD)<Diff) exit
 !print*, '+++++++++++++++++++++++++'
 enddo
 
-T = (HLI - ggr * zlev+lcond*QC+lfus*QI)/cp
+T = (HLI - ggr * zlev+lcond*(QC)+lsub*(QI))/cp
 if (T.ge.tbgmax) then
   QS=qsatw(T,P)
 elseif (T.le.tbgmin) then
@@ -402,7 +394,7 @@ QN=max(QT-QS,0.)
 QC= om * QN
 QI= (1.-om) * QN
 
-THV = (HLI - ggr * zlev+lcond*QC+lfus*QI)/cp * (p00/P)**(rgas/cp) * (1.+epsv*(QT-QN)-QN)
+THV = (HLI - ggr * zlev+lcond*(QC)+lsub*(QI))/cp * (p00/P)**(rgas/cp) * (1.+epsv*(QT-QN)-QN)
 
 end subroutine condensation_edmf
 
