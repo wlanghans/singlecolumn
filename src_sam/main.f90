@@ -104,7 +104,8 @@ write(*,*) 'Working on timestep ', nstep
 ! iterative solve also provides tabs, theta, thetav, etc.
 ! ======================================= 
   if (dosgscloud) then
-    call sgscloudmf()
+    call sgscloudmf(.false.)  ! if false, then the domain mean qt and t are used to get cfrac, qcl, ...
+                              ! if true, then the environmental qt and t are used to get cfrac, qcl, ...
   end if
 
 ! ======================================= 

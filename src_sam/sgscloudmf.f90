@@ -1,5 +1,5 @@
 
-subroutine sgscloudmf()
+subroutine sgscloudmf(lenv)
 
 
 !output:
@@ -47,7 +47,10 @@ use params
 use grid
 use micro_params
 
+
 implicit none
+
+logical, intent(in) :: lenv
 
 !local variables
 integer k, kb, kc
@@ -67,6 +70,7 @@ fac1 = fac_cond+(1+bp)*fac_fus
 fac2 = fac_fus*ap
 ag = 1./(tgrmax-tgrmin) 
 
+hlip=0.
 
 do k=1,nzm
 
@@ -97,7 +101,7 @@ else
 
 ! interpolate plume area fraction to mass level
  frac_mf2 = 0.5*(frac_mf(k)+frac_mf(k+1))
-if (frac_mf2.gt.0.0)  then
+if (frac_mf2.gt.0.0.and.lenv)  then
   if (frac_mf(k+1).gt.0.0) then
     ! get plume moist static energy
     hlip = 0.5*(cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k) +&
@@ -110,11 +114,13 @@ if (frac_mf2.gt.0.0)  then
     ! total water in environment
     qte = (qt(k) - frac_mf2*qtsgs_mf(k))/(1.-frac_mf2)
   end if
+  hlie   = ((t(k)+lcond*qpl(k)+lsub*qpi(k)-frac_mf2*hlip))/(1.-frac_mf2)
+else
+  qte = qt(k)
+  hlie   = t(k)+lcond*qpl(k)+lsub*qpi(k)
 end if
    
 
-! moist static energy in environment 
- hlie   = ((t(k)+lcond*qpl(k)+lsub*qpi(k)-frac_mf2*hlip))/(1.-frac_mf2)
 ! first guess for tabs in environment outside of plumes: assume no condensate in environment
  tabse  = (hlie - ggr*z(k))/cp
 ! thetali in environment: assume no condensate present
