@@ -59,6 +59,8 @@ cfrac_pdf   = 0.0
 q1          = 0.0
 qtgrad      = 0.0
 thetaligrad = 0.0
+cthl        = 0.
+cqt         = 0.
 
 Cm          = 0.0
 Ctheta      = 0.0

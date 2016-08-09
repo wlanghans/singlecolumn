@@ -86,6 +86,7 @@ implicit none
  qisgs_mf=0.
  qtsgs_mf=0.
  cfrac_mf=0.
+ frac_mf=0.
 
 
  
@@ -323,13 +324,14 @@ implicit none
         qisgs_mf(k) = qisgs_mf(k) + UPA(K,i)*UPQCI(k,i)
         qtsgs_mf(k) = qtsgs_mf(k) + UPA(K,i)*UPQT (k,i)
         tabs_mf(k)  = tabs_mf(k)  + UPA(K,I)*UPTABS(k,i)
+        frac_mf(k)  = frac_mf(k)  + UPA(K,i)
         if (UPQCL(k,i)+UPQCI(k,i).gt.0.0) cfrac_mf(k) = cfrac_mf(k) + UPA(K,i)
       ENDDO
       if (cfrac_mf(k).gt.0.) then
-         qcsgs_mf(k) = qcsgs_mf(k) / cfrac_mf(k)
-         qisgs_mf(k) = qisgs_mf(k) / cfrac_mf(k)
-         qtsgs_mf(k) = qtsgs_mf(k) / cfrac_mf(k)
-         tabs_mf(k)  = tabs_mf(k)  / cfrac_mf(k)
+         qcsgs_mf(k) = qcsgs_mf(k) / frac_mf(k)
+         qisgs_mf(k) = qisgs_mf(k) / frac_mf(k)
+         qtsgs_mf(k) = qtsgs_mf(k) / frac_mf(k)
+         tabs_mf(k)  = tabs_mf(k)  / frac_mf(k)
       end if
     ENDDO
     

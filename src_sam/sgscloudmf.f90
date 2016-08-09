@@ -1,30 +1,46 @@
 
 subroutine sgscloudmf()
 
-!input:
-! t      ... liquid/frozen moist static energy
-! presin ... pressure
-! qt     ... total non-precipitating water
-! qp     ... total precipitating water
-! tke    ... turbulent kinetic energy
 
 !output:
-! cfrac_pdf ... cloud fraction from PDF scheme
-! qn        ... total non-precip cloud condensate
-! qcl       ... liquid cloud condensate
-! qci       ... frozen cloud condensate
-! tabs      ... absolute temperature
-! theta     ... potential temperature
-! thetav    ... virtual potential temperature
-! thetar    ... density potential temperature
+! cfrac_tot ... sum of stratiform cover in non-convective region
+!               and convective cloud cover
+! qn        ... domain mean non-precip cloud condensate
+! qv        ... domain mean watervapor
+! qcl       ... domain mean liquid condensate
+! qci       ... domain mean frozen condensate
+! tabs      ... domain mean absolute temperature
+! theta     ... domain mean potential temperature
+! thetav    ... domain mean virtual potential temperature
+! thetar    ... domain mean density potential temperature (no precip considered since 
+!               precip is grid-scale thus no effect on plume buoyancy)
+! c0,c1     ... coefficients needed for buoyancy flux
+
+!input:   ... mean total water and mean moist static energy
+!         ... plume total water and mse
+!         ... grid-scale precip
+!         ... plume condensate (ice and liquid)
+!         ... plume area fraction
 
 
-! following Bechtold 1992,1995 and Sommerica and Deardorff (1977)
 ! strategy:
 ! iterate over the following steps
-! 1) get vertical gradients of hli and qt (extended here to include ice)
-! 2) get variance of saturation deficit, sigmas, wherever tke.ne.0
-! 3) iterate to get cloud condensate and tabs, etc. from PDF scheme
+! 1) compute environmental mse and qt from the domain-mean and in-cloud plume values
+! 2) get first guess for tabs in environment assuming no condensate in environment (only in condensed plumes)
+
+! 3) get environmental thetali from temperature and condensate (which is zero in this first step only)
+! 4) get vertical gradients of thetali and qt by using difference to level below
+! 5) get variance of saturation deficit, sigmas, needed for PDF scheme
+!    following Bechtold 1992,1995 and Sommerica and Deardorff (1977), extended here to include ice
+! 6) get environmental cloud condensate, split into liquid and ice based on temperature
+! 7) get new environmental temperature based on environemtnal mse and environmental condensate
+
+
+! iterate steps 3-7
+
+! 8) get domain-mean qcl and qci as area-weighted sum of plume and environmental qc and qi
+! 9) get domain-mean water vapor content qv=qt-qn
+! 10) get domain mean tabs, theta, thetav, thetar
 
 use vars
 use params
@@ -38,9 +54,9 @@ integer k, kb, kc
 real dtabs, an, bn, ap, bp, om, ag, omp, omn
 real fac1,fac2
 real fff,dfff,dqsat
-real lstarn,dlstarn,lstarp,dlstarp, dtabsa, hlip, hlie, cfrac_mf2, qce, qie, qte, qtel, qne, tabse, qltot,qitot
+real lstarn,dlstarn,lstarp,dlstarp, dtabsa, hlip, hlie, frac_mf2, qce, qie, qte, qtel, qne, tabse
 integer niter
-real :: lambdaf, alphaf, betaf, qsl, totheta, tl, sigmas
+real :: lambdaf, alphaf, qsl, totheta, tl, sigmas, qsw, qsi
 real,dimension (2) :: tabs1, tabs2
 
 an = 1./(tbgmax-tbgmin) 
@@ -60,7 +76,7 @@ if (k.eq.1.or.tke(k).eq.0.0) then
 
 ! no PDF scheme needed if no variability (or if in first layer)
 ! if condensate is present, then it comes from all-or-nothing adjustment
-! and will not modified here
+! and will not be modified here
  tabs(k)=(t(k)-ggr*z(k))/cp + fac_cond*(qcl(k)+qpl(k)) + fac_fus*(qci(k)+qpi(k)) 
  thetali(k) = (tabs(k)- fac_cond*(qcl(k)) - fac_fus*(qci(k)) ) / totheta 
  thetav(k)  = tabs(k)/totheta * (1.+epsv*qv(k)) 
@@ -74,21 +90,25 @@ if (k.eq.1.or.tke(k).eq.0.0) then
    cfrac_tot(k) = 0.0
  end if
 
+ cthl(k) = 1.+epsv*qt(k)
+ cqt(k) =  epsv*thetali(k)
+
 else
 
 ! get plume moist static energy
  hlip = 0.5*(cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k) +&
             cp*tabs_mf(k+1) + ggr*zi(k+1) - lcond * qcsgs_mf(k+1) - lsub * qisgs_mf(k+1))
- cfrac_mf2 = 0.5*(cfrac_mf(k)+cfrac_mf(k+1))
+! interpolate plume area fraction to mass level
+ frac_mf2 = 0.5*(frac_mf(k)+frac_mf(k+1))
 
 ! moist static energy in environment 
- hlie   = ((t(k)+lcond*qpl(k)+lsub*qpi(k)-cfrac_mf2*hlip))/(1.-cfrac_mf2)
+ hlie   = ((t(k)+lcond*qpl(k)+lsub*qpi(k)-frac_mf2*hlip))/(1.-frac_mf2)
 ! total water in environment
- qte = (qt(k) - cfrac_mf2*0.5*(qtsgs_mf(k)+qtsgs_mf(k+1)))/(1.-cfrac_mf2)
-! first guess for tabs in environment outside of plumes: no condensate in environment
+ qte = (qt(k) - frac_mf2*0.5*(qtsgs_mf(k)+qtsgs_mf(k+1)))/(1.-frac_mf2)
+! first guess for tabs in environment outside of plumes: assume no condensate in environment
  tabse  = (hlie - ggr*z(k))/cp
-! thetali in environment
- thetali(k) = tabs(k) / totheta 
+! thetali in environment: assume no condensate present
+ thetali(k) = tabse / totheta 
  
  niter=0
  dtabs = 100.
@@ -108,22 +128,31 @@ else
     ! get liquid water temperature Tl
     tl     = totheta * thetali(k)
     ! get saturation mixing ratio at Tl
-    qsl=qsatw(tl,pres(k))
-    betaf = fac_cond*lcond/(tl**2*rv)
-    lambdaf =  (1. + betaf*qsl )**(-1.)                                                       ! Bechtold Eq (14)
-    alphaf = qsl * totheta * lcond/(tl**2*rv)
+    omn = max(0.,min(1.,(tl-tbgmin)*an))
+    qsw=qsatw(tl,pres(k))
+    qsi=qsati(tl,pres(k))
+    ! get dqsdT
+    alphaf = (omn * qsw * lcond/(tl**2*rv) + (1.-omn) * qsi * lsub/(tl**2*rv))
+    lambdaf = (1. + alphaf * (omn*fac_cond + (1.-omn) * fac_sub) )**(-1.)
+    alphaf =alphaf * totheta
     ! use constant length scale of 250 m
     sigmas = 250.*(max(0.0,qtgrad(k)**2. + alphaf**2*thetaligrad(k)**2. - 2. * alphaf * thetaligrad(k)*qtgrad(k)))**(0.5)
+    sigmas = max(sigmas,1.d-10)
 
-    ! compute normalized saturation deficit
-    q1(k)= min(10.,max(-10.,1000.*(qte-qsl)/(1000.*sigmas+1.e-7)))
+    ! compute saturation deficit
+    q1(k)= qte-qsl
 
     ! get cloud fraction and mean liquid water content
-    cfrac_pdf(k) = min(1.0,max(0.,0.5 * (1. + erf(q1(k)/1.41))))                           ! Bechtold Eq (20)
-    qne = max(0.0,sigmas * lambdaf  * (cfrac_pdf(k) * q1(k) + exp(-q1(k)**2/2.)/2.51 ))  ! Bechtold Eq (21)
+    cfrac_pdf(k) = 0.5 * (1. + erf(   max(-4.,min(4.,q1(k)/(sigmas*1.41)))    ))                           ! Bechtold Eq (20)
+    cthl(k) = cfrac_pdf(k) * (1. - (fac_cond/totheta - (1.+epsv) * tabse/totheta)*lambdaf * alphaf) & ! see bechtold 95 (a,b,alpha,beta)
+         + (1.-cfrac_pdf(k)) * (1.+epsv*qte)
+    cqt(k) =  cfrac_pdf(k) * (epsv*tabse/totheta + (fac_cond/totheta + (1.+epsv) * tabse/totheta) * lambdaf) &
+         + (1.-cfrac_pdf(k)) * epsv*thetali(k)
+
+    qne = max(0.0,lambdaf  * (cfrac_pdf(k) * q1(k) + sigmas*exp(-(q1(k)/sigmas)**2/2.)/2.51 ))  ! Bechtold Eq (21)
  
     ! partition condensate into liquid and ice using temperature
-    omn = max(0.,min(1.,(tabs(k)-tbgmin)*an))
+    omn = max(0.,min(1.,(tabse-tbgmin)*an))
     qce = qne*omn
     qie = qne*(1.-omn)
 
@@ -133,15 +162,17 @@ else
 
     end do ! end of iteration
 
-    qltot = (1.-cfrac_mf2) * qce + 0.5 * cfrac_mf2 * (qcsgs_mf(k)+qcsgs_mf(k+1))
-    qitot = (1.-cfrac_mf2) * qie + 0.5 * cfrac_mf2 * (qisgs_mf(k)+qisgs_mf(k+1))
-    cfrac_tot(k) = cfrac_mf2 + (1.-cfrac_mf2) * cfrac_pdf(k)
-    qn(k) = qltot + qitot
+    ! get final domain averages
+    qcl(k) = (1.-frac_mf2) * qce + 0.5 * frac_mf2 * (qcsgs_mf(k)+qcsgs_mf(k+1))
+    qci(k) = (1.-frac_mf2) * qie + 0.5 * frac_mf2 * (qisgs_mf(k)+qisgs_mf(k+1))
+    cfrac_tot(k) = min(frac_mf2,0.5*(cfrac_mf(k+1)+cfrac_mf(k))) + (1.-frac_mf2) * cfrac_pdf(k)
+    qn(k) = qcl(k) + qci(k)
     qv(k) = qt(k) - qn(k)
     
-    tabs(k) = (t(k)-ggr*z(k))/cp + fac_cond*(qpl(k)+qltot) + fac_sub*(qpi(k)+qitot) 
-    thetav(k) = tabs(k)/totheta  * (1.+epsv*qv(k))
-    thetar(k) = tabs(k)/totheta  * (1.+epsv*qv(k)-qn(k))
+    tabs(k)  = (t(k)-ggr*z(k))/cp + fac_cond*(qpl(k)+qcl(k)) + fac_sub*(qpi(k)+qci(k)) 
+    theta(k)  = tabs(k)/totheta  
+    thetav(k) = theta(k)  * (1.+epsv*qv(k))
+    thetar(k) = theta(k)  * (1.+epsv*qv(k)-qn(k))
 
 end if ! if tke is present
 
@@ -149,26 +180,6 @@ end if ! if tke is present
 qtel=qte 
 
 end do ! loop over k
-
-
-!do k=1,nzm
-
-! get buoyancy flux 
-  ! get liquid water temperature Tl
-!  tl     = totheta * thetali(k)
-  ! get saturation mixing ratio at Tl
-!  qsl=qsatw(tl,pres(k))
-  ! unsaturated limit
-!  bflx_cf = (1.+epsv*qt)*thetalflux + 0.61*thetali(k)*qtflux       ! Bechtold Eq (11) and Sommeria&Deardorff Eq(35)
-  ! saturated limit
-!  c0 = 1. + epsv * qsl - alphaf*lambdaf*thetal*(fac_cond/tl*(1.+0.61*qsl)-1.61)  ! Sommeria&Deardorff Eq(37)
-!  bflx_c  = c0 * thetalflux + (c0*fac_cond/tl  -  1.) *thetal*qtflux       ! Sommeria&Deardorff Eq(40)
-
-  ! linear combination
-!  thetavflux = (1.-cfrac) * bflx_cf + cfrac * bflx_c
-
-!end do
-
 
 end subroutine sgscloudmf
 

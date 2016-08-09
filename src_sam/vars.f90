@@ -26,7 +26,7 @@ real, target :: pblh, wstar, Cm, Crv, Ctheta
 real, allocatable,dimension(:), target :: sumM, sumMu, sumMv, sumMtke, sumMt, sumMrt, sumMrp, buoy_sgs, smix
 real,allocatable,dimension(:), target :: sgs_t_flux, sgs_qt_flux, sgs_thv_flux, taux, tauy, sgs_tke_flux
 real,allocatable,dimension(:), target :: qcsgs_pdf, qcsgs_mf, tabs_mf, qisgs_pdf, qisgs_mf, qtsgs_mf, &
-                                            cfrac_mf, cfrac_pdf, cfrac_tot, tke_thvflx
+                                            cfrac_mf, frac_mf, cfrac_pdf, cfrac_tot, tke_thvflx, cthl, cqt
 real,allocatable,dimension(:), target :: q1, qtgrad, thetaligrad, radlwup
 
 real, parameter :: t00 = 300.   ! constant offset for sstxy 
