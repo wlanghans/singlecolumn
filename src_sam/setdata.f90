@@ -421,7 +421,7 @@ qn=qcl + qci
 qt=qv + qn
 qp=qpl+qpi
 thetali = theta -(p00/pres)**(rgas/cp) * (fac_cond *qcl+fac_sub*qci) 
-thetar=thetav - theta*(qn+qp)
+thetar=thetav - theta*qn
 
 pblh = zi(2)
 buoy_sgs=0.0

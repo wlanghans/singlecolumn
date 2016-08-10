@@ -55,6 +55,7 @@ radlwup     = 0.0
 qcsgs_pdf   = 0.0
 qcsgs_mf    = 0.0
 cfrac_mf    = 0.0
+frac_mf     = 0.0
 cfrac_pdf   = 0.0
 q1          = 0.0
 qtgrad      = 0.0

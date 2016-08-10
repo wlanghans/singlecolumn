@@ -19,11 +19,14 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
                      doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh
 
-open(8,file='./CaseName',status='old',form='formatted')
+call getarg(1,path)
+path =trim(adjustl(path))
+
+open(8,file='./'//path//'CaseName',status='old',form='formatted')
 read(8,'(a)') case
 close (8)
 
-open(55,file='./'//trim(case)//'/prm', status='old',form='formatted')
+open(55,file='./'//path//'/prm', status='old',form='formatted')
 read (55,PARAMETERS,IOSTAT=ierr)
 if (ierr.ne.0) then
      !namelist error checking
@@ -32,7 +35,6 @@ if (ierr.ne.0) then
 end if
 close(55)
 
-path='./'//trim(case)//'/'
 
 if (.not.doradsimple) then
   write(*,*) 'Setting doradsimple=.true.'
@@ -199,7 +201,7 @@ nz = nzm  + 1
 
 
 ! write namelist values out to file for documentation
-      open(unit=55,file='./'//trim(case)//'/'//trim(case)//'.nml',&
+      open(unit=55,file='./'//path//'/'//trim(case)//'.nml',&
             form='formatted', action='write')
       write (55,nml=PARAMETERS)
       write(55,*)

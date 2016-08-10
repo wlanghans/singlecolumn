@@ -12,7 +12,7 @@ real grd,betdz,Ck,Ce,Ces,Ce1,Ce2,Pr,Cee,Cs
 real ratio,a_prod_sh,a_prod_bu,a_diss
 real lstarn, lstarp, bbb, omn, omp, tketau
 real qsatt,dqsat, dtkedtsum, dtkedtmin, l23
-real :: thetalt, thetalk, thetall, qtt, qtk, qtl, covarqtthetal, varqt, varthetal, thetalflux, qtflux
+real :: thetalt, thetalk, thetall, qtt, qtk, qtl, covarqtthetal, varqt, varthetal, wthl, wqt
 integer i,j,k,kc,kb
 
 ! call t_startf('tke_full')
@@ -157,10 +157,19 @@ do k=1,nzm
      !  tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr
      !end if
 
+
      ! get Km 
      tk(k) = Ck*smix(k)*sqrt(tke(k))
+
+     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
+     wthl = -Pr * tk(k) * ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb)) 
+     ! get buoyancy flux from PDF scheme
+     tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
+
      a_prod_sh=(tk(k)+0.001)*def2(k)
-     a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
+     a_prod_bu=ggr/thetar(k) * tke_thvflx(k)
      a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
      dtkedtmin = -tke(k)/dt

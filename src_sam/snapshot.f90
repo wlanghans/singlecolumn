@@ -326,13 +326,41 @@ module snapshot
                   ! Short name
                                            'qcl', &
                   ! Long name
-                                           'Non-precip cloud liquid iass faction', &
+                                           'Non-precip cloud liquid mass faction', &
                   ! Units
                                            'kg/kg', &
                   ! Dimensions
                                            (/ zID, timeID /) &
                )
                ncsnap%field(field_count)%data1 => qcl(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'qpi') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qpi', &
+                  ! Long name
+                                           'Precip cloud ice mixing ratio', &
+                  ! Units
+                                           'kg/kg', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qpi(1:nzm)
+            end if
+         
+            if (trim(field_name) .eq. 'qpl') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qpl', &
+                  ! Long name
+                                           'Precip cloud liquid mass faction', &
+                  ! Units
+                                           'kg/kg', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qpl(1:nzm)
             end if
          
             if (trim(field_name) .eq. 'lmix') then
@@ -561,6 +589,19 @@ module snapshot
                ncsnap%field(field_count)%data1 => q1(1:nzm)
             end if
 
+            if (trim(field_name) .eq. 'wthv') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'wthv', &
+                  ! Long name
+                                           'buoyancy flux', &
+                  ! Units
+                                           'K m/s', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => tke_thvflx(1:nzm)
+            end if
             if (trim(field_name) .eq. 'thetaligrad') then
                call fill_fields_snapshot( &
                   ! Short name
