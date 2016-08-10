@@ -38,6 +38,11 @@ write(*,*) 'Working on timestep ', nstep
 ! ======================================= 
  call zero_stuff()
 
+! ======================================= 
+! compute tendencies from large scale forcing
+! coriolis and dqtdt, dthetadt
+! ======================================= 
+   call forcing()
 
 ! ======================================= 
 ! get drag/transfer coefficients, explicit fluxes, surface values, and wind speed on 1st model level
@@ -88,12 +93,6 @@ write(*,*) 'Working on timestep ', nstep
   if(dolongwave.or.doshortwave) then
      call radiation()
   end if
-
-! ======================================= 
-! compute tendencies from large scale forcing
-! coriolis and dqtdt, dthetadt
-! ======================================= 
-   call forcing()
 
 ! ======================================= 
   ! apply tendencies to prog. variables
