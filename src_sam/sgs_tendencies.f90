@@ -89,8 +89,7 @@ sgs_t_flux (2:nzm)       = 1. * ( &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) ) &
         + sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm))
 
-! TO DO
-! eventually recompute buoyancy flux here from MF and PDF part
+sgs_thv_flux(2:nzm) = 0.5*(tke_thvflx(1:nzm-1) + tke_thvflx(2:nzm))
 
 tend_sgs_t = (d - t)/dt
 

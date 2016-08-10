@@ -40,7 +40,7 @@ module snapshot
          if (.not.snapshot_do) return
          
          ncsnap%title = 'Snapshot fields'
-         ncsnap%file_path ='./'//trim(case)//'/'//trim(case)//'_snapshot.nc' 
+         ncsnap%file_path ='./'//trim(path)//'/'//trim(case)//'_snapshot.nc' 
    
          allocate( ncsnap%dimNames  (4), &
                    ncsnap%dimUnits  (4), &
@@ -176,6 +176,20 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => thetav(1:nzm)
             end if
+
+            if (trim(field_name) .eq. 'thr') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'thr', &
+                  ! Long name
+                                           'Density Potential temperature', &
+                  ! Units
+                                           'K', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => thetar(1:nzm)
+            end if
          
             if (trim(field_name) .eq. 'th') then
                call fill_fields_snapshot( &
@@ -218,6 +232,20 @@ module snapshot
                                            (/zID, timeID /) &
                )
                ncsnap%field(field_count)%data1 => tabs(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'hli') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'hli', &
+                  ! Long name
+                                           'Frozen/liquid moist static energy', &
+                  ! Units
+                                           'J/kg', &
+                  ! Dimensions
+                                           (/zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => t(1:nzm)
             end if
 
             if (trim(field_name) .eq. 'qcsgs_mf') then
@@ -321,6 +349,34 @@ module snapshot
                ncsnap%field(field_count)%data1 => qci(1:nzm)
             end if
          
+            if (trim(field_name) .eq. 'qt') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qt', &
+                  ! Long name
+                                           'Total water mixing ratio', &
+                  ! Units
+                                           'kg/kg', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qt(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'qn') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qn', &
+                  ! Long name
+                                           'Non-precip condensate mixing ratio', &
+                  ! Units
+                                           'kg/kg', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qn(1:nzm)
+            end if
+
             if (trim(field_name) .eq. 'qcl') then
                call fill_fields_snapshot( &
                   ! Short name
@@ -675,9 +731,9 @@ module snapshot
             if (trim(field_name) .eq. 'qtflx') then
                call fill_fields_snapshot( &
                   ! Short name
-                                           'waterflux', &
+                                           'qtflx', &
                   ! Long name
-                                           'Water mass flux', &
+                                           'Total water mass flux', &
                   ! Units
                                            'm/s', &
                   ! Dimensions
@@ -692,7 +748,7 @@ module snapshot
                   ! Short name
                                            'hliflux', &
                   ! Long name
-                                           'Moist static energy flux flux', &
+                                           'Frozen/liquid moist static energy flux flux', &
                   ! Units
                                            'J/kg m/s', &
                   ! Dimensions
@@ -744,12 +800,12 @@ module snapshot
                ncsnap%field(field_count)%data1 => sgs_tke_flux (1:nz)
             end if
 
-            if (trim(field_name) .eq. 'virtheatflx') then
+            if (trim(field_name) .eq. 'buoyancyflx') then
                call fill_fields_snapshot( &
                   ! Short name
-                                           'virtheatflux', &
+                                           'buoyancyflx', &
                   ! Long name
-                                           'Virtual heat flux', &
+                                           'Buoyancy flux', &
                   ! Units
                                            'K m/s', &
                   ! Dimensions

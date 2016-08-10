@@ -94,7 +94,7 @@ integer:: snapshot_start = 0
 integer:: snapshot_period =1
 integer:: snapshot_end = 1000
 logical:: snapshot_as_double = .false.
-character(800) :: snapshot_fields = 'hil,u,v,th,thv,tabs,tke,rho,qt,qv,qcl,qci,vaporflx,heatflx,virtheatflx,cthetav,crv,ctheta,cm'
+character(800) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,qpl,qpi,qtflx,tflx,buoyancyflx,crv,ctheta,cm'
 
 
 end module params

@@ -9,16 +9,18 @@ implicit none
 allocate(z(nzm),adz(nzm),zi(nz),adzw(nz))
 
 allocate(t(nzm),qt(nzm),qp(nzm),u(nzm),v(nzm),tke(nzm))
+allocate(t0(nzm),qt0(nzm),qp0(nzm),u0(nzm),v0(nzm),tke0(nzm))
+
 allocate(theta(nzm), thetav(nzm), thetar(nzm), thetali(nzm), pres(nzm), tabs(nzm), tabs0(nzm), &
                     qv(nzm), qcl(nzm), qpl(nzm), qci(nzm), qpi(nzm), qn(nzm), &
-                    tkh(nzm), tk(nzm), def2(nzm),  &
+                    tkh(nzm), tk(nzm), def2(nzm), rho(nzm),  &
                     rho_i(2:nzm), w(nz), ug(nzm), vg(nzm),dqtdt(nzm), dthetadt(nzm), presi(nz))
 
 allocate(tend_sgs_qt(nzm), tend_sgs_t(nzm),  &
      tend_sgs_u(nzm),tend_sgs_v(nzm),tend_sgs_tke(nzm), tend_sgs_qp(nzm), &
      tend_tke_buoy(nzm), tend_tke_shear(nzm), tend_tke_diss(nzm), &
-     tend_sub_t(nzm), tend_sub_u(nzm), tend_sub_v(nzm), tend_sub_tke(nzm), &
-     tend_force_qt(nzm),tend_force_u(nzm), tend_force_v(nzm), tend_force_tke(nzm), &
+     tend_sub_t(nzm), tend_sub_u(nzm), tend_sub_v(nzm), tend_sub_tke(nzm), tend_sub_qt(nzm), &
+     tend_force_qt(nzm),tend_force_u(nzm), tend_force_v(nzm), tend_force_tke(nzm),tend_sub_qp(nzm), &
      tend_force_t(nzm),tend_rad_t(nzm))
 
 
