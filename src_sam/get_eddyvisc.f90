@@ -55,7 +55,7 @@ do k=1,nzm
   end if
 
    !N**2 based on density potential temperature
-   buoy_sgs(k)=ggr/thetar(k) * (thetar(kc)-thetar(kb))/ (z(kc)-z(kb))
+   buoy_sgs(k)=ggr/thetav(k) * (thetav(kc)-thetav(kb))/ (z(kc)-z(kb))
 
    if (doteixpbl.or.dowitekpbl.or.dolanghanspbl) then 
    ! always use Teixeira's mixing length (Witek's is very similar)
@@ -192,10 +192,10 @@ do k=1,nzm
      a_prod_sh=(tk(k)+0.001)*def2(k)
      ! explicit fluxes are used here in the source term from buoyancy
      if (k.lt.nzm) then
-     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetar(k)/ggr  !+ 0.5 *&
+     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr  !+ 0.5 *&
 !       (sumMthetav(k) - thetav(k) * sumM(k) + sumMthetav(k+1) - thetav(k+1) * sumM(k+1)) 
      else
-     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetar(k)/ggr  !+ 0.5 *&
+     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr  !+ 0.5 *&
 !       (sumMthetav(k) - thetav(k) * sumM(k))
      end if
      a_prod_bu=  ggr/thetar(k) * tke_thvflx(k) 
