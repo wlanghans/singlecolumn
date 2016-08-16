@@ -631,18 +631,74 @@ module snapshot
                ncsnap%field(field_count)%data1 => def2(1:nzm)
             end if
            
+            if (trim(field_name) .eq. 'sigmas') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'sigmas', &
+                  ! Long name
+                                           'std deviation of sat deficit', &
+                  ! Units
+                                           '1', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => sigmas(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'varwrt1') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'varwrt1', &
+                  ! Long name
+                                           'additional variable for quick checks', &
+                  ! Units
+                                           'variable', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => varwrt1(1:nzm)
+            end if
+
             if (trim(field_name) .eq. 'q1') then
                call fill_fields_snapshot( &
                   ! Short name
                                            'q1', &
                   ! Long name
-                                           'normalized sat deficit', &
+                                           'saturation deficit', &
                   ! Units
                                            '1', &
                   ! Dimensions
                                            (/ zID, timeID /) &
                )
                ncsnap%field(field_count)%data1 => q1(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'cthl') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'cthl', &
+                  ! Long name
+                                           'buoyancy flux coeff. for wthl flux', &
+                  ! Units
+                                           '1', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => cthl(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'cqt') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'cqt', &
+                  ! Long name
+                                           'buoyancy flux coeff. for wqt flux', &
+                  ! Units
+                                           '1', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => cqt(1:nzm)
             end if
 
             if (trim(field_name) .eq. 'wthv') then

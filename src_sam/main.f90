@@ -20,6 +20,20 @@ call setgrid()
 !initialize variables
 call setdata()
 
+! ======================================= 
+! call PDF condensation scheme to get sgs
+! cloud cover and condensed water in stratiform part
+! iterative solve also provides tabs, theta, thetav, etc.
+! ======================================= 
+call sgscloudmf(.false.)  ! if false, then the domain mean qt and t are used to get cfrac, qcl, ...
+                          ! if true, then the environmental qt and t are used to get cfrac, qcl, ...
+
+! ======================================= 
+! recompute hydrostatic pressure, since thetav might have changed
+! input needed: presi(1),thetav 
+! ======================================= 
+call get_pressure()
+
 
 !initialize netCDF output files
 call snapshot_init()
@@ -111,8 +125,8 @@ write(*,*) 'Working on timestep ', nstep
                               ! if true, then the environmental qt and t are used to get cfrac, qcl, ...
 
 ! ======================================= 
-! get pressure from eos
-! input needed: tabs, qv, and thetav 
+! get hydrostatic pressure
+! input needed: presi(1),thetav 
 ! ======================================= 
   call get_pressure()
 

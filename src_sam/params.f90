@@ -51,6 +51,7 @@ integer :: nup = 1
 
 logical:: dosgs = .true.
 logical:: dosgscloud = .true.
+real :: lcld = 250.
 logical:: doedmf = .false.
 logical:: donoplumesat=.false.
 logical:: fixedeps=.true.
@@ -94,7 +95,9 @@ integer:: snapshot_start = 0
 integer:: snapshot_period =1
 integer:: snapshot_end = 1000
 logical:: snapshot_as_double = .false.
-character(800) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,qpl,qpi,qtflx,tflx,buoyancyflx,crv,ctheta,cm'
+character(800) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,&
+                                qpl,qpi,qtflx,tflx,buoyancyflx,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
+                                cthl,cqt,varwrt1'
 
 
 end module params

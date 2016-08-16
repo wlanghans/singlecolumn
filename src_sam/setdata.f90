@@ -350,12 +350,12 @@ do k = 1,nzm
    ! get temp
    tabs(k) = thetav(k)/(1.+epsv*qv(k))*(pres(k)/p00)**(rgas/cp)
  
-   ! get rho from gas law
-   rho(k) = pres(k)/rgas/tabs(k)/(1.+epsv*qv(k))*100.
+   ! get rho (density of dry air) from gas law
+   rho(k) = pres(k)/rgas/tabs(k)/(1.+rv/rgas*qv(k))*100.
    
    u(k)     = 0.
    v(k)     = 0.
-   tke(k)   = 0.
+   tke(k)   = 0.001
    qcl(k)   = 0.
    qpl(k)   = 0.
    qci(k)   = 0.
@@ -416,7 +416,7 @@ end if
 !++++++++++++++++++++++++++++++++++++++++++++++++++++++
 ! profiles of hli, qt, and qp are derived at the end
 !++++++++++++++++++++++++++++++++++++++++++++++++++++++
-t=cp*tabs+ggr*z - fac_cond*cp * (qcl+qpl) - fac_sub*cp * (qci+qpi)
+t=cp*tabs+ggr*z - lcond * (qcl+qpl) - lsub * (qci+qpi)
 qn=qcl + qci
 qt=qv + qn
 qp=qpl+qpi
@@ -430,6 +430,11 @@ smix=0.
 tabs0=tabs
 
 !plume properties
+frac_mf=0.
+qcsgs_mf=0.
+qisgs_mf=0.
+qtsgs_mf=0.
+tabs_mf=0.
 UPM=0. 
 UPW=0.
 UPT=0.

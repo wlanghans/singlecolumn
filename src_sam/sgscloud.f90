@@ -40,7 +40,7 @@ real fac1,fac2
 real fff,dfff,dqsat
 real lstarn,dlstarn,lstarp,dlstarp
 integer niter
-real :: lambdaf, alphaf, betaf, qsl, totheta, tl, sigmas
+real :: lambdaf, alphaf, betaf, qsl, totheta, tl
 real :: tabs1, tabs2
 
 an = 1./(tbgmax-tbgmin) 
@@ -116,14 +116,14 @@ else
     lambdaf =  (1. + betaf*qsl )**(-1.)                                                       ! Bechtold Eq (14)
     alphaf = qsl * totheta * lcond/(tl**2*rv)
     ! use constant length scale of 250 m
-    sigmas = 250.*(max(0.0,qtgrad(k)**2. + alphaf**2*thetaligrad(k)**2. - 2. * alphaf * thetaligrad(k)*qtgrad(k)))**(0.5)
+    sigmas(k) = 250.*(max(0.0,qtgrad(k)**2. + alphaf**2*thetaligrad(k)**2. - 2. * alphaf * thetaligrad(k)*qtgrad(k)))**(0.5)
 
     ! compute normalized saturation deficit
-    q1(k)= min(10.,max(-10.,1000.*(qt(k)-qsl)/(1000.*sigmas+1.e-7)))
+    q1(k)= min(10.,max(-10.,1000.*(qt(k)-qsl)/(1000.*sigmas(k)+1.e-7)))
 
     ! get cloud fraction and mean liquid water content
     cfrac_pdf(k) = min(1.0,max(0.,0.5 * (1. + erf(q1(k)/1.41))))                           ! Bechtold Eq (20)
-    qn(k) = max(0.0,sigmas * lambdaf  * (cfrac_pdf(k) * q1(k) + exp(-q1(k)**2/2.)/2.51 ))  ! Bechtold Eq (21)
+    qn(k) = max(0.0,sigmas(k) * lambdaf  * (cfrac_pdf(k) * q1(k) + exp(-q1(k)**2/2.)/2.51 ))  ! Bechtold Eq (21)
     qv(k) = qt(k) - qn(k)
  
     ! partition condensate into liquid and ice using temperature

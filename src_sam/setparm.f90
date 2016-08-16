@@ -17,7 +17,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
                      doteixpbl,dowitekpbl,dolanghanspbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
-                     doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh
+                     doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh, lcld
 
 call getarg(1,path)
 path =trim(adjustl(path))
@@ -37,7 +37,6 @@ read(8,'(a)') case
 close (8)
 
 write(*,*) 'Working on Case = ', trim(case) 
-
 
 if (.not.doradsimple) then
   write(*,*) 'Setting doradsimple=.true.'
@@ -195,7 +194,8 @@ end if
 
 if (land) ocean=.false.
 if (snapshot_fields(1:1) .eq. '+') then
-   snapshot_fields = 'u,v,th,thv,tabs,tke,rho,qv,qcl,qci,vaporflx,heatflx,virtheatflx,cthetav,crv,ctheta,cm,'&
+   snapshot_fields = 'hli,u,v,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,qpl,qpi,&
+                  qtflx,tflx,buoyancyflx,crv,ctheta,cm,q1,sigmas,cfrac_pdf,cthl,cqt,varwrt1,'&
                      //trim(snapshot_fields(2:len(snapshot_fields)))
 end if
 
@@ -204,7 +204,7 @@ nz = nzm  + 1
 
 
 ! write namelist values out to file for documentation
-      open(unit=55,file='./'//trim(path)//'/'//trim(case)//'.nml',&
+      open(unit=55,file='./'//trim(path)//'/'//trim(case)//'.prm',&
             form='formatted', action='write')
       write (55,nml=PARAMETERS)
       write(55,*)

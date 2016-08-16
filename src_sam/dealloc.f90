@@ -29,8 +29,8 @@ deallocate(sumM, sumMu, sumMv, sumMrt,sumMrp,sumMt,sumMtke, &
 deallocate(sgs_t_flux, sgs_qt_flux, sgs_thv_flux, taux, tauy, sgs_tke_flux)
 
 deallocate(qcsgs_mf, tabs_mf, qcsgs_pdf,qisgs_mf, qtsgs_mf, qisgs_pdf, cfrac_mf, frac_mf, cfrac_tot, &
-     cfrac_pdf, tke_thvflx, cthl, cqt)
-deallocate(q1,thetaligrad,qtgrad,radlwup)
+     cfrac_pdf, tke_thvflx, cthl, cqt, varwrt1)
+deallocate(q1,sigmas,thetaligrad,qtgrad,radlwup)
 
 deallocate(UPM,UPW,UPT,UPQT,UPQCL,UPQCI,&
          UPA,UPU,UPV,UPTHV,UPTABS,ENT,&

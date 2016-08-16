@@ -110,6 +110,18 @@ do k=1,nzm
      a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
      a_diss=a_prod_sh+a_prod_bu
 
+     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
+     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     if (qp(k).gt.0.0) then
+       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     end if
+       
+     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
+     ! get buoyancy flux from PDF scheme
+     tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
+
    elseif (dosmagor) then
    ! ==================================
    ! Use Smagorinski closure; TKE is diagnosic
@@ -119,6 +131,17 @@ do k=1,nzm
      a_prod_sh=(tk(k)+0.001)*def2(k)
      a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
      a_diss=a_prod_sh+a_prod_bu
+
+     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
+     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     if (qp(k).gt.0.0) then
+       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     end if
+     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
+     ! get buoyancy flux from PDF scheme
+     tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
 
    elseif (doteixpbl) then
    ! ==================================
@@ -162,8 +185,12 @@ do k=1,nzm
      tk(k) = Ck*smix(k)*sqrt(tke(k))
 
      ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
-     wthl = -Pr * tk(k) * ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
+     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
          * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     if (qp(k).gt.0.0) then
+       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     end if
      wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb)) 
      ! get buoyancy flux from PDF scheme
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
@@ -190,14 +217,18 @@ do k=1,nzm
      ! get Km 
      tk(k) = Ck*smix(k)*sqrt(tke(k))
      a_prod_sh=(tk(k)+0.001)*def2(k)
-     ! explicit fluxes are used here in the source term from buoyancy
-     if (k.lt.nzm) then
-     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr  !+ 0.5 *&
-!       (sumMthetav(k) - thetav(k) * sumM(k) + sumMthetav(k+1) - thetav(k+1) * sumM(k+1)) 
-     else
-     tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr  !+ 0.5 *&
-!       (sumMthetav(k) - thetav(k) * sumM(k))
+
+     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
+     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     if (qp(k).gt.0.0) then
+       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
      end if
+     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
+     ! get buoyancy flux from PDF scheme
+     tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
+
      a_prod_bu=  ggr/thetar(k) * tke_thvflx(k) 
      a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
@@ -223,6 +254,18 @@ do k=1,nzm
    ! same as above but different length scale 
    ! and different coefficients
      tk(k) = Ck*smix(k)*sqrt(tke(k))
+
+     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
+     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     if (qp(k).gt.0.0) then
+       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
+         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     end if
+     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
+     ! get buoyancy flux from PDF scheme
+     tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
+
      a_prod_sh=(tk(k)+0.001)*def2(k)
      a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
      a_diss=min(tke(k)/(4.*dt),Cee/smix(k)*tke(k)**1.5) ! cap the diss rate (useful for large time steps

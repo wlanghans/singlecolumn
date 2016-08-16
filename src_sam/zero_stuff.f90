@@ -13,6 +13,11 @@ u0   = u
 v0   = v
 tke0 = tke
 
+! clipping for non-negative mixinga ratios
+qt  = max(0.0,qt)
+qp  = max(0.0,qp)
+tke = max(0.0,tke)
+
 tend_sgs_qt      = 0.0
 tend_sgs_qp      = 0.0
 tend_sgs_t       = 0.0
@@ -37,9 +42,6 @@ tend_sub_tke     = 0.0
 tend_rad_t       = 0.0
 
 
-qt  = max(0.0,qt)
-qp  = max(0.0,qp)
-tke = max(0.0,tke)
 
 tk          = 0.0
 tkh         = 0.0
@@ -60,8 +62,7 @@ cfrac_pdf   = 0.0
 q1          = 0.0
 qtgrad      = 0.0
 thetaligrad = 0.0
-cthl        = 0.
-cqt         = 0.
+varwrt1     = 0.0
 
 Cm          = 0.0
 Ctheta      = 0.0
