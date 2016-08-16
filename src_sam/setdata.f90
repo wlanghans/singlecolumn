@@ -454,7 +454,15 @@ UPCF=0.
 
  sgs_t_flux=0.0
  sgs_qt_flux=0.0
+ sgs_qp_flux=0.0
  sgs_thv_flux=0.0
+ tke_thvflx = 0.
+ qt_flux_mf=0.0
+ qt_flux_ed=0.0
+ qp_flux_mf=0.0
+ qp_flux_ed=0.0
+ t_flux_mf=0.0
+ t_flux_ed=0.0
  taux=0.0
  tauy=0.0
  sgs_tke_flux=0.0

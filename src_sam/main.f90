@@ -24,12 +24,14 @@ call setdata()
 ! call PDF condensation scheme to get sgs
 ! cloud cover and condensed water in stratiform part
 ! iterative solve also provides tabs, theta, thetav, etc.
+! in case of dosgscloud=false, no sgs cloud is considered
 ! ======================================= 
 call sgscloudmf(.false.)  ! if false, then the domain mean qt and t are used to get cfrac, qcl, ...
                           ! if true, then the environmental qt and t are used to get cfrac, qcl, ...
 
 ! ======================================= 
-! recompute hydrostatic pressure, since thetav might have changed
+! recompute hydrostatic pressure, since thetav might have changed 
+! under presence of sgs clouds
 ! input needed: presi(1),thetav 
 ! ======================================= 
 call get_pressure()
@@ -48,7 +50,7 @@ write(*,*) 'Working on timestep ', nstep
 
 ! ======================================= 
 ! set all tendecies to zero and clip non-negative scalars
-! copy prog varaibles at beginning of time step
+! save prog variables at beginning of time step
 ! ======================================= 
  call zero_stuff()
 
@@ -120,8 +122,9 @@ write(*,*) 'Working on timestep ', nstep
 ! call PDF condensation scheme to get sgs
 ! cloud cover and condensed water in stratiform part
 ! iterative solve also provides tabs, theta, thetav, etc.
+! in case of dosgscloud=false, no sgs cloud is considered
 ! ======================================= 
-    call sgscloudmf(.false.)  ! if false, then the domain mean qt and t are used to get cfrac, qcl, ...
+  call sgscloudmf(.false.)  ! if false, then the domain mean qt and t are used to get cfrac, qcl, ...
                               ! if true, then the environmental qt and t are used to get cfrac, qcl, ...
 
 ! ======================================= 

@@ -57,6 +57,9 @@ do k=1,nzm
    !N**2 based on density potential temperature
    buoy_sgs(k)=ggr/thetav(k) * (thetav(kc)-thetav(kb))/ (z(kc)-z(kb))
 
+
+ 
+
    if (doteixpbl.or.dowitekpbl.or.dolanghanspbl) then 
    ! always use Teixeira's mixing length (Witek's is very similar)
       if (fixedtau) then
@@ -111,14 +114,21 @@ do k=1,nzm
      a_diss=a_prod_sh+a_prod_bu
 
      ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
-     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     if (qp(k).gt.0.0) then
-       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     end if
-       
-     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
+     !wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
+     !    * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     !if (qp(k).gt.0.0) then
+     !  wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
+     !    * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
+     !end if
+     !  
+     !wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
+
+     ! use previously evaluated fluxes
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)) + &
+             (lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)) ) &
+              * (p00/pres(k))**(rgas/cp) / cp
+     wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
+
      ! get buoyancy flux from PDF scheme
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
 
@@ -131,15 +141,13 @@ do k=1,nzm
      a_prod_sh=(tk(k)+0.001)*def2(k)
      a_prod_bu=-(tk(k)+0.001)*Pr*buoy_sgs(k)
      a_diss=a_prod_sh+a_prod_bu
+ 
+     ! use previously evaluated fluxes
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)) + &
+             (lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)) ) &
+              * (p00/pres(k))**(rgas/cp) / cp
+     wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
 
-     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
-     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     if (qp(k).gt.0.0) then
-       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     end if
-     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
      ! get buoyancy flux from PDF scheme
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
 
@@ -181,19 +189,17 @@ do k=1,nzm
      !end if
 
 
-     ! get Km 
-     tk(k) = Ck*smix(k)*sqrt(tke(k))
+     ! use previously evaluated fluxes
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)) + &
+             (lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)) ) &
+              * (p00/pres(k))**(rgas/cp) / cp
+     wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
 
-     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
-     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     if (qp(k).gt.0.0) then
-       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     end if
-     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb)) 
      ! get buoyancy flux from PDF scheme
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
+
+     ! get Km 
+     tk(k) = Ck*smix(k)*sqrt(tke(k))
 
      a_prod_sh=(tk(k)+0.001)*def2(k)
      a_prod_bu=ggr/thetar(k) * tke_thvflx(k)
@@ -214,20 +220,19 @@ do k=1,nzm
    ! Use Witek CPBL closure; TKE is prognostic 
    ! ==================================
 
+     ! use previously evaluated fluxes
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)+t_flux_mf(k) + t_flux_mf(k+1)) + &
+             (lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)+qp_flux_mf(k) + qp_flux_mf(k+1)) ) &
+              * (p00/pres(k))**(rgas/cp) / cp
+     wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1)+qt_flux_mf(k) + qt_flux_mf(k+1))
+
+     ! get buoyancy flux from PDF scheme
+     tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
+
      ! get Km 
      tk(k) = Ck*smix(k)*sqrt(tke(k))
      a_prod_sh=(tk(k)+0.001)*def2(k)
 
-     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
-     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     if (qp(k).gt.0.0) then
-       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     end if
-     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
-     ! get buoyancy flux from PDF scheme
-     tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
 
      a_prod_bu=  ggr/thetar(k) * tke_thvflx(k) 
      a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
@@ -255,14 +260,12 @@ do k=1,nzm
    ! and different coefficients
      tk(k) = Ck*smix(k)*sqrt(tke(k))
 
-     ! use explicit estimates for hil, qt, and qp fluxes to get thli and qt fluxes
-     wthl = -Pr * tk(k) * (t(kc)-t(kb))  &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     if (qp(k).gt.0.0) then
-       wthl = wthl + ((t(kc)-t(kb)) + (lcond*qpl(k)+lsub*qpi(k))/qp(k) * (qp(kc)-qp(kb)) ) &
-         * (p00/pres(k))**(rgas/cp) / (cp*(z(kc)-z(kb)))
-     end if
-     wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
+     ! use previously evaluated fluxes
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)+t_flux_mf(k) + t_flux_mf(k+1)) + &
+             (lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)+qp_flux_mf(k) + qp_flux_mf(k+1)) ) &
+              * (p00/pres(k))**(rgas/cp) / cp
+     wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1)+qt_flux_mf(k) + qt_flux_mf(k+1))
+
      ! get buoyancy flux from PDF scheme
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
 

@@ -27,7 +27,9 @@ allocate(tend_sgs_qt(nzm), tend_sgs_t(nzm),  &
 allocate(sumM(nz), sumMu(nz), sumMv(nz), sumMrt(nz), sumMrp(nz), sumMt(nz),sumMtke(nz), &
          buoy_sgs(nzm), smix(nzm))
 
-allocate(sgs_t_flux(nzm), sgs_qt_flux(nzm), sgs_thv_flux(nzm), taux(nzm), tauy(nzm), sgs_tke_flux(nzm))
+allocate(sgs_t_flux(nz), sgs_qt_flux(nz), sgs_thv_flux(nz), qt_flux_ed(nz), qt_flux_mf(nz), &
+        t_flux_ed(nz), t_flux_mf(nz), taux(nz), tauy(nz), sgs_tke_flux(nz), sgs_qp_flux(nz), &
+        qp_flux_ed(nz), qp_flux_mf(nz))
 
 allocate(qcsgs_mf(nz), tabs_mf(nz), qcsgs_pdf(nzm), qisgs_mf(nz), qtsgs_mf(nz), qisgs_pdf(nzm), &
                     cfrac_mf(nz), frac_mf(nz), cfrac_tot(nzm), cfrac_pdf(nzm), tke_thvflx(nzm),cthl(nzm), cqt(nzm),&

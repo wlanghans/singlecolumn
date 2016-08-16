@@ -35,6 +35,13 @@ sgs_qt_flux (2:nzm) = 1.0 * (  &
               (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qt(2:nzm)-qt(1:nzm-1)) ) &
                            +(sumMrt(2:nzm) - (betap*d(2:nzm) + betam*qt(2:nzm)) * sumM(2:nzm) ))
+qt_flux_ed(1)     = sgs_qt_flux (1)
+qt_flux_ed(nz)    = 0.0
+qt_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qt(2:nzm)-qt(1:nzm-1)) )
+qt_flux_mf(1)     = 0.
+qt_flux_mf(nz)    = 0.
+qt_flux_mf(2:nzm) = (sumMrt(2:nzm) - (betap*d(2:nzm) + betam*qt(2:nzm)) * sumM(2:nzm) )
 
 ! compute qt tendency
 tend_sgs_qt = (d-qt)/dt    
@@ -53,6 +60,20 @@ else
   call get_abcd(rho,qp,sumMrp,Crv,tkh,0.0,a,b,c,d,.true.,.false.)
 end if
 call tridiag(a,b,c,d)
+
+sgs_qp_flux(1)  = 0.
+sgs_qp_flux(nz) = 0.
+sgs_qp_flux (2:nzm) = 1.0 * (  &  
+              (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qp(2:nzm)-qp(1:nzm-1)) ) &
+                           +(sumMrp(2:nzm) - (betap*d(2:nzm) + betam*qp(2:nzm)) * sumM(2:nzm) ))
+qp_flux_ed(1)     = 0.
+qp_flux_ed(nz)    = 0.0
+qp_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qp(2:nzm)-qp(1:nzm-1)) )
+qp_flux_mf(1)     = 0.
+qp_flux_mf(nz)    = 0.
+qp_flux_mf(2:nzm) = (sumMrp(2:nzm) - (betap*d(2:nzm) + betam*qp(2:nzm)) * sumM(2:nzm) )
 
 ! compute qt tendency
 tend_sgs_qp = (d-qp)/dt    
@@ -81,7 +102,6 @@ if (.not.(doneuman.or.sfc_flx_fxd)) then
 else
   ! Nothing to do
   sgs_t_flux (1)    =  sgs_t_flux (1)  
-  sgs_thv_flux (1)  = sgs_thv_flux (1)  
 end if
 ! Diagnose atm. sgs fluxes 
 sgs_t_flux (2:nzm)       = 1. * ( & 
@@ -89,9 +109,22 @@ sgs_t_flux (2:nzm)       = 1. * ( &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) ) &
         + sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm))
 
-sgs_thv_flux(2:nzm) = 0.5*(tke_thvflx(1:nzm-1) + tke_thvflx(2:nzm))
+t_flux_ed(1)     = sgs_t_flux (1)
+t_flux_ed(nz)    = 0.0
+t_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) )
+t_flux_mf(1)     = 0.
+t_flux_mf(nz)    = 0.
+t_flux_mf(2:nzm) = (sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm) )
 
 tend_sgs_t = (d - t)/dt
+
+
+! get buoyancy flux from PDF scheme
+sgs_thv_flux(2:nzm) = 0.5*(cthl(1:nzm-1)+cthl(2:nzm))   * (2.*p00/(pres(1:nzm-1) + pres(2:nzm)))**(rgas/cp) / cp &
+                     * (sgs_t_flux (2:nzm) + (lcond*(qpl(1:nzm-1)+qpl(2:nzm))+lsub*(qpi(1:nzm-1)+qpi(2:nzm)))/& 
+                (qp(1:nzm-1)+qp(2:nzm)) * sgs_qp_flux(2:nzm)) &
+              + 0.5*(cqt(1:nzm-1)+cqt(2:nzm)) * sgs_qt_flux(2:nzm)
 
 ! update t
 if (dosequential) t = d
