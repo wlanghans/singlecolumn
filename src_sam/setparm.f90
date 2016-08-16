@@ -194,8 +194,9 @@ end if
 
 if (land) ocean=.false.
 if (snapshot_fields(1:1) .eq. '+') then
-   snapshot_fields = 'hli,u,v,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,qpl,qpi,&
-                  qtflx,tflx,buoyancyflx,crv,ctheta,cm,q1,sigmas,cfrac_pdf,cthl,cqt,varwrt1,'&
+   snapshot_fields = 'hli,u,v,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,&
+                                qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
+                                cthl,cqt,varwrt1,'&
                      //trim(snapshot_fields(2:len(snapshot_fields)))
 end if
 

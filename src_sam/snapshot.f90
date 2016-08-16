@@ -701,12 +701,12 @@ module snapshot
                ncsnap%field(field_count)%data1 => cqt(1:nzm)
             end if
 
-            if (trim(field_name) .eq. 'wthv') then
+            if (trim(field_name) .eq. 'tkewthv') then
                call fill_fields_snapshot( &
                   ! Short name
-                                           'wthv', &
+                                           'tkewthv', &
                   ! Long name
-                                           'buoyancy flux', &
+                                           'buoyancy flux used in TKE procution term', &
                   ! Units
                                            'K m/s', &
                   ! Dimensions
@@ -856,12 +856,12 @@ module snapshot
                ncsnap%field(field_count)%data1 => sgs_tke_flux (1:nz)
             end if
 
-            if (trim(field_name) .eq. 'buoyancyflx') then
+            if (trim(field_name) .eq. 'totbuoyflx') then
                call fill_fields_snapshot( &
                   ! Short name
-                                           'buoyancyflx', &
+                                           'totbuoyflx', &
                   ! Long name
-                                           'Buoyancy flux', &
+                                           'Total (ED+MF) buoyancy flux', &
                   ! Units
                                            'K m/s', &
                   ! Dimensions
