@@ -158,39 +158,6 @@ do k=1,nzm
    ! Use Teixeira CPBL closure; TKE is prognostic 
    ! ==================================
 
-     !if (dosgscloud.and. k.gt.1.and.k.lt.nzm) then
-     !thetalt = theta(k+1) - fac_cond * qcl(k+1)/(1.+qv(k+1)) * (pres(k+1)/p00)**(-rgas/cp)
-     !thetalk = theta(k) - fac_cond * qcl(k)/(1.+qv(k)) * (pres(k)/p00)**(-rgas/cp)
-     !thetall = theta(k-1) - fac_cond * qcl(k-1)/(1.+qv(k-1)) * (pres(k-1)/p00)**(-rgas/cp)
-     !thetalgrad(k) = 0.5 * ((thetalt-thetalk)/(z(k+1)-z(k)) + (thetalk-thetall)/(z(k)-z(k-1))  )
-     !qtgrad(k) = 0.5 * ((qtt-qtk)/(z(k+1)-z(k)) + (qtk-qtl)/(z(k)-z(k-1))  )
-     !qtt = (qv(k+1) + qcl(k+1))/(1.+qv(k+1))
-     !qtk = (qv(k)   + qcl(k))/(1.+qv(k))
-     !qtl = (qv(k-1) + qcl(k-1))/(1.+qv(k-1))
-     !thetalflux = -(tk(k)+0.001) * Pr * thetalgrad(k)
-     !qtflux = -(tk(k)+0.001) * Pr * qtgrad(k)
-
-
-     ! taken from Bechtold et al. (1992)
-     !varqt = 2. *Ck/1.8*smix(k)**2 * qtgrad(k)**2
-     !varthetal = 2. *Ck/2.6*smix(k)**2 * thetalgrad(k)**2
-     !covarqtthetal = 2. *Ck/1.2*smix(k)**2 * thetalgrad(k) * qtgrad(k)
-     
-
-     ! call sgs cloud scheme
-     !call sgscloud(k,qtflux,thetalflux,varqt,varthetal,covarqtthetal,thetalk,qtk,pres(k), & ! input
-     !                  cfrac_ed(k),qlsgs_ed(k),tke_thvflx(k))                               ! output
-     !call sgscloud2(k,qtflux,thetalflux,thetalk,qtk,pres(k), & ! input
-     !                  cfrac_ed(k),qlsgs_ed(k),tke_thvflx(k))                               ! output
-
-     !else
-     !  cfrac_pdf(k) = 0.
-     !  qlsgs_ed(k) = qcl(k)
-     !  tk(k) = Ck*smix(k)*sqrt(tke(k))
-     !  tke_thvflx(k) = -(tk(k)+0.001)*Pr*buoy_sgs(k) * thetav(k)/ggr
-     !end if
-
-
      ! use previously evaluated fluxes
      wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))* (p00/pres(k))**(rgas/cp) / cp 
      if (qp(k).gt.0.0) then

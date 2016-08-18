@@ -126,7 +126,6 @@ if (k.eq.1.or.tke(k).le.0.0) then
  end if
  qte = qt(k)
  sigmas(k)  = 0.
- varwrt1(k) = 100.
 
 else
 
@@ -189,7 +188,6 @@ end if
     ! use constant length scale of 250 m
     sigmas(k) = lcld*(max(0.0,qtgrad(k)**2. + alphaf**2*thetaligrad(k)**2. - 2. * alphaf * thetaligrad(k)*qtgrad(k)))**(0.5)
     sigmas(k) = max(sigmas(k),1.d-12)
-    varwrt1(k) = 0.
 
     ! compute saturation deficit
     q1(k)= qte-qsl
