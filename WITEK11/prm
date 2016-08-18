@@ -7,13 +7,15 @@ betap=1.0
 betam=0.0
 
 dt=60.
-nstop=480  ! 8 hours
+nstop=360  ! 8 hours
 
 dosgs=.true.
+dosgscloud=.false.
 dosmagor=.false.
-dowitekpbl = .true.
+dowitekpbl = .false.
+doteixpbl = .true.
 fixedtau=.false.
-doedmf = .true.
+doedmf = .false.
 dosingleplume=.true.
 beta =2.0
 nup=1
@@ -33,13 +35,13 @@ doneuman= .true.
 dotkedirichlet=.true.
 tkconst = 0.0
 
-fluxt0   = 0.06    ! K m/s
+fluxt0   = 0.12    ! K m/s
 fluxq0   = 2.5e-05 ! g/g m/s
 tau0     = 0.0
 
 snapshot_do = .true.
 snapshot_start = 0
-snapshot_period =  2 ! 45
+snapshot_period =  1 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .true.
 snapshot_fields = 'tabs,u,v,w,B,upthv,upt,upthl,upw,upa,upqt,upqc,sumM,sumMthetav,rho,th,thv,qv,tke,virtheatflx,vaporflx,heatflx,n2,lmix,tend_mix_rhothetav,tend_diss_rhotke,tend_buoy_rhotke,tend_mix_rhotke,tend_shear_rhotke,pres,tk,tkeflx,pblh,upm,ent,det,wstar,upthd,qlsgs_ed,virtheatflx_mf,virtheatflx_ed,q1,thetalgrad,qtgrad,taux,tauy,def2,dthetadt,dqvdt,tend_rad_rho_thetav,radlwup,cfrac_ed'

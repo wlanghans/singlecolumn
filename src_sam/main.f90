@@ -52,13 +52,13 @@ write(*,*) 'Working on timestep ', nstep
 ! set all tendecies to zero and clip non-negative scalars
 ! save prog variables at beginning of time step
 ! ======================================= 
- call zero_stuff()
+  call zero_stuff()
 
 ! ======================================= 
 ! compute tendencies from large scale forcing
 ! coriolis and dqtdt, dthetadt
 ! ======================================= 
-   call forcing()
+  call forcing()
 
 ! ======================================= 
 ! get drag/transfer coefficients, explicit fluxes, surface values, and wind speed on 1st model level
@@ -92,9 +92,9 @@ write(*,*) 'Working on timestep ', nstep
 ! ======================================= 
 ! compute tendencies from subsidence 
 ! ======================================= 
- if (dosubsidence) then
+  if (dosubsidence) then
    call subsidence()
- end if
+  end if
 
 ! ======================================= 
   ! get sgs/diffusion tendencies (tridiagonal solver)

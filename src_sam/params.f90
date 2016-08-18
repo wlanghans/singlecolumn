@@ -95,9 +95,10 @@ integer:: snapshot_start = 0
 integer:: snapshot_period =1
 integer:: snapshot_end = 1000
 logical:: snapshot_as_double = .false.
-character(800) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,&
-                                qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
-                                cthl,cqt,varwrt1'
+character(900) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,p,rho,qt,qv,qn,qcl,qci,&
+		qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
+		cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke,tend_buoy_tke,&
+		tend_shear_tke,tend_diss_tke,tkeflx,pblh'
 
 
 end module params

@@ -350,7 +350,7 @@ do k = 1,nzm
    
    u(k)     = 0.
    v(k)     = 0.
-   tke(k)   = 0.
+   tke(k)   = 0.001
    qcl(k)   = 0.
    qpl(k)   = 0.
    qci(k)   = 0.

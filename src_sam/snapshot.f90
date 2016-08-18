@@ -492,7 +492,7 @@ module snapshot
             if (trim(field_name) .eq. 'tend_mix_tke') then
                call fill_fields_snapshot( &
                   ! Short name
-                                           'tend_mix_ke', &
+                                           'tend_mix_tke', &
                   ! Long name
                                            'tke tendency from sgs mixing', &
                   ! Units

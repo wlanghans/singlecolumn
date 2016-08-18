@@ -6,6 +6,11 @@ use grid
 
 implicit none
 
+! clipping for non-negative mixinga ratios
+qt  = max(0.0,qt)
+qp  = max(0.0,qp)
+tke = max(0.0,tke)
+
 t0   = t
 qt0  = qt
 qp0  = qp
@@ -13,10 +18,6 @@ u0   = u
 v0   = v
 tke0 = tke
 
-! clipping for non-negative mixinga ratios
-qt  = max(0.0,qt)
-qp  = max(0.0,qp)
-tke = max(0.0,tke)
 
 tend_sgs_qt      = 0.0
 tend_sgs_qp      = 0.0

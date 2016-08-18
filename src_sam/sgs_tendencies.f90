@@ -123,7 +123,7 @@ tend_sgs_t = (d - t)/dt
 ! get buoyancy flux from PDF scheme
 sgs_thv_flux(2:nzm) = 0.5*(cthl(1:nzm-1)+cthl(2:nzm))   * (2.*p00/(pres(1:nzm-1) + pres(2:nzm)))**(rgas/cp) / cp &
                      * (sgs_t_flux (2:nzm) + (lcond*(qpl(1:nzm-1)+qpl(2:nzm))+lsub*(qpi(1:nzm-1)+qpi(2:nzm)))/& 
-                (qp(1:nzm-1)+qp(2:nzm)) * sgs_qp_flux(2:nzm)) &
+                (qp(1:nzm-1)+qp(2:nzm)+1.0d-20) * sgs_qp_flux(2:nzm)) &
               + 0.5*(cqt(1:nzm-1)+cqt(2:nzm)) * sgs_qt_flux(2:nzm)
 
 ! update t

@@ -23,13 +23,16 @@ implicit none
     !value could be found to work best in all conditions.
     !---------------------------------------------------------------
 ! local variables
-    REAL ::  PBLH_TKE,qtke,qtkem1,wt,maxqke,TKEeps,minthv
+    REAL ::  PBLH_TKE,qtke,qtkem1,wt,maxqke,TKEeps,minthv, X1, X2, X3, Y1, Y2, Y3, aa, bb
     REAL :: delt_thv   !delta theta-v; dependent on land/sea point
     REAL, PARAMETER :: sbl_lim  = 200. !typical scale of stable BL (m).
     REAL, PARAMETER :: sbl_damp = 400. !transition length for blending (m).
     INTEGER :: I,J,K,kthv,ktke
 
-    IF (fixedpblh.gt.0.0) return
+    IF (fixedpblh.gt.0.0) then
+       pblh = fixedpblh
+       return
+    END IF
 
     IF (pblhfluxmin) then ! compute cpbl top as level with flux minimum
 
@@ -55,7 +58,7 @@ implicit none
     k = 1
     kthv = 1
     maxqke = 0.
-    DO WHILE (k .LE. nzm-1)
+    DO WHILE (k .LE. nzm-2)
        if (k.eq.1) then
          qtke = (thetav(k+1) - thetav(k))/(z(k+1)-z(k))
        else
@@ -67,7 +70,42 @@ implicit none
        ENDIF
        k = k+1
     ENDDO
-    pblh=z(kthv)
+
+    !compute quadratic fit to thetav/dz using three points
+    !then let height of vertex be the PBL height to allow for PBL height to fall in between levels
+    if (kthv .eq. 1) then
+       pblh = z(1)
+    else
+
+       if (kthv.eq.2) then
+          Y1 = (thetav(2) - thetav(1))/(z(2)-z(1))
+       else
+          Y1 = (thetav(kthv) - thetav(kthv-2))/(z(kthv)-z(kthv-2)) 
+       end if
+       Y2 = (thetav(kthv+1) - thetav(kthv-1))/(z(kthv+1)-z(kthv-1))
+       Y3 = (thetav(kthv+2) - thetav(kthv))/(z(kthv+2)-z(kthv))
+       X1=z(kthv-1)
+       X2=z(kthv)
+       X3=z(kthv+1)
+       aa=((Y2-Y1)*(X1-X3) + (Y3-Y1)*(X2-X1))/((X1-X3)*(X2**2-X1**2) + (X2-X1)*(X3**2-X1**2))
+       bb=((Y2 - Y1) - aa*(X2**2 - X1**2)) / (X2-X1)
+
+
+      if (aa.eq.0.) then
+        ! linear profile of gradient with bb.ne.0.0
+        if (bb.gt.0.0) then
+          pblh = z(kthv+1)
+        elseif(bb.lt.0.0) then
+          pblh = z(kthv-1)
+        else
+          !constant gradient
+          pblh = z(kthv)
+        end if
+      else
+        pblh =  - bb/(2.*aa)
+      end if
+
+    end if
 
 
     ELSE 
