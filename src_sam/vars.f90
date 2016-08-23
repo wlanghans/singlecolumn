@@ -28,7 +28,7 @@ real,allocatable,dimension(:), target :: sgs_t_flux, sgs_qt_flux, sgs_qp_flux, s
                                          t_flux_ed, t_flux_mf, taux, tauy, sgs_tke_flux, qp_flux_ed, qp_flux_mf
 real,allocatable,dimension(:), target :: qcsgs_pdf, qcsgs_mf, tabs_mf, qisgs_pdf, qisgs_mf, qtsgs_mf, &
                                             cfrac_mf, frac_mf, cfrac_pdf, cfrac_tot, tke_thvflx, cthl, cqt, varwrt1
-real,allocatable,dimension(:), target :: q1, sigmas, qtgrad, thetaligrad, radlwup
+real,allocatable,dimension(:), target :: q1, sigmas, qtgrad, thetaligrad, radlwup, radlwdn, radswup, radswdn, radqrlw, radqrsw
 
 real, parameter :: t00 = 300.   ! constant offset for sstxy 
 real :: sst=0.                   ! perturbation from t00

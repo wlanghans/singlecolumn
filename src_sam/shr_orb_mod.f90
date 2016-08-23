@@ -321,7 +321,7 @@ SUBROUTINE shr_orb_params( iyear_AD , eccen  , obliq , mvelp     ,     &
           write(6,F00) ' eccen =   0.016715'
           write(6,F00) ' mvelp = 102.7'
         end if
-        call task_abort()
+        stop
 !bloss        call shr_sys_abort()
       else if ( log_print ) then
          write(6,F00) 'Use input orbital parameters: '
@@ -330,21 +330,21 @@ SUBROUTINE shr_orb_params( iyear_AD , eccen  , obliq , mvelp     ,     &
          if ( log_print ) then
             write(6,F03) 'Input obliquity unreasonable: ', obliq
          end if
-         call task_abort()
+         stop
 !bloss        call shr_sys_abort()
       end if
       if( (eccen < SHR_ORB_ECCEN_MIN).or.(eccen > SHR_ORB_ECCEN_MAX) ) then
          if ( log_print ) then
             write(6,F03) 'Input eccentricity unreasonable: ', eccen
          end if
-         call task_abort()
+         stop
 !bloss        call shr_sys_abort()
       end if
       if( (mvelp < SHR_ORB_MVELP_MIN).or.(mvelp > SHR_ORB_MVELP_MAX) ) then
          if ( log_print ) then
             write(6,F03) 'Input mvelp unreasonable: ' , mvelp
          end if
-         call task_abort()
+         stop
 !bloss        call shr_sys_abort()
       end if
       eccen2 = eccen*eccen
@@ -363,7 +363,7 @@ SUBROUTINE shr_orb_params( iyear_AD , eccen  , obliq , mvelp     ,     &
             write(6,F03) '# of years before 1950: ',yb4_1950AD
             write(6,F01) 'Year to simulate was  : ',iyear_AD
          end if
-         call task_abort()
+         stop
 !bloss        call shr_sys_abort()
       end if
  

@@ -19,7 +19,7 @@ subroutine sw_kgb16
 	use rrsw_kg16, only: sfluxrefo, kao, kbo, selfrefo, forrefo, rayl, no16
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
 	implicit none
 	save 
@@ -31,7 +31,7 @@ subroutine sw_kgb16
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -75,7 +75,7 @@ subroutine sw_kgb17
         use rrsw_kg17, only: sfluxrefo, kao, kbo, selfrefo, forrefo, rayl, no17
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
     
         implicit none
         save
@@ -88,7 +88,7 @@ subroutine sw_kgb17
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionUpperAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -136,7 +136,7 @@ subroutine sw_kgb18
 	use rrsw_kg18, only: sfluxrefo, kao, kbo, selfrefo, forrefo, rayl, no18
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -149,7 +149,7 @@ subroutine sw_kgb18
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -193,7 +193,7 @@ subroutine sw_kgb19
         use rrsw_kg19, only: sfluxrefo, kao, kbo, selfrefo, forrefo, rayl, no19
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -206,7 +206,7 @@ subroutine sw_kgb19
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -250,7 +250,7 @@ subroutine sw_kgb20
         use rrsw_kg20, only: sfluxrefo, kao, kbo, selfrefo, forrefo, rayl, absch4o, no20
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -264,7 +264,7 @@ subroutine sw_kgb20
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -319,7 +319,7 @@ subroutine sw_kgb21
         use rrsw_kg21, only: sfluxrefo, kao, kbo, selfrefo, forrefo, rayl, no21
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -332,7 +332,7 @@ subroutine sw_kgb21
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -380,7 +380,7 @@ subroutine sw_kgb22
         use rrsw_kg22, only: sfluxrefo, kao, kbo, selfrefo, forrefo, rayl, no22
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -393,7 +393,7 @@ subroutine sw_kgb22
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -437,7 +437,7 @@ subroutine sw_kgb23
         use rrsw_kg23, only: sfluxrefo, kao, selfrefo, forrefo, raylo, no23
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -448,7 +448,7 @@ subroutine sw_kgb23
 	integer(kind=im) :: ncid, varID
 	
         status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -486,7 +486,7 @@ subroutine sw_kgb24
 						 raylao, raylbo, abso3ao, abso3bo, no24
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -498,7 +498,7 @@ subroutine sw_kgb24
 	integer(kind=im) :: ncid, varID
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -556,7 +556,7 @@ subroutine sw_kgb25
         use rrsw_kg25, only: sfluxrefo, kao, raylo, abso3ao, abso3bo, no25
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -568,7 +568,7 @@ subroutine sw_kgb25
 	integer(kind=im) :: ncid, varID
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -608,7 +608,7 @@ subroutine sw_kgb26
         use rrsw_kg26, only: sfluxrefo, raylo, no26
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -619,7 +619,7 @@ subroutine sw_kgb26
 	integer(kind=im) :: ncid, varID
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -643,7 +643,7 @@ subroutine sw_kgb27
         use rrsw_kg27, only: sfluxrefo, kao, kbo, raylo, no27
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -654,7 +654,7 @@ subroutine sw_kgb27
 	integer(kind=im) :: ncid, varID
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -688,7 +688,7 @@ subroutine sw_kgb28
         use rrsw_kg28, only: sfluxrefo, kao, kbo, rayl, no28
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -701,7 +701,7 @@ subroutine sw_kgb28
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionUpperAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &
@@ -738,7 +738,7 @@ subroutine sw_kgb29
 						 absh2oo, absco2o, rayl, no29
 	use rrsw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -752,7 +752,7 @@ subroutine sw_kgb29
 	real(kind=rb) :: ncrayl(1)
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_sw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"SolarSourceFunctionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, sfluxrefo, &

@@ -45,6 +45,7 @@ do while(nstep.lt.nstop)
 
 nstep = nstep + 1
 time = time + dt
+day = day0 + nstep*dt/86400.
 
 write(*,*) 'Working on timestep ', nstep
 

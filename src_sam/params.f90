@@ -87,6 +87,19 @@ real :: fcor = 0.376d-04
 logical :: dolongwave=.false.
 logical :: doshortwave=.false.
 logical :: doradsimple=.true.
+logical :: doradhomo=.false.
+logical :: doseasons=.false.
+logical :: doperpetual=.false.
+logical :: dosolarconstant=.false.
+logical :: notracegases=.false.
+real    :: solar_constant = 685. ! solar constant (in W/m2)
+real    :: zenith_angle = 51.7   ! zenith angle (in degrees)
+real    :: nxco2 = 1         ! factor to modify co2 concentration
+real    :: coszrs
+real:: longitude0 = 0.    ! latitude of the domain's center 
+real:: latitude0  = 0.    ! longitude of the domain's center 
+
+
 
 
 !output
@@ -98,7 +111,7 @@ logical:: snapshot_as_double = .false.
 character(900) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,p,rho,qt,qv,qn,qcl,qci,&
 		qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
 		cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke,tend_buoy_tke,&
-		tend_shear_tke,tend_diss_tke,tkeflx,pblh'
+		tend_shear_tke,tend_diss_tke,tkeflx,pblh,B,upw,upthd,ent,wstar'
 
 
 end module params

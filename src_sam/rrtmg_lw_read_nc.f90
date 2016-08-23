@@ -21,7 +21,7 @@ subroutine lw_kgb01
 						selfrefo, forrefo, no1
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
 	implicit none
 	save 
@@ -32,7 +32,7 @@ subroutine lw_kgb01
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -88,7 +88,7 @@ subroutine lw_kgb02
         use rrlw_kg02, only : fracrefao, fracrefbo, kao, kbo, selfrefo, forrefo, no2
         use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
     
         implicit none
         save
@@ -99,7 +99,7 @@ subroutine lw_kgb02
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -144,7 +144,7 @@ subroutine lw_kgb03
                           kbo_mn2o, selfrefo, forrefo, no3
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -156,7 +156,7 @@ subroutine lw_kgb03
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -212,7 +212,7 @@ subroutine lw_kgb04
         use rrlw_kg04, only : fracrefao, fracrefbo, kao, kbo, selfrefo, forrefo, no4
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -223,7 +223,7 @@ subroutine lw_kgb04
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -268,7 +268,7 @@ subroutine lw_kgb05
                           selfrefo, forrefo, ccl4o, no5
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -280,7 +280,7 @@ subroutine lw_kgb05
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -339,7 +339,7 @@ subroutine lw_kgb06
                           cfc11adjo, cfc12o, no6
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -351,7 +351,7 @@ subroutine lw_kgb06
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -407,7 +407,7 @@ subroutine lw_kgb07
                           kbo_mco2, selfrefo, forrefo, no7
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -419,7 +419,7 @@ subroutine lw_kgb07
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -477,7 +477,7 @@ subroutine lw_kgb08
                           cfc12o, cfc22adjo, no8
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -489,7 +489,7 @@ subroutine lw_kgb08
 	integer(kind=im) :: ncid, varID
 	
         status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -579,7 +579,7 @@ subroutine lw_kgb09
                             kbo_mn2o, selfrefo, forrefo, no9
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -591,7 +591,7 @@ subroutine lw_kgb09
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -647,7 +647,7 @@ subroutine lw_kgb10
         use rrlw_kg10, only : fracrefao, fracrefbo, kao, kbo, selfrefo, forrefo, no10
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -658,7 +658,7 @@ subroutine lw_kgb10
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -703,7 +703,7 @@ subroutine lw_kgb11
                           kbo_mo2, selfrefo, forrefo, no11
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -715,7 +715,7 @@ subroutine lw_kgb11
 	integer(kind=im) :: ncid, varID
 	
 	status(:)   = nf90_NoErr
-	status(1)   = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)   = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)   = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)   = nf90_get_var(ncid, varID, fracrefao, &
@@ -771,7 +771,7 @@ subroutine lw_kgb12
         use rrlw_kg12, only : fracrefao, kao, selfrefo, forrefo, no12
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -782,7 +782,7 @@ subroutine lw_kgb12
 	integer(kind=im) :: ncid, varID
 	
 	status(:) = nf90_NoErr
-	status(1) = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1) = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2) = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3) = nf90_get_var(ncid, varID, fracrefao, &
@@ -817,7 +817,7 @@ subroutine lw_kgb13
                           kbo_mo3, selfrefo, forrefo, no13
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -829,7 +829,7 @@ subroutine lw_kgb13
 	integer(kind=im) :: ncid, varID
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, fracrefao, &
@@ -889,7 +889,7 @@ subroutine lw_kgb14
         use rrlw_kg14, only : fracrefao, fracrefbo, kao, kbo, selfrefo, forrefo, no14
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -900,7 +900,7 @@ subroutine lw_kgb14
 	integer(kind=im) :: ncid, varID
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, fracrefao, &
@@ -944,7 +944,7 @@ subroutine lw_kgb15
         use rrlw_kg15, only : fracrefao, kao, kao_mn2, selfrefo, forrefo, no15
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -956,7 +956,7 @@ subroutine lw_kgb15
 	integer(kind=im) :: ncid, varID
 	
 	status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, fracrefao, &
@@ -997,7 +997,7 @@ subroutine lw_kgb16
         use rrlw_kg16, only : fracrefao, fracrefbo, kao, kbo, selfrefo, forrefo, no16
 	use rrlw_ncpar
 	use netcdf
-        use grid, only: rundatadir
+        use grid, only: path
 	
         implicit none
         save
@@ -1008,7 +1008,7 @@ subroutine lw_kgb16
 	integer(kind=im) :: ncid, varID
 	
         status(:)  = nf90_NoErr
-	status(1)  = nf90_open(trim(rundatadir)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
+	status(1)  = nf90_open(trim(path)//'/rrtmg_lw.nc',nf90_nowrite,ncid)
 	
 	status(2)  = nf90_inq_varid(ncid,"PlanckFractionLowerAtmos",varID)
 	status(3)  = nf90_get_var(ncid, varID, fracrefao, &

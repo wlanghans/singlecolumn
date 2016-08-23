@@ -11,6 +11,8 @@ integer :: nz  = 61
 
 real,allocatable,dimension(:) :: z, zi, adz, adzw
 
+integer :: nx = 1
+integer :: ny = 1
 integer :: nstep = 0
 real :: time = 0.
 real :: dt 

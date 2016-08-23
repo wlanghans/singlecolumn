@@ -8,16 +8,26 @@ integer, parameter :: double_bytes = 8
 
 integer :: nzm = 60 
 integer :: nz  = 61 
+integer,parameter :: nx  = 1 
+integer,parameter :: ny  = 1 
 
 real,allocatable,dimension(:) :: z, zi, adz, adzw
 
 integer :: nstep = 0
 real :: time = 0.
+integer:: nrad =1
 real :: dt 
 real :: dz
 integer :: nstop =0
 logical :: doconstdz  = .true.
 character(80) case
+
+
+logical :: compute_reffc = .false.
+logical :: compute_reffi = .false.
+
+real :: day0=0.  ! starting day (including fraction)
+real :: day        ! current day (including fraction)
 
 character(80) :: path   ! The relative path from  main directory to the run directory
 

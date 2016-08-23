@@ -34,7 +34,8 @@ allocate(sgs_t_flux(nz), sgs_qt_flux(nz), sgs_thv_flux(nz), qt_flux_ed(nz), qt_f
 allocate(qcsgs_mf(nz), tabs_mf(nz), qcsgs_pdf(nzm), qisgs_mf(nz), qtsgs_mf(nz), qisgs_pdf(nzm), &
                     cfrac_mf(nz), frac_mf(nz), cfrac_tot(nzm), cfrac_pdf(nzm), tke_thvflx(nzm),cthl(nzm), cqt(nzm),&
               varwrt1(nzm))
-allocate(q1(nzm),sigmas(nzm),thetaligrad(nzm),qtgrad(nzm),radlwup(nz))
+allocate(q1(nzm),sigmas(nzm),thetaligrad(nzm),qtgrad(nzm),radlwup(nz),radlwdn(nz), radswup(nz), radswdn(nz), radqrlw(nz)&
+                 , radqrsw(nz))
 
 allocate(UPM(nz,nup),UPW(nz,nup),UPT(nz,nup),UPQT(nz,nup),UPQCL(nz,nup),UPQCI(nz,nup),&
          UPA(nz,nup),UPU(nz,nup),UPV(nz,nup),UPTHV(nz,nup),UPTABS(nz,nup),ENT(nzm,nup),&

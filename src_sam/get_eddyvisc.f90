@@ -15,7 +15,6 @@ real qsatt,dqsat, dtkedtsum, dtkedtmin, l23
 real :: thetalt, thetalk, thetall, qtt, qtk, qtl, covarqtthetal, varqt, varthetal, wthl, wqt
 integer i,j,k,kc,kb
 
-! call t_startf('tke_full')
 
 if (doteixpbl) then
   Ck=0.5
