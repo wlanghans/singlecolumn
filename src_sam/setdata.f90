@@ -323,6 +323,97 @@ do k = 1,nzm
    
 end do
 
+elseif (trim(case).eq.'RADTEST2') then
+
+zinvbottom  = 1000.
+theta0      = 300.
+qv0         = 15.e-03
+dthetadzfree= 3.5e-03
+dthetadzinv = 20.0e-03
+dqvdzpbl    = 0.0
+dqvdzfree   = - 9.4e-07
+presi(1)    = p00
+
+do k = 1,nzm
+   if (z(k).lt.12000.) then
+      theta(k) = theta0+ z(k) * dthetadzfree
+      qv(k) = max(0.,qv0*exp(-z(k)/3000.  ))
+   else
+      theta(k) = theta0+ 12000. * dthetadzfree + (z(k)-12000.) * dthetadzinv
+      qv(k) = max(0.,qv0*exp(-z(k)/3000.  ))
+   end if
+
+   thetav(k)= theta(k)*(1.+epsv*qv(k))
+   ! get pressure at cell center and at next face from hydrostatic eqn
+   pres(k) = presi(k)*(1. - ggr/cp/thetav(k)*(p00/presi(k))**(rgas/cp) * (z(k)-zi(k)) )**(cp/rgas)
+   presi(k+1) = pres(k)*(1. - ggr/cp/thetav(k)*(p00/pres(k))**(rgas/cp) * (zi(k+1)-z(k)) )**(cp/rgas)
+ 
+   ! get temp
+   tabs(k) = thetav(k)/(1.+epsv*qv(k))*(pres(k)/p00)**(rgas/cp)
+ 
+   ! get rho (density of dry air) from gas law
+   rho(k) = pres(k)/rgas/tabs(k)/(1.+rv/rgas*qv(k))*100.
+   
+   u(k)     = 0.
+   v(k)     = 0.
+   tke(k)   = 0.001
+   qcl(k)   = 0.
+   qpl(k)   = 0.
+   qci(k)   = 0.
+   qpi(k)   = 0.
+
+   
+end do
+
+elseif (trim(case).eq.'RADTEST') then
+
+zinvbottom  = 1000.
+theta0      = 300.
+qv0         = 15.e-03
+dthetadzfree= 3.5e-03
+dthetadzinv = 20.0e-03
+dqvdzpbl    = 0.0
+dqvdzfree   = - 9.4e-07
+presi(1)    = p00
+
+do k = 1,nzm
+   if (z(k).lt.zinvbottom) then
+      theta(k) = theta0
+      qv(k) = max(0.,qv0)
+      !qv(k) = max(0.,qv0*exp(-(z(k))/3000.  ))
+      qcl(k) = max(0.0,(z(k)-600.)/(1000.-600.)*0.5e-3)
+   elseif (z(k).ge.zinvbottom.and.z(k).lt.12000.) then
+      theta(k) = theta0+ (z(k)) * dthetadzfree
+      qv(k) = max(0.,qv0*exp(-(z(k))/3000.  ))
+      qcl(k) = 0.0
+   else
+      theta(k) = theta0+ (12000.) * dthetadzfree + (z(k)-12000.) * dthetadzinv
+      qv(k) = max(0.,qv0*exp(-(z(k))/3000.  ))
+      qcl(k) = 0.0
+   end if
+
+   thetav(k)= theta(k)*(1.+epsv*qv(k))
+   ! get pressure at cell center and at next face from hydrostatic eqn
+   pres(k) = presi(k)*(1. - ggr/cp/thetav(k)*(p00/presi(k))**(rgas/cp) * (z(k)-zi(k)) )**(cp/rgas)
+   presi(k+1) = pres(k)*(1. - ggr/cp/thetav(k)*(p00/pres(k))**(rgas/cp) * (zi(k+1)-z(k)) )**(cp/rgas)
+ 
+   ! get temp
+   tabs(k) = thetav(k)/(1.+epsv*qv(k))*(pres(k)/p00)**(rgas/cp)
+ 
+   ! get rho (density of dry air) from gas law
+   rho(k) = pres(k)/rgas/tabs(k)/(1.+rv/rgas*qv(k))*100.
+   
+   u(k)     = 0.
+   v(k)     = 0.
+   tke(k)   = 0.001
+   !qcl(k)   = 0.
+   qpl(k)   = 0.
+   qci(k)   = 0.
+   qpi(k)   = 0.
+
+   
+end do
+
 elseif (trim(case).eq.'WITEK11') then
 
 zinvbottom  = 1350.
@@ -470,7 +561,7 @@ UPCF=0.
  tkh=0.
 
  ! write initial condition
- open(unit=45,file='./'//trim(case)//'/'//trim(case)//'.init',&
+ open(unit=45,file='./'//trim(path)//'/'//trim(case)//'.init',&
            form='formatted', action='write')
  write(45,FMT1)'z','p','rho','T','th','thv','thli','qv' 
  do k=1,nzm

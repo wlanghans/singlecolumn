@@ -18,9 +18,7 @@ else
 
 ! Call full radiation package:
  
-    write(*,*)'ERROR: Full radiation not implemented yet.'
-    stop
-    !call rad_full()	
+    call rad_full()	
  
 endif
 

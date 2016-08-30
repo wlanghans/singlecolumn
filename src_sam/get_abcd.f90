@@ -78,7 +78,7 @@
               d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
                     tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
                    -tkf(k)*rhof(k)/adzw(k)/dz*betam*(s(k)-s(k-1))         &
-                   +(rhof(k)*(sumMs(k) - betam*s(k)*sumM(k)))&
+                   +(rhof(k)*(sumMs(k) - betam*s(k)*sumMloc(k)))&
                    -(rhof(k+1)*(sumMs(k+1) - betam*s(k+1)*sumMloc(k+1))) )
               !d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
               !      tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &

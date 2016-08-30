@@ -89,11 +89,11 @@ logical :: doshortwave=.false.
 logical :: doradsimple=.true.
 logical :: doradhomo=.false.
 logical :: doseasons=.false.
-logical :: doperpetual=.false.
-logical :: dosolarconstant=.false.
+logical :: doperpetual=.true.
+logical :: dosolarconstant=.true.
 logical :: notracegases=.false.
-real    :: solar_constant = 685. ! solar constant (in W/m2)
-real    :: zenith_angle = 51.7   ! zenith angle (in degrees)
+real    :: solar_constant = 413.98 ! solar constant (in W/m2)
+real    :: zenith_angle = 50.5   ! zenith angle (in degrees)
 real    :: nxco2 = 1         ! factor to modify co2 concentration
 real    :: coszrs
 real:: longitude0 = 0.    ! latitude of the domain's center 
@@ -111,7 +111,8 @@ logical:: snapshot_as_double = .false.
 character(900) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,p,rho,qt,qv,qn,qcl,qci,&
 		qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
 		cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke,tend_buoy_tke,&
-		tend_shear_tke,tend_diss_tke,tkeflx,pblh,B,upw,upthd,ent,wstar'
+		tend_shear_tke,tend_diss_tke,tkeflx,pblh,B,upw,upthd,ent,wstar,tend_rad_t,&
+                radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw'
 
 
 end module params

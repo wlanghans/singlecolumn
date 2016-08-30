@@ -742,6 +742,72 @@ module snapshot
             end if
 
 
+            if (trim(field_name) .eq. 'radqrsw') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'radqrsw', &
+                  ! Long name
+                                           'SW radiative heating rate', &
+                  ! Units
+                                           'K/s', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => radqrsw (1:nzm)
+            end if
+            if (trim(field_name) .eq. 'radswdn') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'radswdn', &
+                  ! Long name
+                                           'SW radiative flux down', &
+                  ! Units
+                                           'W/m2', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => radswdn (1:nz)
+            end if
+            if (trim(field_name) .eq. 'radswup') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'radswup', &
+                  ! Long name
+                                           'SW radiative flux up', &
+                  ! Units
+                                           'W/m2', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => radswup (1:nz)
+            end if
+
+            if (trim(field_name) .eq. 'radqrlw') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'radqrlw', &
+                  ! Long name
+                                           'LW radiative heating rate', &
+                  ! Units
+                                           'K/s', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => radqrlw (1:nzm)
+            end if
+            if (trim(field_name) .eq. 'radlwdn') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'radlwdn', &
+                  ! Long name
+                                           'LW radiative flux down', &
+                  ! Units
+                                           'W/m2', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => radlwdn (1:nz)
+            end if
             if (trim(field_name) .eq. 'radlwup') then
                call fill_fields_snapshot( &
                   ! Short name

@@ -242,7 +242,7 @@ end if ! if tke is present
 qtel=qte 
 
 
-else ! don't use sgs cloud scheme
+else ! don't use sgs cloud scheme, but grid-scale cloud scheme
 
 tabs(k)=(t(k)-ggr*z(k))/cp + fac_cond*(qcl(k)+qpl(k)) + fac_sub*(qci(k)+qpi(k))
 thetali(k) = (tabs(k)- fac_cond*(qcl(k)) - fac_sub*(qci(k)) ) / totheta
