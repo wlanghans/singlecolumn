@@ -17,7 +17,8 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
                      doteixpbl,dowitekpbl,dolanghanspbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
-                     doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh, lcld
+                     doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh, lcld, &
+                     doenergyunit
 
 call getarg(1,path)
 path =trim(adjustl(path))

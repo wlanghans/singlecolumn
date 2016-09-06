@@ -72,10 +72,17 @@ else   ! IF SFC_FLX_FXD=True
   ! WL invert bulk transfer formulae to get drag coefficients C=-flux/dtheta/vmag, which are needed for implicit formulation
   ! WL coefficients might be negative just to ensure that fluxes equal their prescribed values; in this case the surface values are meaningless (that's ok)
   ! NOTE: if fluxes are prescribed, we will use neuman conditions. Cs will not be used
-  sgs_t_flux(1)  = fluxt0*cp 
-  Ctheta = - fluxt0 /( theta(1)  - theta_s) /vmag
-  sgs_qt_flux(1)  = fluxq0 
-  Crv    = - fluxq0 / ( qv(1)/(1.-qv(1)) - r_s  ) / vmag 
+  if (doenergyunit) then
+    sgs_t_flux(1)  = fluxt0 / rho(1)
+    sgs_qt_flux(1) = fluxq0 / (rho(1)*lcond)
+  else
+    ! kinematic units
+    sgs_t_flux(1)  = fluxt0*cp 
+    sgs_qt_flux(1)  = fluxq0 
+
+  end if
+  Ctheta = - sgs_t_flux(1)/cp /( theta(1)  - theta_s) /vmag
+  Crv    = - fluxq0 / ( qv(1) - r_s  ) / vmag 
   sgs_thv_flux(1) = sgs_t_flux(1)/cp * (1.+epsv* qv(1)) + epsv * theta(1) * sgs_qt_flux(1)
 
 

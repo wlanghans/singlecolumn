@@ -36,6 +36,7 @@ real::   fluxq0 =0.  ! surface latent flux, m/s
 real::   tau0   =0.  ! surface stress, m2/s2
 real::   z0     =0.0035  ! roughness length
 logical:: sfc_flx_fxd =.true. ! surface sensible flux is fixed
+logical:: doenergyunit=.false.
 logical:: sfc_tau_fxd =.true.! surface drag is fixed
 logical :: sfc_cm_fxd=.false.
 logical :: sfc_cs_fxd=.false.
