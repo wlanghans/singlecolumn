@@ -55,7 +55,7 @@ logical, intent(in) :: lenv
 !local variables
 integer k, kb, kc
 real dtabs, an, bn, ap, bp, om, ag, omp, omn
-real fac1,fac2
+real fac1,fac2, fac_a
 real fff,dfff,dqsat
 real lstarn,dlstarn,lstarp,dlstarp, dtabsa, hlip, hlie, frac_mf2, qce, qie, qte, qtel, qne, tabse
 integer niter
@@ -189,10 +189,17 @@ end if
  qce = qne*omn
  qie = qne*(1.-omn)
 
- cthl(k) = cfrac_pdf(k) * (1. - (fac_cond/totheta - (1.+epsv) * tabse/totheta)*lambdaf * alphaf) & ! see bechtold 95 (a,b,alpha,beta) and my own notes
+
+ !cthl(k) = cfrac_pdf(k) * (1. - (fac_cond/totheta - (1.+epsv) * tabse/totheta)*lambdaf * alphaf) & ! see bechtold 95 (a,b,alpha,beta) and my own notes
+ fac_a = (1.-qte + (1.+epsv)*qsl)*(1.+epsv*lcond/rgas/tabse)  & 
+           / (1.+epsv*lcond/rgas/tl**2 *fac_cond *qsl)
+ cthl(k) = cfrac_pdf(k) * fac_a & ! see bechtold 95 (a,b,alpha,beta) and my own notes
       + (1.-cfrac_pdf(k)) * (1.+epsv*qte)
- cqt(k) =  cfrac_pdf(k) * (epsv*tabse/totheta + (fac_cond/totheta + (1.+epsv) * tabse/totheta) * lambdaf) &
+ !cqt(k) =  cfrac_pdf(k) * (epsv*tabse/totheta + (fac_cond/totheta + (1.+epsv) * tabse/totheta) * lambdaf) &
+ cqt(k) =  cfrac_pdf(k) * (fac_cond/tabse*fac_a - 1.)*tabse/totheta &
       + (1.-cfrac_pdf(k)) * epsv*thetali(k)
+
+
  
  ! get final domain averages (convective and environment)
  qcl(k) = (1.-frac_mf2) * qce + 0.5 * frac_mf2 * (qcsgs_mf(k)+qcsgs_mf(k+1))
