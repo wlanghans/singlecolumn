@@ -53,14 +53,27 @@ implicit none
 logical, intent(in) :: lenv
 
 !local variables
-integer k, kb, kc
+integer k, kb, kc, n,ks
 real dtabs, an, bn, ap, bp, om, ag, omp, omn
+real, dimension(nzm) :: qte
 real fac1,fac2, fac_a
 real fff,dfff,dqsat
-real lstarn,dlstarn,lstarp,dlstarp, dtabsa, hlip, hlie, frac_mf2, qce, qie, qte, qtel, qne, tabse
-integer niter
-real :: lambdaf, alphaf, qsl, totheta, tl, qsw, qsi, cfrac_l, cfrac_t, thetalil
+real lstarn,dlstarn,lstarp,dlstarp, dtabsa, hlip, hlie, frac_mf2, qce, qie, qne, tabse, ds
+integer,parameter :: niter=100
+real :: lambdaf, alphaf, qsl, totheta, tl, qsw, qsi, cfrac_l, cfrac_t, tabsnoql, dqndt
 real,dimension (2) :: tabs1, tabs2
+
+real, parameter :: zsig_max = 1.0e-2
+
+real, parameter :: q_crit=1.6
+
+real :: cab,ckk,leps
+real,dimension(nzm) :: qtqt, thlthl, qtthl
+real, dimension(2:nzm-1) :: astar,bstar,cstar,dstar
+real, dimension(nzm-2) :: atri,btri,ctri,dtri
+
+
+if (dosgscloud) then
 
 an = 1./(tbgmax-tbgmin) 
 bn = tbgmin * an
@@ -89,24 +102,7 @@ end if
 
 totheta=(pres(k)/p00)**(rgas/cp)
 
-
-if (dosgscloud) then
-
-
-if (k.eq.1.or.tke(k).le.0.0) then
-
-
-! no PDF scheme needed if no variability (or if in first layer)
-! if condensate is present, then it comes from all-or-nothing adjustment
-! and will not be modified here
- call cloud(k)
-
- ! store for next k to compute gradient
- qtel=qt(k)
- thetalil=thetali(k)
-
-else
-
+! environment properties
 ! interpolate plume area fraction to mass level
  frac_mf2 = 0.5*(frac_mf(k)+frac_mf(k+1))
 if (frac_mf2.gt.0.0.and.lenv)  then
@@ -115,74 +111,197 @@ if (frac_mf2.gt.0.0.and.lenv)  then
     hlip = 0.5*(cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k) +&
             cp*tabs_mf(k+1) + ggr*zi(k+1) - lcond * qcsgs_mf(k+1) - lsub * qisgs_mf(k+1))
     ! total water in environment
-    qte = (qt(k) - frac_mf2*0.5*(qtsgs_mf(k)+qtsgs_mf(k+1)))/(1.-frac_mf2)
+    qte(k) = (qt(k) - frac_mf2*0.5*(qtsgs_mf(k)+qtsgs_mf(k+1)))/(1.-frac_mf2)
   else
     ! get plume moist static energy
     hlip = cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k)
     ! total water in environment
-    qte = (qt(k) - frac_mf2*qtsgs_mf(k))/(1.-frac_mf2)
+    qte(k) = (qt(k) - frac_mf2*qtsgs_mf(k))/(1.-frac_mf2)
   end if
   hlie   = ((t(k)+lcond*qpl(k)+lsub*qpi(k)-frac_mf2*hlip))/(1.-frac_mf2)
 else
-  qte = qt(k)
+  qte(k) = qt(k)
   hlie   = t(k)+lcond*qpl(k)+lsub*qpi(k)
 end if
 
-! environment properties
 
-! thetali
- thetali(k) = hlie  / cp / totheta 
+! thetali in environment
+ thetali(k) = (hlie-ggr*z(k))  / cp / totheta 
+
+end do
+
+do k=1,nzm
+! compute vertical gradients
+
+kb=k-1
+kc=k+1
+if(k.eq.1) then
+ kb=1
+ kc=2
+elseif (k.eq.nzm) then
+ kb=nzm-1
+ kc=nzm
+end if
+
+ thetaligrad(k) = (thetali(kc)-thetali(kb))/(z(kc)-z(kb))
+ qtgrad(k)      = (qte(kc)-qte(kb))/(z(kc)-z(kb))
+ tke(k)         = max(0.0,tke(k))
+
+end do
+
+if (dovartrans) then
+
+  ! include transport of (co-)variance and numerically solve 2nd
+  ! order ODE
+  ! set lower BC: balance of diss and prod
+  qtqt(1)  = lcld**2*qtgrad(1)**2.
+  thlthl(1)= lcld**2*thetaligrad(1)**2.
+  qtthl(1) = lcld**2*qtgrad(k)*thetaligrad(1) 
+  ! set upper BC: zero variance
+  qtqt(nzm)  = 0.0
+  thlthl(nzm)= 0.0
+  qtthl(nzm) = 0.0
+
+
+  ! compute coefficients to solve for thlthl
+  cab = 2.5   ! same as in Bechtold 1992, JAS
+  ckk = 0.5   ! has to be same as in TKE scheme
+  do k=2,nzm-1
+    ks=k-1
+    leps = (smix(k)+1.d-10)/2.5  ! Same as in TKE scheme
+    astar(k) = cab / ckk / leps / (smix(k)+1.0d-10)
+    dstar(k) = 2. * thetaligrad(k) * thetaligrad(k)
+    if (tke(k).eq.0.0) then
+      cstar(k)=0.
+      bstar(k)=0.
+    else  
+      cstar(k)=1.
+      bstar(k) = (log(smix(k+1)*sqrt(tke(k+1))+1.d-12) - log(smix(k-1)*sqrt(tke(k-1))+1.d-12))/(adz(k) + adzw(k+1))/dz
+    end if
+    
+    if (k.gt.2.and.k.lt.nzm-1) then
+      atri(ks) = cstar(k)/adz(k)/adzw(k)/dz/dz  - bstar(k)/(adz(k) + adzw(k+1) )/dz
+      btri(ks) = astar(k) - (cstar(k)/adzw(k)/dz+1./adzw(k+1)/dz)/adz(k)/dz
+      ctri(ks) = cstar(k)/adz(k)/adzw(k+1)/dz/dz  + bstar(k)/(adz(k) + adzw(k+1) )/dz
+      dtri(ks) = dstar(k)
+    elseif (k.eq.2) then
+      atri(ks) = 0.0
+      btri(ks) = 1. - (cstar(k)/adzw(k)/dz+1./adzw(k+1)/dz)/adz(k)/dz
+      ctri(ks) = cstar(k)/adz(k)/adzw(k+1)/dz/dz  + bstar(k)/(adz(k) + adzw(k+1) )/dz
+      dtri(ks) = dstar(k) - thlthl(1) * (1./adz(k)/adzw(k)/dz/dz  - bstar(k)/(adz(k) + adzw(k+1) )/dz)
+    else
+      atri(ks) = cstar(k)/adz(k)/adzw(k)/dz/dz  - bstar(k)/(adz(k) + adzw(k+1) )/dz
+      btri(ks) = 1. - (cstar(k)/adzw(k)/dz+1./adzw(k+1)/dz)/adz(k)/dz
+      ctri(ks) = 0.0
+      dtri(ks) = dstar(k)
+    end if 
+  end do
+  !solve tridiagonal matrix
+  call tridiag(atri,btri,ctri,dtri,nzm-2)
+  thlthl(2:nzm-1) = dtri 
+  varwrt1=0.
+  varwrt1(2:nzm-1) = thlthl(2:nzm-1)
+
+  qtqt = 0.
+  qtthl = 0.
+  
+   
+else
+
+   ! use balance between dissipation and production
+   ! to diagnose (co-)variances, then apply limiters
+
+   ! assuming leps=l/2.5 the variances are 2 l^2 dadz dbdz
+   ! use constant length scale of 250 m from Cheineit, which equals l=250 * sqrt(2)  in the variance formulation
+   do k=1,nzm
+    qtqt(k)  = lcld**2*qtgrad(k)**2. 
+    thlthl(k)= lcld**2*thetaligrad(k)**2.
+    qtthl(k) = lcld**2*qtgrad(k)*thetaligrad(k)
+
+    ! limit variances
+    ! Kay's limiters
+    !thlthl(k)=max(min(thlthl(k),10.),0.01)
+    !qtqt(k)=max(min(qtqt(k),1.e-5),1.e-8)
+    !qtthl(k)=sign(max(min(abs(qtthl(k)),1.e-2),1.e-5),qtthl(k))
+    ! max/min taken from Heinze 2005, JAMES
+    thlthl(k)=max(min(thlthl(k),3.),0.001)
+    qtqt(k)=max(min(qtqt(k),2.e-6),1.e-8)
+    qtthl(k)=max(min(qtthl(k),0.02d-3),-4.d-3)
+   end do
+end if
+
+do k=1,nzm
  ! get liquid water temperature Tl
+ totheta=(pres(k)/p00)**(rgas/cp)
  tl     = totheta * thetali(k)
-
- ! compute gradients of qt and thetali
- thetaligrad(k) = (thetali(k)-thetalil)/(z(k)-z(k-1))
- qtgrad(k)      = (qte-qtel)/(z(k)-z(k-1))
-
- if (k.eq.2) then
-   thetaligrad(1) = thetaligrad(2)
-   qtgrad(1)      = qtgrad(2)
- end if
-
- ! store for next k to compute gradient
- qtel=qte            ! this is the environmental qt
- thetalil=thetali(k) ! this is the environmental thetali
-
+ tabsnoql = tl 
+ tabse=tabsnoql
 
  ! get saturation mixing ratio at Tl
  omn = max(0.,min(1.,(tl-tbgmin)*an))
  qsw=qsatw(tl,pres(k))
  qsi=qsati(tl,pres(k))
- qsl = omn * qsw + (1.-omn) * qsi
+ qsl = qsw ! omn * qsw + (1.-omn) * qsi
  ! get dqsdT
- alphaf = (omn * qsw * lcond/(tl**2*rv) + (1.-omn) * qsi * lsub/(tl**2*rv))
- lambdaf = (1. + alphaf * (omn*fac_cond + (1.-omn) * fac_sub) )**(-1.)
+ !alphaf = (omn * qsw * lcond/(tl**2*rv) + (1.-omn) * qsi * lsub/(tl**2*rv))
+ alphaf = qsw * lcond/(tl**2*rv) 
+ !lambdaf = (1. + alphaf * (omn*fac_cond + (1.-omn) * fac_sub) )**(-1.)
+ lambdaf = (1. + alphaf *fac_cond )**(-1.)
  alphaf =alphaf * totheta
- ! use constant length scale of 250 m
- sigmas(k) = lcld*(max(0.0,qtgrad(k)**2. + alphaf**2*thetaligrad(k)**2. - 2. * alphaf * thetaligrad(k)*qtgrad(k)))**(0.5)
- sigmas(k) = max(sigmas(k),1.d-12)
 
- ! compute saturation deficit
- q1(k)= qte-qsl
 
- ! get cloud fraction and mean liquid water content
- cfrac_pdf(k) = 0.5 * (1. + erf(   max(-3.,min(3.,q1(k)/(sigmas(k)*1.41)))    ))                           ! Bechtold Eq (20)
- if (cfrac_pdf(k).eq.cfrac_l) cfrac_pdf(k) = 0.
- if (cfrac_pdf(k).eq.cfrac_t) cfrac_pdf(k) = 1.
- if (cfrac_pdf(k).eq.0.0.or.cfrac_pdf(k).eq.1.) sigmas(k) = 0.0
-  if (sigmas(k).ne.0.0) then
-   qne = max(0.0,lambdaf  * (cfrac_pdf(k) * q1(k) + sigmas(k)*exp(-((q1(k)/sigmas(k))**2)/2.)/2.51 ))  ! Bechtold Eq (21)
- else
-   qne = max(0.0,lambdaf  * (cfrac_pdf(k) * q1(k)))
+ ds=lambdaf *(qte(k)-qsl)
+ sigmas(k) = lambdaf * (max(0.0,qtqt(k) + alphaf**2 * thlthl(k)**2. - 2. * alphaf * qtthl(k)))**(0.5)
+ !sigmas(k) = MIN ( zsig_max, sigmas(k) )
+
+ n=0
+ dtabs=100.
+ do while (abs(dtabs).gt.0.01.and.n.le.niter) 
+
+ if (n.gt.0) then ! not first guess anymore
+   tabse  = tabse+dtabs
+   ! compute mean saturation deficit based on mean temperature
+   ! get saturation mixing ratio at T
+   omn = max(0.,min(1.,(tabse-tbgmin)*an))
+   qsw=qsatw(tabse,pres(k))
+   qsi=qsati(tabse,pres(k))
+   qsl = qsw !omn * qsw + (1.-omn) * qsi
+   ds=qte(k)-qsl
  end if
- if (qne.lt.qp_threshold) qne=0.
 
- ! re-define  sigmas and q1 to be in line with definition in Bechtold
- sigmas(k)  = sigmas (k) * alphaf/2.
- q1(k)      = q1(k) * alphaf/2.
+ IF (sigmas(k).le.0.0) then
+   cfrac_pdf(k) =   ABS ( (SIGN(1.0,ds)+1.0)*0.5 )
+   qne = cfrac_pdf(k) * ds
+   q1(k)=-999.
+   dqndt = -dtqsatw(tabse,pres(k))
+ ELSE
+   q1(k)= ds/sigmas(k)
+   cfrac_pdf(k) = MIN ( 1.0, MAX ( 0.0, &
+                                        0.5 * (1.0+q1(k)/q_crit) ) )
+   IF ( q1(k) .le. - q_crit ) THEN
+      qne = 0.0
+      dqndt = 0.
+   ELSEIF ( q1(k) .ge. q_crit ) THEN
+      qne = sigmas(k) * q1(k) 
+      dqndt = -dtqsatw(tabse,pres(k))
+   ELSE
+      qne = sigmas(k) * (q1(k)+q_crit) * (q1(k)+q_crit) / (2.*(q_crit+q_crit))
+      dqndt = - (q1(k)+q_crit)/(2.*q_crit) * dtqsatw(tabse,pres(k))
+   ENDIF
+ END IF
+ 
+ !if (n.gt.0) then
+   !dtabs= (tl + an*qne*tbgmin*fac_fus + qne*fac_sub  )   &
+   !       / (1. + an*qne*fac_fus ) - tabse
+   dtabs= (tabsnoql - tabse + fac_cond * qne) / (1.- fac_cond * dqndt)
+ !else
+   !tabse  = (tl + an*qne*tbgmin*fac_fus + qne*fac_sub  )   &
+   !       / (1. + an*qne*fac_fus )
+ !end if
 
- tabse  = (tl + an*qne*tbgmin*fac_fus + qne*fac_sub  )   &
-          / (1. + an*qne*fac_fus )
+ n=n+1
+
+ end do
 
  ! partition condensate into liquid and ice using temperature
  omn = max(0.,min(1.,(tabse-tbgmin)*an))
@@ -190,15 +309,14 @@ end if
  qie = qne*(1.-omn)
 
 
- !cthl(k) = cfrac_pdf(k) * (1. - (fac_cond/totheta - (1.+epsv) * tabse/totheta)*lambdaf * alphaf) & ! see bechtold 95 (a,b,alpha,beta) and my own notes
- fac_a = (1.-qte + (1.+epsv)*qsl)*(1.+epsv*lcond/rgas/tabse)  & 
-           / (1.+epsv*lcond/rgas/tl**2 *fac_cond *qsl)
- cthl(k) = cfrac_pdf(k) * fac_a & ! see bechtold 95 (a,b,alpha,beta) and my own notes
-      + (1.-cfrac_pdf(k)) * (1.+epsv*qte)
- !cqt(k) =  cfrac_pdf(k) * (epsv*tabse/totheta + (fac_cond/totheta + (1.+epsv) * tabse/totheta) * lambdaf) &
- cqt(k) =  cfrac_pdf(k) * (fac_cond/tabse*fac_a - 1.)*tabse/totheta &
+ cthl(k) = cfrac_pdf(k) * (1. - (fac_cond/totheta - (1.+epsv) * tabse/totheta)*lambdaf * alphaf) & ! see bechtold 95 (a,b,alpha,beta) and my own notes
+ !fac_a = (1.-qte + (1.+epsv)*qsl)*(1.+epsv*lcond/rgas/tabse)  & 
+ !          / (1.+epsv*lcond/rgas/tl**2 *fac_cond *qsl)
+ !cthl(k) = cfrac_pdf(k) * fac_a & ! see bechtold 95 (a,b,alpha,beta) and my own notes
+      + (1.-cfrac_pdf(k)) * (1.+epsv*qte(k))
+ cqt(k) =  cfrac_pdf(k) * (epsv*tabse/totheta + (fac_cond/totheta + (1.+epsv) * tabse/totheta) * lambdaf) &
+ !cqt(k) =  cfrac_pdf(k) * (fac_cond/tabse*fac_a - 1.)*tabse/totheta &
       + (1.-cfrac_pdf(k)) * epsv*thetali(k)
-
 
  
  ! get final domain averages (convective and environment)
@@ -214,17 +332,16 @@ end if
  thetar(k) = theta(k)  * (1.+epsv*qv(k)-qn(k))
  thetali(k)= theta(k) - 1./totheta *(fac_cond*qcl(k) + fac_sub*qci(k)) 
 
-end if ! if tke is present
+end do
 
+else  ! use all-or-nothing scheme
 
-else  
-
-! use all-or-nothing scheme
-call cloud(k)
+  do k=1,nzm
+    call cloud(k)
+  end do ! loop over k
 
 end if
 
-end do ! loop over k
 
 end subroutine sgscloudmf
 

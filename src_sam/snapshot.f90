@@ -204,6 +204,19 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => theta(1:nzm)
             end if
+            if (trim(field_name) .eq. 'thl') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'thl', &
+                  ! Long name
+                                           'Liquid water potential temperature', &
+                  ! Units
+                                           'K', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => thetali(1:nzm)
+            end if
 
             if (trim(field_name) .eq. 'rho') then
                call fill_fields_snapshot( &

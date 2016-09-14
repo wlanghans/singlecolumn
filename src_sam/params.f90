@@ -52,6 +52,7 @@ integer :: nup = 1
 
 logical:: dosgs = .true.
 logical:: dosgscloud = .true.
+logical :: dovartrans=.false.
 real :: lcld = 250.
 logical:: doedmf = .false.
 logical:: donoplumesat=.false.
@@ -113,7 +114,7 @@ character(900) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,p,rho,qt,qv,qn,qcl,
 		qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
 		cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke,tend_buoy_tke,&
 		tend_shear_tke,tend_diss_tke,tkeflx,pblh,B,upw,upthd,ent,wstar,tend_rad_t,&
-                radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw'
+                radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,thetaligrad,qtgrad,thl'
 
 
 end module params

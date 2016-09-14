@@ -77,7 +77,6 @@ implicit none
     ENDDO
     if (kthv.eq.nzm-2) kthv=nzm-3
  
-    varwrt1=dthvdz
 
     !compute quadratic fit to thetav/dz using three points
     !then let height of vertex be the PBL height to allow for PBL height to fall in between levels

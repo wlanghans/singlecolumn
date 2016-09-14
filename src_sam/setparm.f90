@@ -18,7 +18,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
                      doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh, lcld, &
-                     doenergyunit
+                     doenergyunit, dovartrans
 
 call getarg(1,path)
 path =trim(adjustl(path))
@@ -194,7 +194,8 @@ if (snapshot_fields(1:1) .eq. '+') then
                                 qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
                                 cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke, &
                                 tend_buoy_tke,tend_shear_tke,tend_diss_tke,pblh,B,upw,upthd,ent,wstar,&
-                                tend_rad_t,radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,'&
+                                tend_rad_t,radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,thetaligrad,&
+                                qtgrad,thl,'&
                      //trim(snapshot_fields(2:len(snapshot_fields)))
 end if
 

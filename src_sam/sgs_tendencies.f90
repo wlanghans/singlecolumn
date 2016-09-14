@@ -20,7 +20,7 @@ else
   !Dirichlet
   call get_abcd(rho,qt,sumMrt,Crv,tkh,r_s,a,b,c,d,.true.,.false.)
 end if
-call tridiag(a,b,c,d)
+call tridiag(a,b,c,d,nzm)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
   ! Diagnose implicit surface flux in kinematic units
@@ -59,7 +59,7 @@ else
   !Dirichlet
   call get_abcd(rho,qp,sumMrp,Crv,tkh,0.0,a,b,c,d,.true.,.false.)
 end if
-call tridiag(a,b,c,d)
+call tridiag(a,b,c,d,nzm)
 
 sgs_qp_flux(1)  = 0.
 sgs_qp_flux(nz) = 0.
@@ -92,7 +92,7 @@ else
   !Dirichlet
   call get_abcd(rho,t,sumMt,Ctheta,tkh,t_s,a,b,c,d,.true.,.false.)
 end if
-call tridiag(a,b,c,d)
+call tridiag(a,b,c,d,nzm)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface hli flux 
@@ -139,7 +139,7 @@ else
   ! Dirichlet
   call get_abcd(rho,u,sumMu,Cm,tk,0.,a,b,c,d,.false.,.false.)
 end if
-call tridiag(a,b,c,d)
+call tridiag(a,b,c,d,nzm)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface momentum flux
@@ -168,7 +168,7 @@ else
   ! Dirichlet
   call get_abcd(rho,v,sumMv,Cm,tk,0.,a,b,c,d,.false.,.false.)
 end if
-call tridiag(a,b,c,d)
+call tridiag(a,b,c,d,nzm)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface momentum flux
@@ -196,7 +196,7 @@ if (progtke) then
     sgs_tke_flux(1) = 0.0   ! lower BC for tke transfer (questionable)
     call get_abcd(rho,tke,sumMtke,0.,tk,0.,a,b,c,d,.false.,.true.,sgs_tke_flux(1))
   end if
-  call tridiag(a,b,c,d)
+  call tridiag(a,b,c,d,nzm)
 
   if (dotkedirichlet) sgs_tke_flux(1) = - 2.*tk(1)/adz(1)/dz * (betap*d(1)+betam*tke(1))
   !diagnose atm. fluxes
