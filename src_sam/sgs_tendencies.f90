@@ -85,6 +85,16 @@ if (dosequential) qp = d
 !+++++++++++++++++++++++++++++++++++++++
 ! hli 
 !+++++++++++++++++++++++++++++++++++++++
+
+if (dothlflux) then
+  sgs_t_flux (1) = sgs_t_flux (1)/cp
+  t = (t -ggr * z)/cp * (p00/pres)**(rgas/cp)
+  sumMt = sumMt/cp * (p00/pres)**(rgas/cp)
+  t_s = t_s/cp
+end if
+
+
+
 if (doneuman.or.sfc_flx_fxd) then 
   !Neuman
   call get_abcd(rho,t,sumMt,Ctheta,tkh,t_s,a,b,c,d,.true.,.true.,sgs_t_flux (1))
@@ -96,38 +106,64 @@ call tridiag(a,b,c,d,nzm)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface hli flux 
-  sgs_t_flux (1)       = - vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
+  if (.not.dothlflux) then
+    sgs_t_flux (1)       = - vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
 ! Diagnose implicit surface buoyancy flux 
-  sgs_thv_flux(1) = sgs_t_flux(1)/cp * (1.+epsv* qv(1)) + epsv * theta(1) * sgs_qt_flux(1)
+    sgs_thv_flux(1) = sgs_t_flux(1)/cp * (1.+epsv* qv(1)) + epsv * theta(1) * sgs_qt_flux(1)
+  else
+    sgs_t_flux (1)       = - cp * vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
+    sgs_thv_flux(1) = sgs_t_flux(1) * (1.+epsv* qv(1)) + epsv * theta(1) * sgs_qt_flux(1)
+  end if
 else
   ! Nothing to do
   sgs_t_flux (1)    =  sgs_t_flux (1)  
+  if (dothlflux) sgs_t_flux (1) = cp * sgs_t_flux (1)
 end if
 ! Diagnose atm. sgs fluxes 
 sgs_t_flux (2:nzm)       = 1. * ( & 
             (-1.)/adzw(2:nzm)/dz * 0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) ) &
         + sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm))
+if (dothlflux) sgs_t_flux (2:nzm) = cp *(pres(2:nzm)/p00)**(rgas/cp) * sgs_t_flux (2:nzm) 
 
 t_flux_ed(1)     = sgs_t_flux (1)
 t_flux_ed(nz)    = 0.0
 t_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) )
+if (dothlflux) t_flux_ed(2:nzm) = cp *(pres(2:nzm)/p00)**(rgas/cp) * t_flux_ed(2:nzm) 
 t_flux_mf(1)     = 0.
 t_flux_mf(nz)    = 0.
 t_flux_mf(2:nzm) = (sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm) )
 
-tend_sgs_t = (d - t)/dt
+if (dothlflux) t_flux_mf(2:nzm) = cp *(pres(2:nzm)/p00)**(rgas/cp) * t_flux_mf(2:nzm) 
 
-
-! get buoyancy flux from PDF scheme
-sgs_thv_flux(2:nzm) = 0.5*(cthl(1:nzm-1)+cthl(2:nzm))   * (2.*p00/(pres(1:nzm-1) + pres(2:nzm)))**(rgas/cp) / cp &
+if (dothlflux) then
+  tend_sgs_t = cp * (pres/p00)**(rgas/cp) * (d - t)/dt
+  ! get buoyancy flux from PDF scheme
+  sgs_thv_flux(2:nzm) = 0.5*(cthl(1:nzm-1)+cthl(2:nzm)) &
+   * (sgs_t_flux (2:nzm) + (2.*p00/(pres(1:nzm-1) + pres(2:nzm)))**(rgas/cp) / cp *&
+          (lcond*(qpl(1:nzm-1)+qpl(2:nzm))+lsub*(qpi(1:nzm-1)+qpi(2:nzm)))/&
+                (qp(1:nzm-1)+qp(2:nzm)+1.0d-20) * sgs_qp_flux(2:nzm)) &
+              + 0.5*(cqt(1:nzm-1)+cqt(2:nzm)) * sgs_qt_flux(2:nzm)
+else
+  tend_sgs_t = (d - t)/dt
+  ! get buoyancy flux from PDF scheme
+  sgs_thv_flux(2:nzm) = 0.5*(cthl(1:nzm-1)+cthl(2:nzm))   * (2.*p00/(pres(1:nzm-1) + pres(2:nzm)))**(rgas/cp) / cp &
                      * (sgs_t_flux (2:nzm) + (lcond*(qpl(1:nzm-1)+qpl(2:nzm))+lsub*(qpi(1:nzm-1)+qpi(2:nzm)))/& 
                 (qp(1:nzm-1)+qp(2:nzm)+1.0d-20) * sgs_qp_flux(2:nzm)) &
               + 0.5*(cqt(1:nzm-1)+cqt(2:nzm)) * sgs_qt_flux(2:nzm)
+end if
+
+
 
 ! update t
-if (dosequential) t = d
+if (dosequential) then 
+  if (.not.dothlflux) then 
+     t = d
+  else
+     t = d*cp*(pres/p00)**(rgas/cp) + ggr * z
+  end if
+end if
 
 !+++++++++++++++++++++++++++++++++++++++
 ! u 
