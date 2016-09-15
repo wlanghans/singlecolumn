@@ -1,0 +1,62 @@
+&PARAMETERS
+dz = 20.
+nzm=200
+doconstdz = .true.
+
+betap=1.0
+betam=0.0
+
+dt=10.
+nstop=2880  ! 6 hours
+
+dosequential=.true.
+dosgs=.true.
+dosgscloud=.true.
+dovartrans=.false.
+dothlflux=.true.
+lcld=150.
+dosmagor=.false.
+dowitekpbl = .false.
+doteixpbl = .true.
+doconsttk= .false.
+fixedtau=.false.
+fixedpblh = -1000.
+dopblh = .true.
+pblhfluxmin = .false.
+pblhthgrad=.true.
+dosurface=.true.
+sfc_flx_fxd=.true. 
+doneuman= .true.
+dotkedirichlet=.true.
+
+doedmf = .false.
+dosingleplume=.true.
+beta =2.0
+nup=1
+fixedfa=.true.
+fixedeps = .false.
+witekeps = .false.
+neggerseps = .true.
+donoplumesat=.true.
+eps0=2.e-03
+
+doenergyunit=.false.
+fluxt0   = 0.12    ! K m/s
+fluxq0   = 2.5e-05 ! g/g m/s
+tau0     = 0.0
+sst=-7.5
+
+doforcing=.false.
+dosubsidence=.false.
+dothuburn=.true.
+docoriolis=.false.
+dolongwave=.false.
+doshortwave=.false.
+doradsimple=.false.
+
+snapshot_do = .true.
+snapshot_start = 0
+snapshot_period =  10 ! 45
+snapshot_end = 1000000000
+snapshot_as_double = .true.
+/
