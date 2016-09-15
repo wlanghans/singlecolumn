@@ -58,7 +58,7 @@ module rad
        dt, nstep, nrad, day, day0, &
        z, dz, adz, path
   use vars, only : t, tabs, qv, qcl, qci, sst, rho, t00, &
-       pres,presi,tend_rad_t,                     &
+       pres,presi,tend_rad_t,cfrac_tot,               &
        radlwup, radlwdn, radswup, radswdn, radqrlw, radqrsw !, &
                                 ! 1D diagnostics
 !       s_flns, s_fsns, s_flnt, s_flntoa, s_fsnt, s_fsntoa, &
@@ -350,7 +350,7 @@ contains
 
           IWP(i, 1:nzm) = qci(1:nzm) * 1.e3 * layerMass(i, 1:nzm) 
           IWP(i, nzm+1) = 0. ! zero out extra layer
-          cloudFrac(i,:) = MERGE(1., 0., LWP(i,:)>0. .or. IWP(i,:)>0.)
+          cloudFrac(i,:) = cfrac_tot (:) !MERGE(1., 0., LWP(i,:)>0. .or. IWP(i,:)>0.)
 
           if(have_cloud_optics) then
             print*, 'cloud optics option not included. stopping'
