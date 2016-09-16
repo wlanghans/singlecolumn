@@ -73,14 +73,14 @@ end do
            !+ cp_spec*0.5*(rho(k)/(1.-qv(k))+rho(k-1)/(1.-qv(k-1)))*f0*(0.25*zi(k)+0.75*zi(itop)) &
            !                    *(zi(k)-zi(itop))**(1./3.)
            ! WL: changed to Stevens (2005), MWR, formulation
-           + cp_spec*0.5*(rho(k)/(1.-qv(k))+rho(k-1)/(1.-qv(k-1)))*f0*(0.25*(zi(k)-zi(itop))**(4./3.) &
+           + cp_spec*0.5*(rho(k)+rho(k-1))*f0*(0.25*(zi(k)-zi(itop))**(4./3.) &
                                + zi(itop)*(zi(k)-zi(itop))**(1./3.))
       qzinf  = qzinf  - deltaq(k)
       qzeroz = qzeroz + deltaq(k)
    end do
    flux(nz) = coef*exp(-qzinf) + coef1*exp(-qzeroz) &
    !WL: linear interpolate density to model's top and adapt Stevens (2005), MWR, formulation
-        + cp_spec*(rho(nzm)+ 0.5*adz(nzm)*dz* (rho(nzm)/(1.-qv(nzm))-rho(nzm-1)/(1.-qv(nzm-1)))/adzw(nzm)/dz)&
+        + cp_spec*(rho(nzm)+ 0.5*adz(nzm)*dz* (rho(nzm)-rho(nzm-1))/adzw(nzm)/dz)&
                *f0*(0.25*(zi(nz)-zi(itop))**(4./3.) + zi(itop)*(zi(nz)-zi(itop))**(1./3.))
 
    ! note that our flux differs from the specification in that it
