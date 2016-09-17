@@ -342,6 +342,12 @@ else  ! use all-or-nothing scheme
 
 end if
 
+lwp=0.
+do k=1,nzm
+  lwp = lwp + rho(k) * qcl(k) * adz(k)*dz
+end do
+lwp = lwp * 1000. ! convert to g/m2
+
 
 end subroutine sgscloudmf
 

@@ -517,6 +517,7 @@ thetali = theta -(p00/pres)**(rgas/cp) * (fac_cond *qcl+fac_sub*qci)
 thetar=thetav - theta*qn
 
 pblh = zi(2)
+lwp  = 0.
 buoy_sgs=0.0
 smix=0.
 

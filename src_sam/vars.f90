@@ -22,7 +22,7 @@ real, allocatable,dimension(:),target :: tend_sgs_qt, tend_sgs_t, &
 
 ! sgs variables
 real vmag, ustar, r_s, t_s, theta_s
-real, target :: pblh, wstar, Cm, Crv, Ctheta
+real, target :: pblh, wstar, Cm, Crv, Ctheta, lwp
 real, allocatable,dimension(:), target :: sumM, sumMu, sumMv, sumMtke, sumMt, sumMrt, sumMrp, buoy_sgs, smix
 real,allocatable,dimension(:), target :: sgs_t_flux, sgs_qt_flux, sgs_qp_flux, sgs_thv_flux, qt_flux_ed, qt_flux_mf, &
                                          t_flux_ed, t_flux_mf, taux, tauy, sgs_tke_flux, qp_flux_ed, qp_flux_mf

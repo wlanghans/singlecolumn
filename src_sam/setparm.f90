@@ -195,7 +195,7 @@ if (snapshot_fields(1:1) .eq. '+') then
                                 cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke, &
                                 tend_buoy_tke,tend_shear_tke,tend_diss_tke,pblh,B,upw,upthd,ent,wstar,&
                                 tend_rad_t,radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,thetaligrad,&
-                                qtgrad,thl,'&
+                                qtgrad,thl,lwp,'&
                      //trim(snapshot_fields(2:len(snapshot_fields)))
 end if
 

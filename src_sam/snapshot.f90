@@ -1206,6 +1206,21 @@ module snapshot
                )
                ncsnap%field(field_count)%data0 => wstar
             end if
+
+            if (trim(field_name) .eq. 'lwp') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'lwp', &
+                  ! Long name
+                                           'Liquid water path', &
+                  ! Units
+                                           'g/m2', &
+                  ! Dimensions
+                                           (/ timeID /) &
+               )
+               ncsnap%field(field_count)%data0 => lwp
+            end if
+
             if (trim(field_name) .eq. 'pblh') then
                call fill_fields_snapshot( &
                   ! Short name
