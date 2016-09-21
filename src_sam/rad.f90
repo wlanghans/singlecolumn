@@ -345,10 +345,13 @@ contains
           !
           ! Compute cloud IWP/LWP and particle sizes - convert from kg to g
           !
-          LWP(i, 1:nzm) = qcl(1:nzm) * 1.e3 * layerMass(i, 1:nzm) 
+          ! WL assume that RRTM needs in-cloud values (rather than domain means)
+          LWP(i, 1:nzm) = qcl(1:nzm) * 1.e3 * layerMass(i, 1:nzm) / (cfrac_tot (1:nzm)+1.0d-20)
+          LWP(i, 1:nzm) = MERGE(0.,LWP(i, 1:nzm),cfrac_tot (1:nzm).eq.0.0)
           LWP(i, nzm+1) = 0. ! zero out extra layer
 
-          IWP(i, 1:nzm) = qci(1:nzm) * 1.e3 * layerMass(i, 1:nzm) 
+          IWP(i, 1:nzm) = qci(1:nzm) * 1.e3 * layerMass(i, 1:nzm) / (cfrac_tot (1:nzm)+1.0d-20)
+          IWP(i, 1:nzm) = MERGE(0.,IWP(i, 1:nzm),cfrac_tot (1:nzm).eq.0.0)
           IWP(i, nzm+1) = 0. ! zero out extra layer
           cloudFrac(i,:) = cfrac_tot (:) !MERGE(1., 0., LWP(i,:)>0. .or. IWP(i,:)>0.)
 
