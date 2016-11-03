@@ -63,7 +63,7 @@ do k=1,nzm
          if (doteixpbl)  tketau=600.
          if (dowitekpbl) tketau=600.
       else
-         tketau= max(1. * pblh /  ((ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.)),0.0)
+         tketau= max(.5 * pblh /  ((ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.)),0.0)
       end if
       l23 =    (tketau*sqrt(tke(k)+1.0d-10))**(-1) 
       if (buoy_sgs(k).gt.0.0.and.(dowitekpbl.or.doteixpbl)) l23 = l23 +&

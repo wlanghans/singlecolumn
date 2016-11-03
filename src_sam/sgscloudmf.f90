@@ -232,11 +232,11 @@ end if
 
 do k=1,nzm
 
- if (tke(k).le.0.) then
+ !if (tke(k).le.0.) then
 
-     call cloud(k)
+ !    call cloud(k)
 
- else
+ !else
 
  ! get liquid water temperature Tl
  totheta=(pres(k)/p00)**(rgas/cp)
@@ -339,7 +339,7 @@ do k=1,nzm
  thetar(k) = theta(k)  * (1.+epsv*qv(k)-qn(k))
  thetali(k)= theta(k) - 1./totheta *(fac_cond*qcl(k) + fac_sub*qci(k)) 
 
-end if ! tke>0
+!end if ! tke>0
 
 end do
 
