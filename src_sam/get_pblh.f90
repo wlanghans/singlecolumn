@@ -29,6 +29,10 @@ implicit none
     REAL, PARAMETER :: sbl_lim  = 200. !typical scale of stable BL (m).
     REAL, PARAMETER :: sbl_damp = 400. !transition length for blending (m).
     INTEGER :: I,J,K,kthv,ktke
+    LOGICAL :: pblhalter
+
+    pblhalter = .false.
+  
 
     IF (fixedpblh.gt.0.0) then
        pblh = fixedpblh
@@ -53,6 +57,8 @@ implicit none
        k = k+1
     ENDDO 
     pblh=z(kthv)
+
+      if (pblh.gt.4000.) pblhalter=.true.
 
     ELSEIF (pblhthgrad) THEN
 
@@ -82,8 +88,9 @@ implicit none
     !then let height of vertex be the PBL height to allow for PBL height to fall in between levels
     if (kthv .eq. 1) then
        pblh = z(1)
+    elseif (dthvdz(kthv).lt.dthvdz(kthv+1).or.z(kthv).gt.4000.) then
+      pblhalter=.true.
     else
-
        Y1 = dthvdz(kthv-1)
        Y2 = dthvdz(kthv)
        Y3 = dthvdz(kthv+1)
@@ -111,7 +118,9 @@ implicit none
     end if
 
 
-    ELSE 
+    END IF
+
+    IF (pblhalter.or..not.(pblhfluxmin.or.pblhthgrad)) then
 
 
     !FIND MAX TKE AND MIN THETAV IN THE LOWEST 500 M
