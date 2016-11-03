@@ -159,11 +159,9 @@ do k = 1,nzm
    if (z(k).le.zinvbottom) then
       theta(k) = theta0 
       qv(k) = qv0
-      tke(k) = 0.3
    else
       theta(k) = 297.5 + (z(k)-zinvbottom)**(1./3.)
       qv(k) = 1.5e-03
-      tke(k) = 0.
    end if
    thetav(k)= theta(k)*(1.+epsv*qv(k))
    ! get pressure at cell center and at next face from hydrostatic eqn
@@ -188,6 +186,7 @@ do k = 1,nzm
    qpl(k)   = 0.
    qci(k)   = 0.
    qpi(k)   = 0.
+   tke(k)   = 0.
 
    
 end do

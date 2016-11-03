@@ -33,9 +33,12 @@
  
         tkf(1)  = Cs
         tkf(nz) = 0.
-        ! these rhof values are actually never used
-        rhof(1)  = rhoin(1)
-        rhof(nz) = rhoin(nzm)
+        do k=2,nzm
+           tkf(k)  = 0.5*(tkin(k-1)+tkin(k))
+           rhof(k) = 0.5*(rhoin(k-1)+rhoin(k))
+        end do
+        rhof(1) = 2.*rhof(2) - rhof(3)
+        rhof(nz)= 2.*rhof(nzm) - rhof(nzm-1)
 
         if ((dosfcbcneuman).and..not.present(kinflx)) then
           write(*,*) 'ERROR: Surface fluxes need to be passed in case' 
@@ -52,10 +55,6 @@
 
 
         DO k=1,nzm
-           ! compute tk on faces
-           IF (k.lt.nzm) tkf(k+1)  = 0.5*(tkin(k)+tkin(k+1))
-           ! compute rho on faces
-           IF (k.lt.nzm) rhof(k+1) = 0.5*(rhoin(k)+rhoin(k+1))
            
            
            IF (k.gt.1.and.k.lt.nzm) THEN
@@ -105,9 +104,9 @@
               !      tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
               !     -rhof(k+1)*sumMs(k+1) )
               if (.not.dosfcbcneuman) then
-                  d(k) = d(k) + vmag*tkf(1)/adz(k)/dz*(betam*s(k)-ssfc)
+                  d(k) = d(k) + rhof(k)/rhoin(k)*vmag*tkf(1)/adz(k)/dz*(betam*s(k)-ssfc)
               else ! neuman bc, always fully explicit right now
-                  d(k) = d(k) - kinflx/adz(k)/dz
+                  d(k) = d(k) - rhof(k)/rhoin(k)*kinflx/adz(k)/dz
               end if
            ELSE
               a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *                  &

@@ -20,7 +20,7 @@ dowitekpbl = .false.
 doteixpbl = .true.
 doconsttk= .false.
 fixedtau=.false.
-fixedpblh = -1000.
+fixedpblh = 1000.
 dopblh = .true.
 pblhfluxmin = .false.
 pblhthgrad=.true.
@@ -41,7 +41,7 @@ donoplumesat=.true.
 eps0=2.e-03
 
 doenergyunit=.false.
-fluxt0   = 0.12    ! K m/s
+fluxt0   = 0.06    ! K m/s
 fluxq0   = 2.5e-05 ! g/g m/s
 tau0     = 0.0
 sst=-7.5
