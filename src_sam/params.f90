@@ -100,7 +100,7 @@ real    :: nxco2 = 1         ! factor to modify co2 concentration
 real    :: coszrs
 real:: longitude0 = 0.    ! latitude of the domain's center 
 real:: latitude0  = 0.    ! longitude of the domain's center 
-logical :: dothlflux = .false.
+logical :: dotlflux = .true.
 
 
 

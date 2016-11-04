@@ -159,11 +159,12 @@ implicit none
        UPQT(1,1)=qt(1)+beta*wqt/(sqrt(0.2)*wstar) !(sqrt(tke(1)) + 0.001 )
        UPTHV(1,1)=thetav(1)+beta*wthv/ (sqrt(0.2)*wstar) !(sqrt(tke(1)) + 0.001 )
        UPTABS(1,1)=UPTHV(1,1)/(1.+epsv*UPQT(1,1)) * (pres(1)/p00)**(rgas/cp) 
-       UPQCL(1,1)=qcl(1)
-       UPQCI(1,1)=qci(1)
-       UPT(1,1)= cp * UPTABS(1,1) + ggr * z(1) - lcond*(qcl(1)) - lsub*(qci(1))    
+       UPQCL(1,1)=0.
+       UPQCI(1,1)=0.
+       UPT(1,1)= (p00/pres(1))**(rgas/cp) *&
+       (UPTABS(1,1) - fac_cond*(qcl(1)) - fac_sub*(qci(1)))    
        UPCF(1,1) = 0.0
-       UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*(UPQT(1,1)-UPQCL(1,1)-UPQCI(1,1))) - thetav(1)/(1.+epsv*qv(1))
+       UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*(UPQT(1,1)-UPQCL(1,1)-UPQCI(1,1))) - thetav(1)/(1.+epsv*qv(1)-qn(1))
 
     else
       ! following Cheinet
@@ -187,11 +188,12 @@ implicit none
          ! according to cheinet the 0.58 is for thetav, hence thetav is initialized (instead of theta)
          UPTHV(1,I)=thetav(1)+0.58*UPW(1,I)*sigmaTHV/sigmaW
          UPTABS(1,1)=UPTHV(1,1)/(1.+epsv*UPQT(1,1)) * (pres(1)/p00)**(rgas/cp) 
-         UPQCL(1,1)=qcl(1)
-         UPQCI(1,1)=qci(1)
-         UPT(1,1)= cp * UPTABS(1,1) + ggr * z(1) - lcond*(qcl(1)) - lsub*(qci(1))    
+         UPQCL(1,1)=0.
+         UPQCI(1,1)=0.
+         UPT(1,1)= (p00/pres(1))**(rgas/cp) *&
+         (UPTABS(1,1) - fac_cond*(qcl(1)) - fac_sub*(qci(1)))    
          UPCF(1,1) = 0.0
-         UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*(UPQT(1,1)-UPQCL(1,1)-UPQCI(1,1))) - thetav(1)/(1.+epsv*qv(1))
+         UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*(UPQT(1,1)-UPQCL(1,1)-UPQCI(1,1))) - thetav(1)/(1.+epsv*qv(1)-qn(1))
       ENDDO
 
     end if
@@ -218,7 +220,7 @@ implicit none
           EntExp=exp(-ENT(k-1,i)*(zi(k)-zi(k-1)))
 
           QTn=qt(k-1)*(1.-EntExp)+UPQT(k-1,i)*EntExp
-          Tn=t(k-1)*(1.-EntExp)+UPT(k-1,i)*EntExp
+          Tn=(p00/pres(k-1))**(rgas/cp) * (t(k-1)/cp-ggr/cp*z(k-1)+fac_cond*qcl(k-1)+fac_sub*qci(k-1))*(1.-EntExp)+UPT(k-1,i)*EntExp
           !Un=u(k)*(1.-EntExp)+UPU(k-1,i)*EntExp
           !Vn=v(k)*(1.-EntExp)+UPV(k-1,i)*EntExp
 
@@ -246,6 +248,7 @@ implicit none
 
 !          end if
        
+          ! based on density potential temperature (without qp effect since homogeneous across cell)
           BUOY(k-1,i)=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetar(k-1)-1.)
         
           EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
@@ -308,7 +311,13 @@ implicit none
     DO k=2,nzm
       DO i=1,nup
         sumM(k)      =sumM(k)      +UPA(K,I)*UPW(K,I)
-        sumMt(k)     =sumMt(k)     +UPA(K,i)*(UPT(K,I)-lcond*qpl(k)-lsub*qpi(k))*UPW(K,I)
+        if (dotlflux) then
+          ! flux in terms of liquid/ice temperature (convert to tabs)
+          sumMt(k)     =sumMt(k)     +UPA(K,i)*(presi(k)/p00)**(rgas/cp)*UPT(K,I)*UPW(K,I)
+        else
+          ! flux in terms of liquid/frozen water static energy (convert to h)
+          sumMt(k)     =sumMt(k)     +UPA(K,i)*(cp*(presi(k)/p00)**(rgas/cp)*UPT(K,I)-lcond*qpl(k)-lsub*qpi(k))*UPW(K,I)
+        end if
         sumMrt(k)    =sumMrt(k)    +UPA(K,i)*UPQT(K,I)*UPW(K,I) 
         !sumMu(k)  =sumMu(k)+UPA(K,i)*UPW(K,I)*UPU(K,I)
         !sumMv(k)  =sumMv(k)+UPA(K,i)*UPW(K,I)*UPV(K,I)
