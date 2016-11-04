@@ -9,6 +9,7 @@ implicit none
 ! local variables
 
 real,dimension(nzm) :: a, b, c, d
+integer :: k
 
 !+++++++++++++++++++++++++++++++++++++++
 ! non-precip water mixing ratio qt 
