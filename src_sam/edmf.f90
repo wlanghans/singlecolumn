@@ -314,7 +314,7 @@ implicit none
         if (dotlflux) then
           ! flux in terms of liquid/ice pot temperature (needs to include precip contribution since its considered in env)
           sumMt(k)     =sumMt(k)     +UPA(K,i)*(UPT(K,I) - (p00/presi(k))**(rgas/cp)*&
-           (frac_cond*0.5*(qpl(k)+qpl(k-1)) +frac_sub*0.5*(qpi(k)+qpi(k-1))  ))*UPW(K,I)
+           (fac_cond*0.5*(qpl(k)+qpl(k-1)) +fac_sub*0.5*(qpi(k)+qpi(k-1))  ))*UPW(K,I)
         else
           ! flux in terms of liquid/frozen water static energy (convert to h)
           sumMt(k)     =sumMt(k)     +UPA(K,i)*(cp*(presi(k)/p00)**(rgas/cp)*UPT(K,I)-&
