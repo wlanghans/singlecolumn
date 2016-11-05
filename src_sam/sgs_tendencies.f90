@@ -89,8 +89,8 @@ if (dosequential) qp = d
 
 if (dotlflux) then
   sgs_t_flux (1) = sgs_t_flux (1)/cp
-  t = (t -ggr * z)/cp 
-  t_s = t_s/cp
+  t = (t -ggr * z)/cp * (p00/pres)**(rgas/cp)
+  t_s = t_s/cp * (p00/presi(1))**(rgas/cp)
 end if
 
 
@@ -109,20 +109,19 @@ if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface hli flux 
   if (.not.dotlflux) then
     sgs_t_flux (1)       = - vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
-! Diagnose implicit surface buoyancy flux 
-    sgs_thv_flux(1) = sgs_t_flux(1)/cp * (1.+epsv* qv(1)) + epsv * theta(1) * sgs_qt_flux(1)
   else
     sgs_t_flux (1)       = - cp * vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
-    sgs_thv_flux(1) = sgs_t_flux(1)/cp * (1.+epsv* qv(1)) + epsv * theta(1) * sgs_qt_flux(1)
   end if
 else
-  ! Nothing to do
-  sgs_t_flux (1)    =  sgs_t_flux (1)  
+  ! Nothing to do but conversion 
   if (dotlflux) sgs_t_flux (1) = cp * sgs_t_flux (1)
 end if
 
+! Diagnose implicit surface buoyancy flux 
+ sgs_thv_flux(1) = sgs_t_flux(1)/cp * (1.+epsv* qv(1)) + epsv * theta(1) * sgs_qt_flux(1)
+
 if (dotlflux) then 
-  t_s = t_s*cp
+  t_s = t_s*cp*(presi(1)/p00)**(rgas/cp)
 end if
 
 ! Diagnose atm. sgs fluxes 
@@ -140,16 +139,16 @@ if (dotlflux) t_flux_ed(2:nzm) = cp * t_flux_ed(2:nzm)
 t_flux_mf(1)     = 0.
 t_flux_mf(nz)    = 0.
 t_flux_mf(2:nzm) = (sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm) )
+if (dotlflux) t_flux_mf(2:nzm) = cp* t_flux_mf(2:nzm) 
 
 
 if (dotlflux) then
-  tend_sgs_t = cp * (d - t)/dt
-  ! get buoyancy flux from PDF scheme
+  tend_sgs_t = cp * (d - t)/dt 
 else
   tend_sgs_t = (d - t)/dt
-  ! get buoyancy flux from PDF scheme
 end if
 
+! get buoyancy flux from PDF scheme
 do k=2,nzm
   sgs_thv_flux(k) = sgs_t_flux (k)
   if ((qp(k-1)+qp(k)).ne.0.0) sgs_thv_flux(k)=sgs_thv_flux(k) &
