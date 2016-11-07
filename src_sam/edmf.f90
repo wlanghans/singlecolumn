@@ -127,7 +127,7 @@ implicit none
 ! set initial conditions for updrafts
     zs=50.
     pwmin=1.
-    pwmax=4.
+    pwmax=3.
 
 ! see Lenschow et al. (1980), JAS
     wstar=max(0.,(ggr/thetav(1)*wthv*pblh)**(1./3.))
@@ -187,13 +187,13 @@ implicit none
          UPQT(1,I)=qt(1)+0.32*UPW(1,I)*sigmaQT/sigmaW
          ! according to cheinet the 0.58 is for thetav, hence thetav is initialized (instead of theta)
          UPTHV(1,I)=thetav(1)+0.58*UPW(1,I)*sigmaTHV/sigmaW
-         UPTABS(1,1)=UPTHV(1,1)/(1.+epsv*UPQT(1,1)) * (pres(1)/p00)**(rgas/cp) 
-         UPQCL(1,1)=qcl(1)
-         UPQCI(1,1)=qci(1)
-         UPT(1,1)= (p00/pres(1))**(rgas/cp) *&
-         (UPTABS(1,1) - fac_cond*(qcl(1)) - fac_sub*(qci(1)))    
-         UPCF(1,1) = 0.0
-         UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*(UPQT(1,1)-UPQCL(1,1)-UPQCI(1,1))) - thetav(1)/(1.+epsv*qv(1)-qn(1))
+         UPTABS(1,I)=UPTHV(1,I)/(1.+epsv*UPQT(1,I)) * (pres(1)/p00)**(rgas/cp) 
+         UPQCL(1,I)=qcl(1)
+         UPQCI(1,I)=qci(1)
+         UPT(1,I)= (p00/pres(1))**(rgas/cp) *&
+         (UPTABS(1,I) - fac_cond*(qcl(1)) - fac_sub*(qci(1)))    
+         UPCF(1,I) = 0.0
+         UPTHD(1,I) = UPTHV(1,I)/(1.+epsv*(UPQT(1,I)-UPQCL(1,I)-UPQCI(1,I))) - thetav(1)/(1.+epsv*qv(1)-qn(1))
       ENDDO
 
     end if
@@ -243,14 +243,14 @@ implicit none
             if (donoplumesat) then
               QCLn=0.0
               QCIn=0.0
-              THVn = (Tn - ggr * zi(k))/cp * (p00/presi(k))**(rgas/cp) * (1.+epsv*QTn)
+              THVn = Tn * (1.+epsv*QTn)
             end if
 
 !          end if
        
           ! based on density potential temperature (without qp effect since homogeneous across cell)
           BUOY(k-1,i)=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetar(k-1)-1.)
-        
+
           EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
           Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))
 
