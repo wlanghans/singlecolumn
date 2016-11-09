@@ -229,11 +229,12 @@ if (dosequential) v=d
 ! tke transport
 !+++++++++++++++++++++++++++++++++++++++
 if (progtke) then
+  tke_s = 3.75*ustar**2 + 0.2*wstar**2
   if (dotkedirichlet) then
-    call get_abcd(rho,tke,sumMtke,2.* tk(1)/adz(1)/dz/vmag,tk,0.,a,b,c,d,.false.,.false.)
+    call get_abcd(rho,tke,sumMtke,2.* tk(1)/adz(1)/dz/vmag,tk,tke_s,a,b,c,d,.false.,.false.)
   else
     sgs_tke_flux(1) = 0.0   ! lower BC for tke transfer (questionable)
-    call get_abcd(rho,tke,sumMtke,0.,tk,0.,a,b,c,d,.false.,.true.,sgs_tke_flux(1))
+    call get_abcd(rho,tke,sumMtke,0.,tk,tke_s,a,b,c,d,.false.,.true.,sgs_tke_flux(1))
   end if
   call tridiag(a,b,c,d,nzm)
 

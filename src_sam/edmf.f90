@@ -36,7 +36,7 @@ implicit none
 
       INTEGER :: K,I
       REAL :: wthv,wqt,wthl,qstar,thstar,sigmaW,sigmaQT,sigmaTH,sigmaTHV,zs, &
-           pwmin,pwmax,wmin,wmax,wlv,wtv
+           pwmax,wmin,wmax,wlv,wtv
       REAL :: QTn,Tn,THVn,QCLn,QCIn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit
 
 ! w parameters
@@ -86,6 +86,8 @@ implicit none
  qisgs_mf=0.
  qtsgs_mf=0.
  cfrac_mf=0.
+ tabs_mf=0.
+ tke_mf=0.
  frac_mf=0.
 
 
@@ -126,8 +128,7 @@ implicit none
 
 ! set initial conditions for updrafts
     zs=50.
-    pwmin=1.
-    pwmax=3.
+    pwmax=3.5
 
 ! see Lenschow et al. (1980), JAS
     wstar=max(0.,(ggr/thetav(1)*wthv*pblh)**(1./3.))
@@ -165,6 +166,12 @@ implicit none
        (UPTABS(1,1) - fac_cond*(qcl(1)) - fac_sub*(qci(1)))    
        UPCF(1,1) = 0.0
        UPTHD(1,1) = UPTHV(1,1)/(1.+epsv*(UPQT(1,1)-UPQCL(1,1)-UPQCI(1,1))) - thetav(1)/(1.+epsv*qv(1)-qn(1))
+       frac_mf(1) = UPA(1,1)
+       qcsgs_mf(1) = qcsgs_mf(1) + UPA(1,i)*UPQCL(1,i)
+       qisgs_mf(1) = qisgs_mf(1) + UPA(1,i)*UPQCI(1,i)
+       qtsgs_mf(1) = qtsgs_mf(1) + UPA(1,i)*UPQT (1,i)
+       tabs_mf(1)  = tabs_mf(1)  + UPA(1,I)*UPTABS(1,i)
+       tke_mf(1)   = tke_mf(1)   + UPA(1,I)* 3./4. * UPW(1,i)**2
 
     else
       ! following Cheinet
@@ -194,9 +201,20 @@ implicit none
          (UPTABS(1,I) - fac_cond*(qcl(1)) - fac_sub*(qci(1)))    
          UPCF(1,I) = 0.0
          UPTHD(1,I) = UPTHV(1,I)/(1.+epsv*(UPQT(1,I)-UPQCL(1,I)-UPQCI(1,I))) - thetav(1)/(1.+epsv*qv(1)-qn(1))
+         frac_mf(1) = frac_mf(1)+UPA(1,I)
+         qcsgs_mf(1) = qcsgs_mf(1) + UPA(1,i)*UPQCL(1,i)
+         qisgs_mf(1) = qisgs_mf(1) + UPA(1,i)*UPQCI(1,i)
+         qtsgs_mf(1) = qtsgs_mf(1) + UPA(1,i)*UPQT (1,i)
+         tabs_mf(1)  = tabs_mf(1)  + UPA(1,I)*UPTABS(1,i)
+         tke_mf(1)   = tke_mf(1)   + UPA(1,I)* 3./4. * UPW(1,i)**2
       ENDDO
 
     end if
+
+    qcsgs_mf(1)=qcsgs_mf(1)/frac_mf(1)
+    qisgs_mf(1)=qisgs_mf(1)/frac_mf(1)
+    qtsgs_mf(1)=qtsgs_mf(1)/frac_mf(1)
+    tabs_mf(1)=tabs_mf(1)/frac_mf(1)
 
     
 
@@ -251,8 +269,12 @@ implicit none
           ! based on density potential temperature (without qp effect since homogeneous across cell)
           BUOY(k-1,i)=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetar(k-1)-1.)
 
-          EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
-          Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))
+          !EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
+          !Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))
+
+          ! new (old standard) approach that allows entrainment to force w to zero even if B>0:
+          Wn2=UPW(k-1,i)**2 + 2. * (- (Wb+Wc*ENT(k-1,i)) * UPW(k-1,i)**2 &
+              +  Wa * BUOY(k-1,i) ) * (zi(k)-zi(k-1))
 
  
           IF (Wn2 >0.) THEN
@@ -327,6 +349,7 @@ implicit none
         qisgs_mf(k) = qisgs_mf(k) + UPA(K,i)*UPQCI(k,i)
         qtsgs_mf(k) = qtsgs_mf(k) + UPA(K,i)*UPQT (k,i)
         tabs_mf(k)  = tabs_mf(k)  + UPA(K,I)*UPTABS(k,i)
+        tke_mf(k)   = tke_mf(k)   + UPA(K,I)* 3./4. * UPW(k,i)**2
         frac_mf(k)  = frac_mf(k)  + UPA(K,i)
         if (UPQCL(k,i)+UPQCI(k,i).gt.0.0) cfrac_mf(k) = cfrac_mf(k) + UPA(K,i)
       ENDDO
@@ -341,7 +364,7 @@ implicit none
 
 end subroutine edmf
 
-subroutine condensation_edmf(QT,HLI,P,zlev,THV,QC,QI)
+subroutine condensation_edmf(QT,THLI,P,zlev,THV,QC,QI)
 !
 ! zero or one condensation for edmf: calculates THV and QC, and QI
 !
@@ -350,7 +373,7 @@ use micro_params
 use vars, only : qsatw, qsati
 
 implicit none
-real,intent(in) :: QT,HLI,P, zlev
+real,intent(in) :: QT,THLI,P, zlev
 real,intent(out):: THV,QC,QI
 
 integer :: niter,i
@@ -372,7 +395,8 @@ QN=0.
 !print*, '+++++++++++++qc=0++++++++'
 !print*, '+++++++++++++++++++++++++'
 do i=1,NITER
-T = (HLI - ggr * zlev+lcond*QC+lsub*QI)/cp
+! get tabs
+T = (THLI +fac_cond*QC+fac_sub*QI) * (P/p00)**(rgas/cp)
 ! WL get saturation mixing ratio
 if (T.ge.tbgmax) then
   QS=qsatw(T,P)
@@ -392,7 +416,7 @@ if (abs(QN-QNOLD)<Diff) exit
 !print*, '+++++++++++++++++++++++++'
 enddo
 
-T = (HLI - ggr * zlev+lcond*(QC)+lsub*(QI))/cp
+T = (THLI +fac_cond*QC+fac_sub*QI) * (P/p00)**(rgas/cp)
 if (T.ge.tbgmax) then
   QS=qsatw(T,P)
 elseif (T.le.tbgmin) then
@@ -405,7 +429,7 @@ QN=max(QT-QS,0.)
 QC= om * QN
 QI= (1.-om) * QN
 
-THV = (HLI - ggr * zlev+lcond*(QC)+lsub*(QI))/cp * (p00/P)**(rgas/cp) * (1.+epsv*(QT-QN)-QN)
+THV = (THLI +fac_cond*QC+fac_sub*QI) * (1.+epsv*(QT-QN)-QN)
 
 end subroutine condensation_edmf
 

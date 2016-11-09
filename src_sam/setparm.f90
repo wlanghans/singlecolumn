@@ -18,7 +18,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
                      doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh, lcld, &
-                     doenergyunit, dovartrans, dotlflux
+                     doenergyunit, dovartrans, dotlflux,pwmin,ctketau
 
 call getarg(1,path)
 path =trim(adjustl(path))
@@ -47,6 +47,7 @@ if (dosgs.and.doedmf.and.count((/witekeps,fixedeps,neggerseps,randomeps/)).gt.1 
   write(*,*) 'ERROR: only one entrainment option can be chosen.'
   stop
 end if
+
 
 if (dosgs.and.doedmf.and.randomeps ) then
   write(*,*) 'WARNING: random entrainment not implemented yet'
@@ -168,6 +169,10 @@ if (dosgs.and.dolanghanspbl) then
   pblhthgrad=.true.
   pblhfluxmin=.false.
 end if
+if (doedmf.and.(.not.dosingleplume).and.(pwmin.lt.0..or.pwmin.gt.3.5)) then
+  write(*,*) 'ERROR: pwmin has to be larger than 0 and smaller than 3.5'
+  stop
+end if
 if (doconsttk) then
   if (dosgs) write(*,*) 'doconsttk=.true., a constant eddy-diffusivity K=',tkconst,' m2/s is used'
   progtke = .false.
@@ -193,9 +198,9 @@ if (snapshot_fields(1:1) .eq. '+') then
    snapshot_fields = 'hli,u,v,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,&
                                 qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
                                 cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke, &
-                                tend_buoy_tke,tend_shear_tke,tend_diss_tke,pblh,B,upw,upthd,ent,wstar,&
+                                tend_buoy_tke,tend_shear_tke,tend_diss_tke,pblh,B,upw,upthd,ent,wstar,ustar,&
                                 tend_rad_t,radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,thetaligrad,&
-                                qtgrad,thl,lwp,'&
+                                qtgrad,thl,lwp,a_mf,tke_mf,qtflx_ed,qtflx_mf,tke_s,'&
                      //trim(snapshot_fields(2:len(snapshot_fields)))
 end if
 

@@ -90,7 +90,7 @@ else   ! IF SFC_FLX_FXD=True
       if(OCEAN) z0 = 0.0001  ! for LAND z0 should be set in namelist (default z0=0.035)
 
       ustar = diag_ustar(z(1),  &
-                ggr/tabs(1)* (fluxt0+epsv*tabs(1)*fluxq0),vmag,z0)
+                ggr/tabs(1)* (fluxt0+epsv*tabs(1)*fluxq0),theta(1)*(1.+epsv*qv(1)),vmag,z0)
       tau0  = ustar**2
       Cm = tau0 / vmag**2
      
@@ -139,7 +139,9 @@ end
 ! Code corrected 8th June 1999 (obukhov length was wrong way up,
 ! so now used as reciprocal of obukhov length)
 
-      real function diag_ustar(z,bflx,wnd,z0)
+! Corrected Nov 8th 2016 (obukhov length was wrong; theta_rev/g was missing)
+
+      real function diag_ustar(z,bflx,thv1,wnd,z0)
 
       implicit none
       real, parameter      :: vonk =  0.4   ! von Karmans constant
@@ -150,33 +152,34 @@ end
 
       real, intent (in)    :: z             ! height where u locates
       real, intent (in)    :: bflx          ! surface buoyancy flux (m^2/s^3)
+      real, intent (in)    :: thv1          ! virt pot temp on first model level (K)
       real, intent (in)    :: wnd           ! wind speed at z
       real, intent (in)    :: z0            ! momentum roughness height
 
       integer :: iterate
-      real    :: lnz, klnz, c1, x, psi1, zeta, rlmo, ustar
+      real    :: lnz, klnz, c1, x, psi1, zeta, rlmo, ustarl
 
       lnz   = log(z/z0) 
       klnz  = vonk/lnz              
       c1    = 3.14159/2. - 3.*log(2.)
 
-      ustar =  wnd*klnz
+      ustarl =  wnd*klnz
       if (bflx /= 0.0) then 
         do iterate=1,4
-          rlmo   = -bflx * vonk/(ustar**3 + eps)   !reciprocal of
+          rlmo   = -bflx *g/thv1* vonk/(ustarl**3 + eps)   !reciprocal of
                                                    !obukhov length
           zeta  = z*rlmo
           if (zeta > 0.) then
-            ustar =  vonk*wnd  /(lnz + am*zeta)
+            ustarl =  vonk*wnd  /(lnz + am*zeta)
           else
             x     = sqrt( sqrt( 1.0 - bm*zeta ) )
             psi1  = 2.*log(1.0+x) + log(1.0+x*x) - 2.*atan(x) + c1
-            ustar = wnd*vonk/(lnz - psi1)
+            ustarl = wnd*vonk/(lnz - psi1)
           end if
         end do
       end if
 
-      diag_ustar = ustar
+      diag_ustar = ustarl
 
       return
       end function diag_ustar

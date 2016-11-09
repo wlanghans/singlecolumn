@@ -29,10 +29,10 @@ sfc_flx_fxd=.true.
 doneuman= .true.
 dotkedirichlet=.true.
 
-doedmf = .false.
-dosingleplume=.true.
+doedmf = .true.
+dosingleplume=.false.
 beta =2.0
-nup=1
+nup=100
 fixedfa=.true.
 fixedeps = .false.
 witekeps = .false.

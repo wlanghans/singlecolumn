@@ -154,13 +154,27 @@ module snapshot
                   ! Short name
                                            'tke', &
                   ! Long name
-                                           'Turbulent kinetic energy', &
+                                           'Turbulent kinetic energy; ED', &
                   ! Units
                                            'J/kg', &
                   ! Dimensions
                                            (/ zID, timeID /) &
                )
                ncsnap%field(field_count)%data1 => tke(1:nzm)
+            end if
+
+            if (trim(field_name) .eq. 'tkemf') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'tkemf', &
+                  ! Long name
+                                           'Turbulent kinetic energy; MF', &
+                  ! Units
+                                           'J/kg', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => tke_mf(1:nz)
             end if
          
             if (trim(field_name) .eq. 'thv') then
@@ -835,6 +849,19 @@ module snapshot
                ncsnap%field(field_count)%data1 => radlwup (1:nz)
             end if
     
+            if (trim(field_name) .eq. 'a_mf') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'a_mf', &
+                  ! Long name
+                                           'Fractional area with MF', &
+                  ! Units
+                                           '1', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => frac_mf (1:nz)
+            end if
             if (trim(field_name) .eq. 'cfrac_mf') then
                call fill_fields_snapshot( &
                   ! Short name
@@ -875,6 +902,34 @@ module snapshot
                                            (/ z2ID, timeID /) &
                )
                ncsnap%field(field_count)%data1 => sgs_qt_flux (1:nz)
+            end if
+
+            if (trim(field_name) .eq. 'qtflx_ed') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qtflx_ed', &
+                  ! Long name
+                                           'Water mass flux; ED', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qt_flux_ed (1:nz)
+            end if
+
+            if (trim(field_name) .eq. 'qtflx_mf') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'qtflx_mf', &
+                  ! Long name
+                                           'Water mass flux; MF', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => qt_flux_mf (1:nz)
             end if
          
          
@@ -1193,6 +1248,20 @@ module snapshot
                ncsnap%field(field_count)%data2 => UPT (1:nz,1:nup)
             end if
 
+            if (trim(field_name) .eq. 'ustar') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'ustar', &
+                  ! Long name
+                                           'characteristic u scale', &
+                  ! Units
+                                           'm/s', &
+                  ! Dimensions
+                                           (/ timeID /) &
+               )
+               ncsnap%field(field_count)%data0 => ustar
+            end if
+
             if (trim(field_name) .eq. 'wstar') then
                call fill_fields_snapshot( &
                   ! Short name
@@ -1219,6 +1288,20 @@ module snapshot
                                            (/ timeID /) &
                )
                ncsnap%field(field_count)%data0 => lwp
+            end if
+
+            if (trim(field_name) .eq. 'tke_s') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'tke_s', &
+                  ! Long name
+                                           'TKE at surface', &
+                  ! Units
+                                           'm2/s2', &
+                  ! Dimensions
+                                           (/ timeID /) &
+               )
+               ncsnap%field(field_count)%data0 => tke_s
             end if
 
             if (trim(field_name) .eq. 'pblh') then

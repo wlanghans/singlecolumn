@@ -54,11 +54,13 @@ logical:: dosgs = .true.
 logical:: dosgscloud = .true.
 logical :: dovartrans=.false.
 real :: lcld = 250.
+real :: ctketau=0.5
 logical:: doedmf = .false.
+real :: pwmin=1.2
 logical:: donoplumesat=.false.
 logical:: fixedeps=.true.
 logical:: neggerseps=.false.
-real:: nuneggers=1.
+real:: nuneggers=2.
 logical:: randomeps=.false.
 logical :: fixedfa=.true.
 real   :: eps0=1.e-03
@@ -111,11 +113,12 @@ integer:: snapshot_start = 0
 integer:: snapshot_period =1
 integer:: snapshot_end = 1000
 logical:: snapshot_as_double = .false.
-character(900) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,p,rho,qt,qv,qn,qcl,qci,&
+character(1000) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,p,rho,qt,qv,qn,qcl,qci,&
 		qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&
 		cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke,tend_buoy_tke,&
-		tend_shear_tke,tend_diss_tke,tkeflx,pblh,B,upw,upthd,ent,wstar,tend_rad_t,&
-                radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,thetaligrad,qtgrad,thl,lwp'
+		tend_shear_tke,tend_diss_tke,tkeflx,pblh,B,upw,upthd,ent,wstar,ustar,tend_rad_t,&
+                radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,thetaligrad,qtgrad,thl,lwp,a_mf,&
+                tkemf,qtflx_ed,qtflx_mf,tke_s'
 
 
 end module params
