@@ -19,7 +19,7 @@ dosmagor=.false.
 dowitekpbl = .false.
 doteixpbl = .true.
 doconsttk= .false.
-fixedtau=.false.
+fixedtau=.true.
 fixedpblh = -1000.
 dopblh = .true.
 pblhfluxmin = .false.
@@ -29,7 +29,7 @@ sfc_flx_fxd=.true.
 doneuman= .true.
 dotkedirichlet=.true.
 
-doedmf = .true.
+doedmf = .false.
 dosingleplume=.false.
 beta =2.0
 nup=100

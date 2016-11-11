@@ -143,10 +143,9 @@ do k=1,nzm
      a_diss=a_prod_sh+a_prod_bu
  
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))* (p00/pres(k))**(rgas/cp) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) / cp 
      if (qp(k).gt.0.0) then
-       wthl = wthl +  ((lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)))  &
-              * (p00/pres(k))**(rgas/cp) / cp
+       wthl = wthl +  ((fac_cond*qpl(k)+fac_sub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1))) * (p00/pres(k))**(rgas/cp)
      end if
      wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
 
@@ -159,10 +158,9 @@ do k=1,nzm
    ! ==================================
 
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))* (p00/pres(k))**(rgas/cp) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) / cp 
      if (qp(k).gt.0.0) then
-       wthl = wthl +  ((lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)))  &
-              * (p00/pres(k))**(rgas/cp) / cp
+       wthl = wthl +  ((fac_cond*qpl(k)+fac_sub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1))) * (p00/pres(k))**(rgas/cp)
      end if
      wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
 
@@ -192,7 +190,7 @@ do k=1,nzm
    ! ==================================
 
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)+t_flux_mf(k) + t_flux_mf(k+1)))* (p00/pres(k))**(rgas/cp) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)+t_flux_mf(k) + t_flux_mf(k+1))) / cp 
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)+qp_flux_mf(k) + qp_flux_mf(k+1)))  &
               * (p00/pres(k))**(rgas/cp) / cp
@@ -234,7 +232,7 @@ do k=1,nzm
      tk(k) = Ck*smix(k)*sqrt(tke(k))
 
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))* (p00/pres(k))**(rgas/cp) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))/ cp 
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)))  &
               * (p00/pres(k))**(rgas/cp) / cp

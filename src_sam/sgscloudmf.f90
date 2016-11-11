@@ -60,7 +60,7 @@ real fac1,fac2, fac_a
 real fff,dfff,dqsat
 real lstarn,dlstarn,lstarp,dlstarp, dtabsa, hlip, hlie, frac_mf2, qce, qie, qne, tabse, ds
 integer,parameter :: niter=100
-real :: lambdaf, alphaf, qsl, totheta, tl, qsw, qsi, cfrac_l, cfrac_t, tabsnoql, dqndt
+real :: lambdaf, alphaf, qsl, totheta, tl, qsw, qsi, cfrac_l, cfrac_t, tabsnoql, dqndt, domndt
 real,dimension (2) :: tabs1, tabs2
 
 real, parameter :: zsig_max = 1.0e-2
@@ -248,12 +248,12 @@ do k=1,nzm
  omn = max(0.,min(1.,(tl-tbgmin)*an))
  qsw=qsatw(tl,pres(k))
  qsi=qsati(tl,pres(k))
- qsl = qsw ! omn * qsw + (1.-omn) * qsi
+ qsl =  omn * qsw + (1.-omn) * qsi
  ! get dqsdT
- !alphaf = (omn * qsw * lcond/(tl**2*rv) + (1.-omn) * qsi * lsub/(tl**2*rv))
- alphaf = qsw * lcond/(tl**2*rv) 
- !lambdaf = (1. + alphaf * (omn*fac_cond + (1.-omn) * fac_sub) )**(-1.)
- lambdaf = (1. + alphaf *fac_cond )**(-1.)
+ alphaf = (omn * qsw * lcond/(tl**2*rv) + (1.-omn) * qsi * lsub/(tl**2*rv))
+ !alphaf = qsw * lcond/(tl**2*rv) 
+ lambdaf = (1. + alphaf * (omn*fac_cond + (1.-omn) * fac_sub) )**(-1.)
+ !lambdaf = (1. + alphaf *fac_cond )**(-1.)
  alphaf =alphaf * totheta
 
 
@@ -272,15 +272,22 @@ do k=1,nzm
    omn = max(0.,min(1.,(tabse-tbgmin)*an))
    qsw=qsatw(tabse,pres(k))
    qsi=qsati(tabse,pres(k))
-   qsl = qsw !omn * qsw + (1.-omn) * qsi
+   qsl = omn * qsw + (1.-omn) * qsi
    ds=qte(k)-qsl
  end if
+
+ if (tabse.gt.tbgmax.or.tabse.lt.tbgmin) then
+    domndt = 0.
+ else
+    domndt  = 1./an
+ end if
+
 
  IF (sigmas(k).le.0.0) then
    cfrac_pdf(k) =   ABS ( (SIGN(1.0,ds)+1.0)*0.5 )
    qne = cfrac_pdf(k) * ds
    q1(k)=-999.
-   dqndt = -dtqsatw(tabse,pres(k))
+   dqndt = - (omn  * dtqsatw(tabse,pres(k)) + (1.-omn) * dtqsati(tabse,pres(k)))
  ELSE
    q1(k)= ds/sigmas(k)
    cfrac_pdf(k) = MIN ( 1.0, MAX ( 0.0, &
@@ -290,10 +297,10 @@ do k=1,nzm
       dqndt = 0.
    ELSEIF ( q1(k) .ge. q_crit ) THEN
       qne = sigmas(k) * q1(k) 
-      dqndt = -dtqsatw(tabse,pres(k))
+      dqndt = - (omn  * dtqsatw(tabse,pres(k)) + (1.-omn) * dtqsati(tabse,pres(k)))
    ELSE
       qne = sigmas(k) * (q1(k)+q_crit) * (q1(k)+q_crit) / (2.*(q_crit+q_crit))
-      dqndt = - (q1(k)+q_crit)/(2.*q_crit) * dtqsatw(tabse,pres(k))
+      dqndt = - (q1(k)+q_crit)/(2.*q_crit) * (omn  * dtqsatw(tabse,pres(k)) + (1.-omn) * dtqsati(tabse,pres(k)))
    ENDIF
  END IF
  
@@ -301,6 +308,8 @@ do k=1,nzm
    !dtabs= (tl + an*qne*tbgmin*fac_fus + qne*fac_sub  )   &
    !       / (1. + an*qne*fac_fus ) - tabse
    dtabs= (tabsnoql - tabse + fac_cond * qne) / (1.- fac_cond * dqndt)
+   dtabs= (tabsnoql - tabse + (omn*fac_cond+(1.-omn)*fac_sub) * qne) / &
+   (1.- (omn*fac_cond+(1.-omn)+fac_sub) * dqndt + qne * fac_fus * domndt )
  !else
    !tabse  = (tl + an*qne*tbgmin*fac_fus + qne*fac_sub  )   &
    !       / (1. + an*qne*fac_fus )
@@ -316,14 +325,11 @@ do k=1,nzm
  qie = qne*(1.-omn)
 
 
- cthl(k) = cfrac_pdf(k) * (1. - (fac_cond/totheta - (1.+epsv) * tabse/totheta)*lambdaf * alphaf) & ! see bechtold 95 (a,b,alpha,beta) and my own notes
- !fac_a = (1.-qte + (1.+epsv)*qsl)*(1.+epsv*lcond/rgas/tabse)  & 
- !          / (1.+epsv*lcond/rgas/tl**2 *fac_cond *qsl)
- !cthl(k) = cfrac_pdf(k) * fac_a & ! see bechtold 95 (a,b,alpha,beta) and my own notes
-      + (1.-cfrac_pdf(k)) * (1.+epsv*qte(k))
- cqt(k) =  cfrac_pdf(k) * (epsv*tabse/totheta + (fac_cond/totheta + (1.+epsv) * tabse/totheta) * lambdaf) &
- !cqt(k) =  cfrac_pdf(k) * (fac_cond/tabse*fac_a - 1.)*tabse/totheta &
-      + (1.-cfrac_pdf(k)) * epsv*thetali(k)
+ ! Bechtold (1995) Eqn. (B5)
+ cthl(k) = cfrac_pdf(k) * (1.+epsv*qte(k)-(fac_cond/totheta - (1.+epsv) * &
+         tabse/totheta)*lambdaf*alphaf) + (1.-cfrac_pdf(k)) * (1.+epsv*qte(k))
+ cqt(k)  = cfrac_pdf(k) * (epsv*tabse/totheta+(fac_cond/totheta - (1.+epsv) *tabse/totheta)*lambdaf ) &
+           + (1.-cfrac_pdf(k)) * epsv * tabse/totheta
 
  
  ! get final domain averages (convective and environment)
