@@ -904,6 +904,34 @@ module snapshot
                ncsnap%field(field_count)%data1 => sgs_qt_flux (1:nz)
             end if
 
+            if (trim(field_name) .eq. 'tflx_ed') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'tflx_ed', &
+                  ! Long name
+                                           'Moist static energy flux; ED', &
+                  ! Units
+                                           'W/m2', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => t_flux_ed (1:nz)
+            end if
+
+            if (trim(field_name) .eq. 'tflx_mf') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'tflx_mf', &
+                  ! Long name
+                                           'Moist static energy flux; MF', &
+                  ! Units
+                                           'W/m2', &
+                  ! Dimensions
+                                           (/ z2ID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => t_flux_mf (1:nz)
+            end if
+
             if (trim(field_name) .eq. 'qtflx_ed') then
                call fill_fields_snapshot( &
                   ! Short name

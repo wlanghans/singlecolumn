@@ -238,7 +238,7 @@ do k=1,nzm
               * (p00/pres(k))**(rgas/cp) / cp
      end if
      wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
-
+  
      ! get buoyancy flux from PDF scheme
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
 

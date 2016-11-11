@@ -15,7 +15,7 @@ dosgscloud=.true.
 dovartrans=.false.
 dotlflux=.true.
 lcld=150.
-ctketau=.2
+ctketau=.5
 dosmagor=.false.
 dowitekpbl = .false.
 doteixpbl = .true.
@@ -40,7 +40,7 @@ fixedfa=.true.
 fixedeps = .false.
 witekeps = .false.
 neggerseps = .true.
-nuneggers=1.8 ! default is 2
+nuneggers=2. ! default is 2
 donoplumesat=.true.
 eps0=2.e-03
 

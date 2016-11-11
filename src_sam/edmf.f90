@@ -396,7 +396,7 @@ QN=0.
 !print*, '+++++++++++++++++++++++++'
 do i=1,NITER
 ! get tabs
-T = (THLI +fac_cond*QC+fac_sub*QI) * (P/p00)**(rgas/cp)
+T = THLI* (P/p00)**(rgas/cp) +fac_cond*QC+fac_sub*QI
 ! WL get saturation mixing ratio
 if (T.ge.tbgmax) then
   QS=qsatw(T,P)
@@ -416,7 +416,7 @@ if (abs(QN-QNOLD)<Diff) exit
 !print*, '+++++++++++++++++++++++++'
 enddo
 
-T = (THLI +fac_cond*QC+fac_sub*QI) * (P/p00)**(rgas/cp)
+T = THLI* (P/p00)**(rgas/cp) +fac_cond*QC+fac_sub*QI
 if (T.ge.tbgmax) then
   QS=qsatw(T,P)
 elseif (T.le.tbgmin) then
@@ -429,7 +429,7 @@ QN=max(QT-QS,0.)
 QC= om * QN
 QI= (1.-om) * QN
 
-THV = (THLI +fac_cond*QC+fac_sub*QI) * (1.+epsv*(QT-QN)-QN)
+THV = (THLI +(fac_cond*QC+fac_sub*QI)*(p00/P)**(rgas/cp)) * (1.+epsv*(QT-QN)-QN)
 
 end subroutine condensation_edmf
 
