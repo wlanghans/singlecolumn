@@ -854,7 +854,7 @@ module snapshot
                   ! Short name
                                            'a_mf', &
                   ! Long name
-                                           'Fractional area with MF', &
+                                           'Fractional area with plumes', &
                   ! Units
                                            '1', &
                   ! Dimensions
@@ -881,7 +881,7 @@ module snapshot
                   ! Short name
                                            'cfrac_pdf', &
                   ! Long name
-                                           'Cloud fraction from PDF scheme', &
+                                           'Cloud fraction in plume environment', &
                   ! Units
                                            '1', &
                   ! Dimensions

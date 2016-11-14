@@ -400,8 +400,10 @@ T = THLI* (P/p00)**(rgas/cp) +fac_cond*QC+fac_sub*QI
 ! WL get saturation mixing ratio
 if (T.ge.tbgmax) then
   QS=qsatw(T,P)
+  om=1.
 elseif (T.le.tbgmin) then
   QS=qsati(T,P)
+  om=0.
 else
   om = an*T-bn
   QS=om*qsatw(T,P)+(1.-om)*qsati(T,P)
