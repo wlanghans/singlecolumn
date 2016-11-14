@@ -889,6 +889,20 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => cfrac_pdf (1:nzm)
             end if
+
+            if (trim(field_name) .eq. 'cfrac_tot') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'cfrac_tot', &
+                  ! Long name
+                                           'Total cloud fraction (environ+plumes)', &
+                  ! Units
+                                           '1', &
+                  ! Dimensions
+                                           (/ zID, timeID /) &
+               )
+               ncsnap%field(field_count)%data1 => cfrac_tot(1:nzm)
+            end if
          
             if (trim(field_name) .eq. 'qtflx') then
                call fill_fields_snapshot( &
@@ -964,11 +978,11 @@ module snapshot
             if (trim(field_name) .eq. 'tflx') then
                call fill_fields_snapshot( &
                   ! Short name
-                                           'hliflux', &
+                                           'tflx', &
                   ! Long name
-                                           'Frozen/liquid moist static energy flux flux', &
+                                           'Frozen/liquid moist static energy flux', &
                   ! Units
-                                           'J/kg m/s', &
+                                           'W/m2', &
                   ! Dimensions
                                            (/ z2ID, timeID /) &
                )

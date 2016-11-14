@@ -300,7 +300,7 @@ implicit none
                 EXIT
              END IF
              UPTHD(k-1,i)=0.5*(UPTHV(k,i)/(1.+epsv*(UPQT(k,i)-UPQCL(k,i)-UPQCI(k,i))-UPQCL(k,i)-UPQCI(k,i))+&
-     UPTHV(k-1,i)/(1.+epsv*(UPQT(k-1,i)-UPQCL(k-1,i)-UPQCI(k,i))-UPQCL(k-1,i)-UPQCI(k,i)))-theta(k-1)
+     UPTHV(k-1,i)/(1.+epsv*(UPQT(k-1,i)-UPQCL(k-1,i)-UPQCI(k,i))-UPQCL(k-1,i)-UPQCI(k-1,i)))-theta(k-1)
           ELSE
             EXIT
           END IF 
