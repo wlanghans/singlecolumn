@@ -23,7 +23,7 @@ deallocate(tend_sgs_qt, tend_sgs_t,  &
      tend_force_t,tend_rad_t)
 
 
-deallocate(sumM, sumMu, sumMv, sumMrt,sumMrp,sumMt,sumMtke, &
+deallocate(sumM, sumMu, sumMv, sumMrt,sumMrp,sumMt,sumMtke,sumMthv,sumDEF2, &
          buoy_sgs, smix)
 
 deallocate(sgs_t_flux, sgs_qt_flux, sgs_thv_flux, qt_flux_mf, qt_flux_ed, t_flux_ed, t_flux_mf, taux, tauy, sgs_tke_flux,&

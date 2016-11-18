@@ -16,9 +16,9 @@ real :: thetalt, thetalk, thetall, qtt, qtk, qtl, covarqtthetal, varqt, vartheta
 integer i,j,k,kc,kb
 
 
-if (doteixpbl) then
+if (doteixpbl.or.dolanghanspbl) then
   Ck=0.5
-elseif (dowitekpbl.or.dolanghanspbl) then
+elseif (dowitekpbl) then
   Ck=0.425
 else
   Ck=0.1
@@ -66,7 +66,7 @@ do k=1,nzm
          tketau= max(ctketau * pblh /  ((ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.)),0.0)
       end if
       l23 =    (tketau*sqrt(tke(k)+1.0d-10))**(-1) 
-      if (buoy_sgs(k).gt.0.0.and.(dowitekpbl.or.doteixpbl)) l23 = l23 +&
+      if (buoy_sgs(k).gt.0.0) l23 = l23 +&
         (max(0.7*sqrt(tke(k)+1.0d-10)/sqrt(buoy_sgs(k)),adz(k)*dz/2.))**(-1)
       l23 = l23**(-1)
       smix(k)=  l23 +(xkar*z(k)-l23)*exp(-z(k)/100.)
@@ -91,9 +91,9 @@ do k=1,nzm
    end if
 
 !   Pr=1. +2.*ratio
-   if (doteixpbl) then
+   if (doteixpbl.or.dolanghanspbl) then
       Cee= 0.16 * 2.5
-   elseif (dowitekpbl.or.dolanghanspbl) then
+   elseif (dowitekpbl) then
       Cee=0.304 
    else
       ratio=smix(k)/grd
@@ -222,6 +222,50 @@ do k=1,nzm
    ! ==================================
    ! Use Langhans CPBL closure with sgs clouds; TKE is prognostic 
    ! ==================================
+
+    ! use previously evaluated fluxes
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) / cp
+     if (qp(k).gt.0.0) then
+       wthl = wthl +  ((fac_cond*qpl(k)+fac_sub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1))) * (p00/pres(k))**(rgas/cp)
+     end if
+     wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
+
+     ! get buoyancy flux from PDF scheme for environment 
+     tke_thvflx(k) = (1.-0.5*(frac_mf(k)+frac_mf(k+1) )) * (cthl(k) * wthl + cqt(k) * wqt)
+     ! now add buoyancy flux in plumes
+     if (k.eq.1) then
+       tke_thvflx(k) = tke_thvflx(k) + 0.25*(frac_mf(k)+frac_mf(k+1)) * (t_flux_ed(1)/cp+sumMthv(2))
+     else
+       tke_thvflx(k) = tke_thvflx(k) + 0.25*(frac_mf(k)+frac_mf(k+1)) * (sumMthv(k)+sumMthv(k+1))
+     end if
+
+     ! get Km 
+     tk(k) = Ck*smix(k)*sqrt(tke(k))
+
+     ! production from mean flow
+     a_prod_sh=(tk(k)+0.001)*def2(k)
+     ! add production from plumes
+     a_prod_sh=a_prod_sh + (tk(k)+0.001)*0.5*(sumDEF2(k)+sumDEF2(k+1))
+     a_prod_bu= ggr/thetar(k) * tke_thvflx(k) !-(tk(k)+0.001) * Pr * buoy_sgs(k) !        ggr/thetar(k) * tke_thvflx(k)
+     ! dissipation in environment
+     a_diss= Cee / smix(k)*tke(k)**1.5
+     !a_diss=(1.-0.5*(frac_mf(k)+frac_mf(k+1) )) * Cee / smix(k)*tke(k)**1.5
+     ! add dissipation in plumes (which is prop to sum of tke's)
+     !if (0.5*(frac_mf(k)+frac_mf(k+1) ).gt.0.0  ) then
+     !  a_diss=a_diss + 0.5*(frac_mf(k)+frac_mf(k+1) ) *&
+     !  Cee / smix(k)*(tke(k)+0.5*(tke_mf(k)+tke_mf(k+1))/(0.5*(frac_mf(k)+frac_mf(k+1) )))**1.5 
+     !end if
+     dtkedtsum = a_prod_sh+a_prod_bu-a_diss
+     dtkedtmin = -tke(k)/dt
+     if (dtkedtsum.lt.dtkedtmin) then
+       dtkedtsum = dtkedtmin / dtkedtsum
+       a_prod_bu = dtkedtsum * a_prod_bu
+       a_prod_sh = dtkedtsum * a_prod_sh
+       a_diss    = dtkedtsum * a_diss
+     end if
+     if (dosequential) tke(k)=tke(k)+dt*(a_prod_sh+a_prod_bu-a_diss)
+     wstar=max(0.,(ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.))
+
 
    elseif (dotkeles) then
    ! ==================================

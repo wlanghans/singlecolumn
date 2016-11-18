@@ -143,7 +143,7 @@ if (dopblh.and..not.dosgs) then
   write(*,*) 'Cant compute pblh without turbulence parameterization. Stopping'
   stop
 end if
-if (dosgs.and.doteixpbl.and..not.fixedtau) then
+if (dosgs.and.(doteixpbl.or.dolanghanspbl).and..not.fixedtau) then
    dopblh=.true.
    !pblhfluxmin=.true.
    !pblhthgrad=.false.
@@ -153,17 +153,6 @@ if (dosgs.and.dowitekpbl) then
   if (doedmf) then
     !dosingleplume=.true.
     fixedfa=.true.
-  end if
-  dopblh=.true.
-  pblhthgrad=.true.
-  pblhfluxmin=.false.
-end if
-if (dosgs.and.dolanghanspbl) then
-  if (doedmf) then
-    !dosingleplume=.true.
-    fixedfa=.true.
-    nup=1
-    witekeps=.true.
   end if
   dopblh=.true.
   pblhthgrad=.true.
@@ -189,7 +178,7 @@ elseif (dowitekpbl) then
   if (dosgs) write(*,*) 'Witek PBL TKE closure is used to get K'
   progtke = .true.
 elseif (dolanghanspbl) then
-  if (dosgs) write(*,*) 'Langhans PBL TKE closure is used to get K and sgs clouds are accounted for'
+  if (dosgs) write(*,*) 'Langhans PBL TKE closure is used to get K '
   progtke = .true.
 end if
 
@@ -200,7 +189,7 @@ if (snapshot_fields(1:1) .eq. '+') then
                                 cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke, &
                                 tend_buoy_tke,tend_shear_tke,tend_diss_tke,pblh,B,upw,upthd,upqcl,upqci,ent,wstar,ustar,&
                                 tend_rad_t,radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,thetaligrad,&
-                                qtgrad,thl,lwp,a_mf,tke_mf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,'&
+                                qtgrad,thl,lwp,a_mf,tke_mf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf,'&
                      //trim(snapshot_fields(2:len(snapshot_fields)))
 end if
 

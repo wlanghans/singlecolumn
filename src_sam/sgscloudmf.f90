@@ -104,7 +104,7 @@ totheta=(pres(k)/p00)**(rgas/cp)
 
 ! environment properties
 ! interpolate plume area fraction to mass level
- frac_mf2 = 0.5*(frac_mf(k)+frac_mf(k+1))
+frac_mf2 = 0.5*(frac_mf(k)+frac_mf(k+1))
 if (frac_mf2.gt.0.0.and.lenv)  then
   if (frac_mf(k+1).gt.0.0) then
     ! get plume moist static energy
@@ -333,6 +333,7 @@ do k=1,nzm
 
  
  ! get final domain averages (convective and environment)
+ frac_mf2 = 0.5*(frac_mf(k)+frac_mf(k+1))
  qcl(k) = (1.-frac_mf2) * qce + 0.5 * frac_mf2 * (qcsgs_mf(k)+qcsgs_mf(k+1))
  qci(k) = (1.-frac_mf2) * qie + 0.5 * frac_mf2 * (qisgs_mf(k)+qisgs_mf(k+1))
  cfrac_tot(k) = min(frac_mf2,0.5*(cfrac_mf(k+1)+cfrac_mf(k))) + (1.-frac_mf2) * cfrac_pdf(k)

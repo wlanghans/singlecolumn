@@ -118,7 +118,7 @@ character(1000) :: snapshot_fields = 'hli,u,v,th,thv,tabs,tke,p,rho,qt,qv,qn,qcl
 		cthl,cqt,varwrt1,tk,tkh,lmix,tend_mix_qt,tend_mix_t,tend_mix_tke,tend_buoy_tke,&
 		tend_shear_tke,tend_diss_tke,tkeflx,pblh,B,upw,upthd,upqcl,upqci,ent,wstar,ustar,tend_rad_t,&
                 radlwdn,radlwup,radqrlw,radswdn,radswup,radqrsw,thetaligrad,qtgrad,thl,lwp,a_mf,&
-                tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot'
+                tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
 
 
 end module params

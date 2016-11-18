@@ -317,6 +317,8 @@ implicit none
     sumMu(1)      = 0.0
     sumMv(1)      = 0.0
     sumMtke(1)    = 0.0
+    sumMthv(1)    = 0.0
+    sumDEF2(1)     = 0.0
     sumM(nz)       = 0.0
     sumMt(nz)      = 0.0
     sumMrt(nz)     = 0.0
@@ -324,6 +326,8 @@ implicit none
     sumMu(nz)      = 0.0
     sumMv(nz)      = 0.0
     sumMtke(nz)    = 0.0
+    sumMthv(nz)    = 0.0
+    sumDEF2(nz)     = 0.
 
     sumMu      = 0.0
     sumMv      = 0.0
@@ -343,6 +347,8 @@ implicit none
           lcond*0.5*(qpl(k)+qpl(k-1))-lsub*0.5*(qpi(k)+qpi(k-1))+ggr*zi(k))*UPW(K,I)
         end if
         sumMrt(k)    =sumMrt(k)    +UPA(K,i)*UPQT(K,I)*UPW(K,I) 
+        sumMthv(k)   =sumMthv(k)   +UPA(K,i)*UPW(K,I) * (UPTHV(k,i) - 0.5 *(thetar(k-1)+thetar(k)))
+        sumDEF2(k)    = sumDEF2(k) + 2. * UPA(K,i) * ((UPW(K+1,I)-UPW(K-1,I))/(zi(k+1)-zi(k-1)))**2
         !sumMu(k)  =sumMu(k)+UPA(K,i)*UPW(K,I)*UPU(K,I)
         !sumMv(k)  =sumMv(k)+UPA(K,i)*UPW(K,I)*UPV(K,I)
         qcsgs_mf(k) = qcsgs_mf(k) + UPA(K,i)*UPQCL(k,i)

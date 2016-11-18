@@ -862,6 +862,7 @@ module snapshot
                )
                ncsnap%field(field_count)%data1 => frac_mf (1:nz)
             end if
+
             if (trim(field_name) .eq. 'cfrac_mf') then
                call fill_fields_snapshot( &
                   ! Short name
@@ -873,7 +874,7 @@ module snapshot
                   ! Dimensions
                                            (/ z2ID, timeID /) &
                )
-               ncsnap%field(field_count)%data1 => cfrac_mf (1:nz)
+               ncsnap%field(field_count)%data1 => cfrac_mf(1:nz)
             end if
 
             if (trim(field_name) .eq. 'cfrac_pdf') then

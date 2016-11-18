@@ -24,7 +24,7 @@ allocate(tend_sgs_qt(nzm), tend_sgs_t(nzm),  &
      tend_force_t(nzm),tend_rad_t(nzm))
 
 
-allocate(sumM(nz), sumMu(nz), sumMv(nz), sumMrt(nz), sumMrp(nz), sumMt(nz),sumMtke(nz), &
+allocate(sumM(nz), sumMu(nz), sumMv(nz), sumMrt(nz), sumMrp(nz), sumMt(nz),sumMtke(nz),sumMthv(nz),sumDEF2(nz), &
          buoy_sgs(nzm), smix(nzm))
 
 allocate(sgs_t_flux(nz), sgs_qt_flux(nz), sgs_thv_flux(nz), qt_flux_ed(nz), qt_flux_mf(nz), &
