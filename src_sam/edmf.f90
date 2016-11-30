@@ -348,7 +348,7 @@ implicit none
         end if
         sumMrt(k)    =sumMrt(k)    +UPA(K,i)*UPQT(K,I)*UPW(K,I) 
         sumMthv(k)   =sumMthv(k)   +UPA(K,i)*UPW(K,I) * (UPTHV(k,i) - 0.5 *(thetar(k-1)+thetar(k)))
-        sumDEF2(k)    = sumDEF2(k) + 2. * UPA(K,i) * ((UPW(K+1,I)-UPW(K-1,I))/(zi(k+1)-zi(k-1)))**2
+        sumDEF2(k)    = sumDEF2(k) + 3. * UPA(K,i) * ((UPW(K+1,I)-UPW(K-1,I))/(zi(k+1)-zi(k-1)))**2
         !sumMu(k)  =sumMu(k)+UPA(K,i)*UPW(K,I)*UPU(K,I)
         !sumMv(k)  =sumMv(k)+UPA(K,i)*UPW(K,I)*UPV(K,I)
         qcsgs_mf(k) = qcsgs_mf(k) + UPA(K,i)*UPQCL(k,i)

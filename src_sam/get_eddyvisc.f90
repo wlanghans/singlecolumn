@@ -84,7 +84,7 @@ do k=1,nzm
    end if
  
    ! Prantdl number
-   if (dowitekpbl.or.dolanghanspbl) then
+   if (dowitekpbl) then
      Pr = 0.5882 
    else
      Pr=1. 
@@ -234,9 +234,9 @@ do k=1,nzm
      tke_thvflx(k) = (1.-0.5*(frac_mf(k)+frac_mf(k+1) )) * (cthl(k) * wthl + cqt(k) * wqt)
      ! now add buoyancy flux in plumes
      if (k.eq.1) then
-       tke_thvflx(k) = tke_thvflx(k) + 0.25*(frac_mf(k)+frac_mf(k+1)) * (t_flux_ed(1)/cp+sumMthv(2))
+       tke_thvflx(k) = tke_thvflx(k) + 0.5 * (0.5*(frac_mf(k)+frac_mf(k+1))*  t_flux_ed(1)/cp+sumMthv(2))
      else
-       tke_thvflx(k) = tke_thvflx(k) + 0.25*(frac_mf(k)+frac_mf(k+1)) * (sumMthv(k)+sumMthv(k+1))
+       tke_thvflx(k) = tke_thvflx(k) + 0.5* (sumMthv(k)+sumMthv(k+1))
      end if
 
      ! get Km 
@@ -245,13 +245,16 @@ do k=1,nzm
      ! production from mean flow
      a_prod_sh=(tk(k)+0.001)*def2(k)
      ! add production from plumes
-     a_prod_sh=a_prod_sh + (tk(k)+0.001)*0.5*(sumDEF2(k)+sumDEF2(k+1))
+     if ((frac_mf(k)+frac_mf(k+1) ).gt.0.0) then
+       a_prod_sh=a_prod_sh + &
+      ( Ck*pblh*sqrt( (tke_mf(k)+tke_mf(k+1))/(frac_mf(k)+frac_mf(k+1) ) ) +0.001)*0.5*(sumDEF2(k)+sumDEF2(k+1))
+     end if
      a_prod_bu= ggr/thetar(k) * tke_thvflx(k) !-(tk(k)+0.001) * Pr * buoy_sgs(k) !        ggr/thetar(k) * tke_thvflx(k)
      ! dissipation in environment
      a_diss= Cee / smix(k)*tke(k)**1.5
      !a_diss=(1.-0.5*(frac_mf(k)+frac_mf(k+1) )) * Cee / smix(k)*tke(k)**1.5
      ! add dissipation in plumes (which is prop to sum of tke's)
-     !if (0.5*(frac_mf(k)+frac_mf(k+1) ).gt.0.0  ) then
+     !if ((frac_mf(k)+frac_mf(k+1) ).gt.0.0  ) then
      !  a_diss=a_diss + 0.5*(frac_mf(k)+frac_mf(k+1) ) *&
      !  Cee / smix(k)*(tke(k)+0.5*(tke_mf(k)+tke_mf(k+1))/(0.5*(frac_mf(k)+frac_mf(k+1) )))**1.5 
      !end if
