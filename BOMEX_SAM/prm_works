@@ -1,0 +1,65 @@
+&PARAMETERS
+dz = 20.
+nzm=200
+doconstdz = .true.
+
+betap=1.0
+betam=0.0
+
+dt=10.
+nstop= 2880  ! 8 hours
+
+dosequential=.true.
+dosgs=.true.
+dosgscloud=.true.
+dozerosigma=.true. ! forces sigma zero, satad used in environment but plumes still considered for sgs cloud cover
+dovartrans=.false.
+dotlflux=.false.
+lcld=150.
+ctketau=0.5
+dosmagor=.false.
+dowitekpbl = .false.
+doteixpbl = .true.
+doconsttk= .false.
+fixedtau=.true.
+fixedpblh = -2000.
+dopblh = .true.
+pblhfluxmin = .false.
+pblhthgrad=.false.
+dosurface=.true.
+sfc_flx_fxd=.true. 
+sfc_tau_fxd=.true. 
+doneuman= .true.
+dotkedirichlet=.true.
+
+doedmf = .true.
+pwmin=1.6
+dosingleplume=.false.
+beta =2.0
+nup=50
+fixedfa=.true.
+fixedeps = .false.
+witekeps = .false.
+neggerseps = .true.
+nuneggers=1.4
+donoplumesat=.false.
+eps0=4.e-03
+
+doenergyunit=.false.
+fluxt0   = 8.e-03    ! K m/s
+fluxq0   = 5.2e-05 ! g/g m/s
+tau0     = 0.0784
+
+doforcing=.true.
+dosubsidence=.true.
+dothuburn=.true.
+docoriolis=.true.
+dolongwave=.false.
+doshortwave=.false.
+
+snapshot_do = .true.
+snapshot_start = 0
+snapshot_period =  4 ! 45
+snapshot_end = 1000000000
+snapshot_as_double = .true.
+/
