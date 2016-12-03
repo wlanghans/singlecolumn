@@ -24,7 +24,7 @@ implicit none
     !---------------------------------------------------------------
 ! local variables
     REAL ::  PBLH_TKE,qtke,qtkem1,wt,maxqke,TKEeps,minthv, X1, X2, X3, Y1, Y2, Y3, aa, bb, dzavg
-    REAL :: delt_thv   !delta theta-v; dependent on land/sea point
+    REAL :: delt_thv,pblh0   !delta theta-v; dependent on land/sea point
     REAL,dimension(nzm) :: dthvdz
     REAL, PARAMETER :: sbl_lim  = 200. !typical scale of stable BL (m).
     REAL, PARAMETER :: sbl_damp = 400. !transition length for blending (m).
@@ -33,6 +33,7 @@ implicit none
 
     pblhalter = .false.
   
+    pblh0=pblh
 
     IF (fixedpblh.gt.0.0) then
        pblh = fixedpblh
@@ -48,8 +49,8 @@ implicit none
     kthv = 1
     minthv = 9.E9
     DO WHILE (k.le.nzm)
-       ! use flux from previous step
-       qtke  = sgs_thv_flux(k) ! 
+       ! use kinematic flux from previous step; needs to be converted
+       qtke  = sgs_thv_flux(k)/cp/ (0.5*(rho(k-1)+rho(k)))! 
        IF (minthv > qtke) then
            minthv = qtke
            kthv = k
@@ -69,11 +70,12 @@ implicit none
     DO WHILE (k .LE. nzm-2)
        if (k.eq.1) then
          dthvdz(k) = (thetav(k+1) - thetav(k))/(z(k+1)-z(k))
-       elseif (k.eq.nzm-1.or.k.eq.2) then
+       !elseif (k.eq.nzm-1.or.k.eq.2) then
+       else
          dthvdz(k) = (thetav(k+1) - thetav(k-1))/(z(k+1)-z(k-1))
-       else 
-         dzavg = 0.5*(0.25*(z(k+2)-z(k-2)) + 0.5*(z(k+1)-z(k-1))) 
-         dthvdz(k) = (-thetav(k+2) +8.* thetav(k+1) - 8.* thetav(k-1) + thetav(k-2))/(12.*dzavg)
+       !else 
+       !  dzavg = 0.5*(0.25*(z(k+2)-z(k-2)) + 0.5*(z(k+1)-z(k-1))) 
+       !  dthvdz(k) = (-thetav(k+2) +8.* thetav(k+1) - 8.* thetav(k-1) + thetav(k-2))/(12.*dzavg)
        end if
        IF (maxqke < dthvdz(k)) then
            maxqke = dthvdz(k)
@@ -198,6 +200,7 @@ implicit none
 
     !BLEND THE TWO PBLH TYPES HERE: 
     wt=.5*TANH((pblh - sbl_lim)/sbl_damp) + .5
+    wt=1.
     pblh=PBLH_TKE*(1.-wt) + pblh*wt
 
     END IF  

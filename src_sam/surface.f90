@@ -4,7 +4,7 @@ use vars
 use params
 implicit none
 	
-real diag_ustar
+real diag_ustar, rho_s
 integer i,j
 real(8) buffer(2), buffer1(2)
 
@@ -72,9 +72,10 @@ else   ! IF SFC_FLX_FXD=True
   ! WL invert bulk transfer formulae to get drag coefficients C=-flux/dtheta/vmag, which are needed for implicit formulation
   ! WL coefficients might be negative just to ensure that fluxes equal their prescribed values; in this case the surface values are meaningless (that's ok)
   ! NOTE: if fluxes are prescribed, we will use neuman conditions. Cs will not be used
+  rho_s  = 2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))
   if (doenergyunit) then
-    sgs_t_flux(1)  = fluxt0 / rho(1)
-    sgs_qt_flux(1) = fluxq0 / (rho(1)*lcond)
+    sgs_t_flux(1)  = fluxt0 / rho_s
+    sgs_qt_flux(1) = fluxq0 / (rho_s*lcond)
   else
     ! kinematic units
     sgs_t_flux(1)  = fluxt0*cp 

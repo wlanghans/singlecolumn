@@ -260,6 +260,7 @@ do k=1,nzm
  ds=lambdaf *(qte(k)-qsl)
  sigmas(k) = lambdaf * (max(0.0,qtqt(k) + alphaf**2 * thlthl(k)**2. - 2. * alphaf * qtthl(k)))**(0.5)
  !sigmas(k) = MIN ( zsig_max, sigmas(k) )
+ if (dozerosigma) sigmas(k) = 0.0
 
  n=0
  dtabs=100.

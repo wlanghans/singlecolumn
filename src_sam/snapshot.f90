@@ -733,7 +733,7 @@ module snapshot
                   ! Short name
                                            'tkewthv', &
                   ! Long name
-                                           'buoyancy flux used in TKE procution term', &
+                                           'kin. buoy flux used in TKE procution term', &
                   ! Units
                                            'K m/s', &
                   ! Dimensions
@@ -910,9 +910,9 @@ module snapshot
                   ! Short name
                                            'qtflx', &
                   ! Long name
-                                           'Total water mass flux', &
+                                           'Total water mass flux; rho*L*w*qt', &
                   ! Units
-                                           'm/s', &
+                                           'W/m2', &
                   ! Dimensions
                                            (/ z2ID, timeID /) &
                )
@@ -924,9 +924,9 @@ module snapshot
                   ! Short name
                                            'tflx_ed', &
                   ! Long name
-                                           'Moist static energy flux; ED', &
+                                           'Thetal flux; ED', &
                   ! Units
-                                           'W/m2', &
+                                           'K m/s', &
                   ! Dimensions
                                            (/ z2ID, timeID /) &
                )
@@ -938,9 +938,9 @@ module snapshot
                   ! Short name
                                            'tflx_mf', &
                   ! Long name
-                                           'Moist static energy flux; MF', &
+                                           'Thetal flux; MF', &
                   ! Units
-                                           'W/m2', &
+                                           'K m/s', &
                   ! Dimensions
                                            (/ z2ID, timeID /) &
                )
@@ -981,7 +981,7 @@ module snapshot
                   ! Short name
                                            'tflx', &
                   ! Long name
-                                           'Frozen/liquid moist static energy flux', &
+                                           'Total thetal flux; rho*cp*w*thetal', &
                   ! Units
                                            'W/m2', &
                   ! Dimensions
@@ -1038,9 +1038,9 @@ module snapshot
                   ! Short name
                                            'totbuoyflx', &
                   ! Long name
-                                           'Total (ED+MF) buoyancy flux', &
+                                           'Total (ED+MF) buoyancy flux;rho*cp*w*thetav', &
                   ! Units
-                                           'K m/s', &
+                                           'W/m2', &
                   ! Dimensions
                                            (/ z2ID, timeID /) &
                )
@@ -1276,6 +1276,19 @@ module snapshot
                                            (/ z2ID, npID, timeID /) &
                )
                ncsnap%field(field_count)%data2 => UPQCI (1:nz,1:nup)
+            end if
+            if (trim(field_name) .eq. 'upqt') then
+               call fill_fields_snapshot( &
+                  ! Short name
+                                           'upqt', &
+                  ! Long name
+                                           'plume total water mass fraction', &
+                  ! Units
+                                           'g/g', &
+                  ! Dimensions
+                                           (/ z2ID, npID, timeID /) &
+               )
+               ncsnap%field(field_count)%data2 => UPQT (1:nz,1:nup)
             end if
             if (trim(field_name) .eq. 'upt') then
                call fill_fields_snapshot( &

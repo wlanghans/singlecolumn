@@ -24,19 +24,19 @@ end if
 call tridiag(a,b,c,d,nzm)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
-  ! Diagnose implicit surface flux in kinematic units
-  sgs_qt_flux (1) = - vmag * Crv * (betam*qt(1) + betap*d(1) - r_s )
+  ! Diagnose implicit surface flux in Wm2 for output
+  sgs_qt_flux (1) = - (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * lcond * vmag * Crv * (betam*qt(1) + betap*d(1) - r_s )
 else
   ! Nothing to do
-  sgs_qt_flux (1) = sgs_qt_flux (1) 
+  sgs_qt_flux (1) = (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * lcond * sgs_qt_flux (1) 
 end if
-! Diagnose implicit atm. sgs fluxes in kinematic units
-! sgs_qt_flux (2:nzm) = 0.5*(rho(1:nzm-1) + rho(2:nzm)) * (  &  
-sgs_qt_flux (2:nzm) = 1.0 * (  &  
+  ! Diagnose implicit atm flux in Wm2 for output
+sgs_qt_flux (2:nzm) =0.5*(rho(1:nzm-1)+rho(2:nzm)) * lcond  * (  &  
               (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qt(2:nzm)-qt(1:nzm-1)) ) &
                            +(sumMrt(2:nzm) - (betap*d(2:nzm) + betam*qt(2:nzm)) * sumM(2:nzm) ))
-qt_flux_ed(1)     = sgs_qt_flux (1)
+! and components in kinematic units
+qt_flux_ed(1)     = sgs_qt_flux (1) / lcond/ (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3)))
 qt_flux_ed(nz)    = 0.0
 qt_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qt(2:nzm)-qt(1:nzm-1)) )
@@ -62,12 +62,13 @@ else
 end if
 call tridiag(a,b,c,d,nzm)
 
+  ! Diagnose implicit atm flux in Wm2 for output
 sgs_qp_flux(1)  = 0.
 sgs_qp_flux(nz) = 0.
-sgs_qp_flux (2:nzm) =  &  
+sgs_qp_flux (2:nzm) =  0.5*(rho(1:nzm-1)+rho(2:nzm)) * lcond  * &  
               (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qp(2:nzm)-qp(1:nzm-1)) ) ! &
-!                           +(sumMrp(2:nzm) - (betap*d(2:nzm) + betam*qp(2:nzm)) * sumM(2:nzm) )
+! and components in kinematic units
 qp_flux_ed(1)     = 0.
 qp_flux_ed(nz)    = 0.0
 qp_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
@@ -106,39 +107,42 @@ call tridiag(a,b,c,d,nzm)
 
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
-! Diagnose implicit surface hli flux 
+! Diagnose implicit surface flux in W/m2 for output
   if (.not.dotlflux) then
-    sgs_t_flux (1)       = - vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
+    sgs_t_flux (1)       = - (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * &
+                            vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
   else
-    sgs_t_flux (1)       = - cp * vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
+    sgs_t_flux (1)       = - (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * &
+                            cp * vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
   end if
 else
-  ! Nothing to do but conversion 
-  if (dotlflux) sgs_t_flux (1) = cp * sgs_t_flux (1)
+  if (dotlflux) sgs_t_flux (1) = (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * cp * sgs_t_flux (1)
 end if
 
 ! Diagnose implicit surface buoyancy flux 
- sgs_thv_flux(1) = sgs_t_flux(1)/cp * (1.+epsv* qv(1)) + epsv * theta(1) * sgs_qt_flux(1)
+ sgs_thv_flux(1) = sgs_t_flux(1) * (1.+epsv* qv(1)) + &
+ epsv * theta(1) * cp * sgs_qt_flux(1)/lcond
 
 if (dotlflux) then 
   t_s = t_s*cp*(presi(1)/p00)**(rgas/cp)
 end if
 
-! Diagnose atm. sgs fluxes 
-sgs_t_flux (2:nzm)       = 1. * ( & 
+! Diagnose atm. sgs fluxes in Wm2 for output
+sgs_t_flux (2:nzm)       = 0.5*(rho(1:nzm-1)+rho(2:nzm)) * ( & 
             (-1.)/adzw(2:nzm)/dz * 0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) ) &
         + sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm))
 if (dotlflux) sgs_t_flux (2:nzm) = cp * sgs_t_flux (2:nzm) 
 
-t_flux_ed(1)     = sgs_t_flux (1)
+! needs to be in kinematic units since used later
+t_flux_ed(1)     = sgs_t_flux (1) / (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) / cp
 t_flux_ed(nz)    = 0.0
 t_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
-                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) )
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) ) / cp
 if (dotlflux) t_flux_ed(2:nzm) = cp * t_flux_ed(2:nzm) 
 t_flux_mf(1)     = 0.
 t_flux_mf(nz)    = 0.
-t_flux_mf(2:nzm) = (sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm) )
+t_flux_mf(2:nzm) = (sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm) )/cp
 if (dotlflux) t_flux_mf(2:nzm) = cp* t_flux_mf(2:nzm) 
 
 
@@ -148,13 +152,14 @@ else
   tend_sgs_t = (d - t)/dt
 end if
 
-! get buoyancy flux from PDF scheme
+! get buoyancy flux from PDF scheme in Wm2 for output
 do k=2,nzm
   sgs_thv_flux(k) = sgs_t_flux (k)
   if ((qp(k-1)+qp(k)).ne.0.0) sgs_thv_flux(k)=sgs_thv_flux(k) &
-               + (lcond*(qpl(k-1)+qpl(k))+lsub*(qpi(k-1)+qpi(k)))/(qp(k-1)+qp(k)) * sgs_qp_flux(k) 
-  sgs_thv_flux(k) = 0.5*(cthl(k-1)+cthl(k))   * (2.*p00/(pres(k-1) + pres(k)))**(rgas/cp) / cp &
-                    * sgs_thv_flux(k) + 0.5*(cqt(k-1)+cqt(k)) * sgs_qt_flux(k)
+               + (lcond*(qpl(k-1)+qpl(k))+lsub*(qpi(k-1)+qpi(k)))/(qp(k-1)+qp(k)) * &
+                      sgs_qp_flux(k)/lcond * (2.*p00/(pres(k-1) + pres(k)))**(rgas/cp)
+  sgs_thv_flux(k) =  0.5*(cthl(k-1)+cthl(k)) * sgs_thv_flux(k) &
+                         + cp * 0.5*(cqt(k-1)+cqt(k)) * sgs_qt_flux(k)/lcond
 end do
 
 

@@ -60,7 +60,7 @@ do k=1,nzm
    if (doteixpbl.or.dowitekpbl.or.dolanghanspbl) then 
    ! always use Teixeira's mixing length (Witek's is very similar)
       if (fixedtau) then
-         if (doteixpbl)  tketau=600.
+         if (doteixpbl)  tketau=400.
          if (dowitekpbl) tketau=600.
       else
          tketau= max(ctketau * pblh /  ((ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.)),0.0)
@@ -122,7 +122,7 @@ do k=1,nzm
      !wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
 
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))* (p00/pres(k))**(rgas/cp) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) / cp 
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)))  &
               * (p00/pres(k))**(rgas/cp) / cp
