@@ -1,0 +1,328 @@
+#!/bin/bash
+cases=("CPBL2" "CPBL4" "BOMEX")
+pname=("ctketau" "pwmin" "tauneggers" "Wc")  
+
+# Teixeira and Cheineit 2003
+# use Pr=1 and Ck=0.5 Cee=0.16, lee=l/2.5
+# exponential decay length on l is 100 m, but apparently the formulation of l is insensitive to this length scale
+# ctketau= 600 s [they observe a span between 500 and 700 s]
+# maybe modify stability correction on turbulent length scale: modify 0.7 coefficient in stability correction
+
+# Cheineit and Teixeira 2003
+# use expoential decay length for l that's 100 m
+# use Ck=0.55 ctketau=620 s, PR=1
+
+# Cheineit 2003 JAS uses plumes only, thus ctketau=0 and pwmin=0
+
+# Witek 2011: Pr=0.56 (larger C coefficient for tke transport) since MF not accounted for TKE transport; varies eps by +-30%
+
+# Suselj 2012 use Pr=1., ctketau=400 s, Ck=1., Cee=0.16, tauneggers=500 s - 900 s
+
+# Neggers 2002 JAS use tauneggers=333 s for BOMEX and tauneggers=250 s for SCMS
+
+# Cheinet 2004 JAS tests tauneggers= 240 - 420 s
+
+
+#Lenschow and Stephens 1980; van Ulden and Siebesma 1997: frac area with buoyant updrafts is around 0.1; BOMEX: around 0.5
+
+
+#pwmin=1.1 to 1.8 means a=13.6 to 3.6% area fraction
+
+# follow deRoode to estimate Wc between 0.1 and 1. and use linear relation to derive Wa from Wc
+
+pmin=( 200.0 1.1  200.0 0.1)
+pmax=(1000.0 1.9 1000.0 0.9 )
+nrange=(11 11 11 11)
+
+# define run dir
+rundir="/home/wolfi/singlecolumn/ensemble"
+
+# define format for naming convection of runs: Casename_i_j_k_l  with ijkl the indices defining the parameter vector from the 3D parameter space
+pfmt='%02g_%02g_%02g_%02g'
+
+runind=${nrange[@]:0}
+
+if [ ${#pname[@]} != ${#pmin[@]} -o ${#pname[@]} != ${#pmax[@]} ]
+  then
+    echo "ERROR: number of parameter names and values is not the same"
+  exit
+else
+  pnumber=${#pname[@]}
+fi
+
+if [ -d $rundir ]
+then
+  echo ERROR: Directory $rundir already exists!
+  exit
+else
+  mkdir $rundir
+fi
+
+
+#get increment array
+pinc=${pmin[@]:0}
+i=0
+while [ $i -lt ${#pname[@]} ];do
+if [ ${nrange[i]} -lt 2 ]
+then
+  echo At least 2 values have to be specified for each parameter
+  exit
+fi
+
+pinc[i]=$(echo "scale=5; (${pmax[i]}-${pmin[i]})/(${nrange[i]}-1)" | bc)
+
+pmaxnew=$(echo "scale=5; ${pmin[i]}+(${nrange[i]}-1)*${pinc[i]}" | bc) 
+echo Parameter ${pname[i]}
+printf '%10s\t' "Max aim" "Max actual"
+echo
+printf '%10.5f\t' ${pmax[i]} $pmaxnew
+echo
+
+i=`expr $i + 1`
+done
+
+
+ncomb=1
+i=0
+while [ $i -lt $pnumber ]; do
+let "ncomb=${nrange[i]}*$ncomb"
+i=`expr $i + 1`
+done
+
+echo There are $ncomb parameter combinations
+
+let "nruns=${#cases[@]}*$ncomb"
+
+echo About to run $nruns simulations
+echo Cases: ${cases[@]:0}
+echo Parameter names: 
+printf '%10s\t' ${pname[@]:0}
+echo
+echo Parameter mins/maxs: 
+printf '%10.3f\t' ${pmin[@]:0}
+echo
+printf '%10.3f\t' ${pmax[@]:0}
+echo
+echo Size of parameter array: 
+printf '%10i\t' ${nrange[@]:0}
+echo
+
+#loop over all ensemble members: #cases x #comb 
+
+exec=1  #[0: don't execute runs, 1: execute runs]
+# start loop over runs
+run=0
+nend=`expr $nruns  - 1`
+echo $nend
+while [ $run -le $nend ]; do
+
+if [ ${exec} -eq 1 ]
+then
+
+#get indices from run index
+let "ncase=$run/$ncomb"
+let "runind[0]=($run-$ncase*$ncomb)/(${nrange[1]}*${nrange[2]}*${nrange[3]})"
+let "runind[1]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]})/(${nrange[2]}*${nrange[3]})"
+let "runind[2]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]})/${nrange[3]}"
+let "runind[3]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]}-runind[2]*${nrange[3]})"
+
+case=${cases[ncase]}
+echo Working on case $case simulation number $run / $nruns
+
+# get parameter array for this specific simulation
+# there is a nCases x n1 x n2 x...x nparam total simulations
+
+runname="$case""_"`printf $pfmt ${runind[0]} ${runind[1]} ${runind[2]} ${runind[3]}`
+
+#create run nfolder
+if [ -d ${rundir}/${runname} ]
+then
+  echo ERROR: Directory ${rundir}/${runname} already exists!
+  exit
+else
+  mkdir ${rundir}/${runname}
+fi
+
+
+
+#write part of namelist thats common to all runs
+cat <<EOF >${rundir}/${runname}/prm
+&PARAMETERS
+dz = 20.
+nzm=200
+doconstdz = .true.
+betap=1.0
+betam=0.0
+dt=10.
+dosequential=.true.
+dosgs=.true.
+dosgscloud=.true.
+dozerosigma=.true. 
+donoenvcloud = .true.
+dovartrans=.false.
+dotlflux=.false.
+lcld=150.
+dosmagor=.false.
+dowitekpbl = .false.
+doteixpbl = .true.
+doconsttk= .false.
+fixedtau=.true.
+fixedpblh = -2000.
+dopblh = .true.
+pblhfluxmin = .false.
+pblhthgrad=.false.
+dosurface=.true.
+sfc_flx_fxd=.true.
+sfc_tau_fxd=.true.
+doneuman= .true.
+dotkedirichlet=.true.
+doedmf = .true.
+dosingleplume=.false.
+nup=20
+fixedfa=.true.
+fixedeps = .false.
+witekeps = .false.
+neggerseps = .true.
+donoplumesat=.false.
+dolongwave=.false.
+doshortwave=.false.
+dothuburn=.true.
+snapshot_do = .true.
+snapshot_start = 0
+snapshot_period =  6 ! 45
+snapshot_end = 1000000000
+snapshot_as_double = .true.
+EOF
+
+#write case specific parameters (CPBL or BOMEX)
+if [ $case == "BOMEX" ]
+then
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1080  
+doforcing=.true.
+dosubsidence=.true.
+docoriolis=.true.
+doenergyunit=.false.
+ocean=.true.
+land=.false.
+fluxt0   = 8.e-03    
+fluxq0   = 5.2e-05 
+tau0     = 0.0784
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+BOMEX
+EOF
+  
+elif [ $case == "CPBL1" ]
+then
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1800  
+doforcing=.false.
+dosubsidence=.false.
+docoriolis=.false.
+doenergyunit=.false.
+ocean=.false.
+land=.true.
+fluxt0   = 0.03    
+fluxq0   = 2.5e-05 
+tau0     = 0.0
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+WITEK
+EOF
+
+
+elif [ $case == "CPBL2" ]
+then
+
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1800  
+doforcing=.false.
+dosubsidence=.false.
+docoriolis=.false.
+doenergyunit=.false.
+ocean=.false.
+land=.true.
+fluxt0   = 0.03    
+fluxq0   = 2.5e-05 
+tau0     = 0.0
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+WITEK
+EOF
+
+elif [ $case == "CPBL3" ]
+then
+
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1800  
+doforcing=.false.
+dosubsidence=.false.
+docoriolis=.false.
+doenergyunit=.false.
+ocean=.false.
+land=.true.
+fluxt0   = 0.06    
+fluxq0   = 2.5e-05 
+tau0     = 0.0
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+WITEK
+EOF
+
+elif [ $case == "CPBL4" ]
+then
+
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1800  
+doforcing=.false.
+dosubsidence=.false.
+docoriolis=.false.
+doenergyunit=.false.
+ocean=.false.
+land=.true.
+fluxt0   = 0.12    
+fluxq0   = 2.5e-05 
+tau0     = 0.0
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+WITEK
+EOF
+
+else
+  echo "ERROR: Case not specified"
+  exit
+fi
+
+#write specific part of namelist
+nend2=`expr ${pnumber} - 1 `
+for i in `seq 0 ${nend2}`
+do
+  pvalue[i]=$(echo "scale=5; ${pmin[i]}+${runind[i]}*${pinc[i]}" | bc)
+  cat <<EOF >>${rundir}/${runname}/prm
+${pname[i]}=${pvalue[i]}
+EOF
+done
+
+#finish namelist
+cat <<EOF >>${rundir}/${runname}/prm
+/
+EOF
+
+fi # if exec
+
+cat <<EOF >> ${rundir}/runlist
+${runname}
+EOF
+
+#advance run number
+run=`expr $run + 1 `
+echo $run
+
+done
+
