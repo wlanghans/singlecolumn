@@ -285,10 +285,17 @@ do k=1,nzm
 
 
  IF (sigmas(k).le.0.0) then
+   if (donoenvcloud) then
+   cfrac_pdf(k) = 0.0
+   qne = 0.0
+   q1(k)=-999.
+   dqndt = - (omn  * dtqsatw(tabse,pres(k)) + (1.-omn) * dtqsati(tabse,pres(k)))
+   else
    cfrac_pdf(k) =   ABS ( (SIGN(1.0,ds)+1.0)*0.5 )
    qne = cfrac_pdf(k) * ds
    q1(k)=-999.
    dqndt = - (omn  * dtqsatw(tabse,pres(k)) + (1.-omn) * dtqsati(tabse,pres(k)))
+   end if
  ELSE
    q1(k)= ds/sigmas(k)
    cfrac_pdf(k) = MIN ( 1.0, MAX ( 0.0, &

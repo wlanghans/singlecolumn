@@ -17,8 +17,8 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
                      doteixpbl,dowitekpbl,dolanghanspbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
                      sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
-                     doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, nuneggers, fixedpblh, lcld, &
-                     doenergyunit, dovartrans, dotlflux,pwmin,ctketau, dozerosigma
+                     doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, tauneggers, fixedpblh, lcld, &
+                     doenergyunit, dovartrans, dotlflux,pwmin,ctketau, dozerosigma, Wc, donoenvcloud
 
 call getarg(1,path)
 path =trim(adjustl(path))
@@ -182,7 +182,11 @@ elseif (dolanghanspbl) then
   progtke = .true.
 end if
 
-if (land) ocean=.false.
+if (land.eqv.ocean) then
+  write(*,*) 'WARNING: locean == lland, thus setting ocean=true and land=false'
+  ocean=.true.
+  land =.false.
+end if
 if (snapshot_fields(1:1) .eq. '+') then
    snapshot_fields = 'hli,u,v,w,th,thv,tabs,tke,rho,p,qt,qv,qn,qcl,qci,&
                                 qpl,qpi,qtflx,tflx,totbuoyflx,tkewthv,crv,ctheta,cm,q1,sigmas,cfrac_pdf,&

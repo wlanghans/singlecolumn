@@ -47,8 +47,6 @@ nstep = nstep + 1
 time = time + dt
 day = day0 + nstep*dt/86400.
 
-write(*,*) 'Working on timestep ', nstep
-
 ! ======================================= 
 ! set all tendecies to zero and clip non-negative scalars
 ! save prog variables at beginning of time step

@@ -37,7 +37,7 @@ implicit none
       INTEGER :: K,I
       REAL :: wthv,wqt,wthl,qstar,thstar,sigmaW,sigmaQT,sigmaTH,sigmaTHV,zs, &
            pwmax,wmin,wmax,wlv,wtv
-      REAL :: QTn,Tn,THVn,QCLn,QCIn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit
+      REAL :: QTn,Tn,THVn,QCLn,QCIn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit, Wa
 
 ! w parameters
       REAL,PARAMETER :: &
@@ -46,9 +46,9 @@ implicit none
         !&Wb= 0.0 , & 
         !&Wc= 1.0 
         ! de roode
-        &Wa=0.5,& 
-        &Wb= 0.0 , & 
-        &Wc= 0.4 
+     !   &Wa=0.5,& 
+     Wb= 0.0  
+     !   &Wc= 0.4 
         ! suselj
         !&Wa=2./3.,& 
         !&Wb= 0.002 , & 
@@ -103,6 +103,7 @@ implicit none
  ! quit in case of a non-positive buoyancy flux
  if (wthv.le.0.0) return
  
+ Wa = 0.4* Wc + 0.3
  ! get entrainment rate
   !do i=1,nup
   !  do k=1,nzm
@@ -227,8 +228,9 @@ implicit none
           if (fixedeps) then
             ENT(k-1,i) = eps0
           elseif (neggerseps) then
-            ENT(k-1,i) = 2.*nuneggers*wstar/(UPW(k-1,i)+1.0e-6)/pblh 
-            !ENT(k-1,i) = min(1.e-2,1./(600.*UPW(k-1,i))) 
+            !ENT(k-1,i) = 2.*nuneggers*wstar/(UPW(k-1,i)+1.0e-6)/pblh 
+            !ENT(k-1,i) = 2.*tauneggers*wstar/(UPW(k-1,i)+1.0e-6)/pblh 
+            ENT(k-1,i) = 1./(tauneggers*UPW(k-1,i)+1.0e-6) 
           elseif (witekeps) then
             ENT(k-1,i) = 0.7/(smix(k-1)+1.0e-06)
           elseif (randomeps) then

@@ -1659,7 +1659,6 @@ module snapshot
               nstep .ge. snapshot_start .and. &
               nstep .le. snapshot_end   .and. &
               mod(nstep-snapshot_start,snapshot_period) .eq. 0 ) then
-              write(*,*) 'Writing output ...'
               call netcdf_write_allproc(snap)
               snapshot_dump = .true.
          end if

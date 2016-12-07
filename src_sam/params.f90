@@ -56,11 +56,12 @@ logical :: dovartrans=.false.
 real :: lcld = 250.
 real :: ctketau=0.5
 logical:: doedmf = .false.
+real :: Wc=0.5
 real :: pwmin=1.2
 logical:: donoplumesat=.false.
 logical:: fixedeps=.true.
 logical:: neggerseps=.false.
-real:: nuneggers=2.
+real:: tauneggers=500.
 logical:: randomeps=.false.
 logical :: fixedfa=.true.
 real   :: eps0=1.e-03
@@ -104,6 +105,7 @@ real:: longitude0 = 0.    ! latitude of the domain's center
 real:: latitude0  = 0.    ! longitude of the domain's center 
 logical :: dotlflux = .true.
 logical :: dozerosigma=.false.
+logical :: donoenvcloud=.false.
 
 
 

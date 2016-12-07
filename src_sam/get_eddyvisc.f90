@@ -60,8 +60,7 @@ do k=1,nzm
    if (doteixpbl.or.dowitekpbl.or.dolanghanspbl) then 
    ! always use Teixeira's mixing length (Witek's is very similar)
       if (fixedtau) then
-         if (doteixpbl)  tketau=400.
-         if (dowitekpbl) tketau=600.
+         if (doteixpbl.or.dowitekpbl)  tketau=ctketau
       else
          tketau= max(ctketau * pblh /  ((ggr/thetav(1)*sgs_thv_flux(1)*pblh)**(1./3.)),0.0)
       end if
