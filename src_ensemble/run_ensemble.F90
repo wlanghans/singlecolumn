@@ -7,7 +7,7 @@ Program Parallel_Run_Ensemble
   character(50),dimension(:),allocatable :: runname
   character(50) :: namehlp,command
 
-  integer :: my_id, Nproc, ierr, Nruns, N_local_runs, N_local_max
+  integer :: my_id, Nproc, ierr, Nruns, N_local_runs, N_max
    integer, allocatable, dimension(:) :: mpi_id
 
   integer :: i,k
@@ -42,15 +42,16 @@ Program Parallel_Run_Ensemble
   run_end   = run_start+itmp(1)-1
   if(my_id == Nproc-1) run_end = Nruns-1
   N_local_runs = run_end - run_start+1
+  write(*,*)  'ID ',my_id, ' has ',N_local_runs,' runs'
 
-  call MPI_Allreduce(N_local_runs,N_local_max,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,ierr)
+  call MPI_Allreduce(N_local_runs,N_max,1,MPI_INTEGER,MPI_MAX,MPI_COMM_WORLD,ierr)
 
-  allocate(runname(N_local_max))
+  allocate(runname(N_max))
 
   open(77,file=trim(path_in)//'/runlist',status='old',form='formatted')
 
   k=0
-  do i=1,Nruns
+  do i=0,Nruns-1
       read(77,*) namehlp
       if (run_start.le.i.and.run_end.ge.i) then 
         k=k+1
@@ -62,13 +63,15 @@ Program Parallel_Run_Ensemble
 
   if (k.ne.N_local_runs) then
       write(*,*) 'Something is wrong!',k,N_local_runs
+      write(*,*) 'ID ',my_id, 'IDs:', run_start, ' IDe:',run_end 
       call MPI_FINALIZE(ierr)
   end if
 
 
   do i=1,N_local_runs
    command = "./sc_sam_wl "//trim(runname(i))
-   call EXECUTE_COMMAND_LINE ( command, WAIT = .TRUE. )
+   write(*,*) command
+   !call EXECUTE_COMMAND_LINE ( command, WAIT = .TRUE. )
   end do
 
   call MPI_Finalize(ierr)

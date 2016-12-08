@@ -35,7 +35,11 @@ pmax=(1000.0 1.9 1000.0 0.9 )
 nrange=(11 11 11 11)
 
 # define run dir
-rundir="/home/wolfi/singlecolumn/ensemble"
+rundir="/global/scratch/langhans/opt_ensemble/"
+srcdir="/global/home/users/langhans/singlecolumn/"
+
+#executable
+exec=$srcdir/sc_sam_wl
 
 # define format for naming convection of runs: Casename_i_j_k_l  with ijkl the indices defining the parameter vector from the 3D parameter space
 pfmt='%02g_%02g_%02g_%02g'
@@ -119,15 +123,21 @@ while [ $run -le $nend ]; do
 if [ ${exec} -eq 1 ]
 then
 
-#get indices from run index
-let "ncase=$run/$ncomb"
-let "runind[0]=($run-$ncase*$ncomb)/(${nrange[1]}*${nrange[2]}*${nrange[3]})"
-let "runind[1]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]})/(${nrange[2]}*${nrange[3]})"
-let "runind[2]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]})/${nrange[3]}"
-let "runind[3]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]}-runind[2]*${nrange[3]})"
+if [ $pnumber -ne 4 ]
+then
+  echo ERROR: Find indices is currently coded for 4 parameters! 
+  exit
+else
+  #get indices from run index
+  let "ncase=$run/$ncomb"
+  let "runind[0]=($run-$ncase*$ncomb)/(${nrange[1]}*${nrange[2]}*${nrange[3]})"
+  let "runind[1]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]})/(${nrange[2]}*${nrange[3]})"
+  let "runind[2]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]})/${nrange[3]}"
+  let "runind[3]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]}-runind[2]*${nrange[3]})"
+fi
 
 case=${cases[ncase]}
-echo Working on case $case simulation number $run / $nruns
+echo Creating case $case simulation number $run / $nruns
 
 # get parameter array for this specific simulation
 # there is a nCases x n1 x n2 x...x nparam total simulations
@@ -323,6 +333,9 @@ EOF
 #advance run number
 run=`expr $run + 1 `
 echo $run
+
+#copy executable to rundir
+cp $exec $rundir
 
 done
 

@@ -7,13 +7,13 @@ $(shell ./mkFilepath)
 $(shell ./mkSrcfiles)
 $(shell ./mkDepends Filepath Srcfiles > Depends)
 
-F90 = /usr/bin/gfortran -c
-LD = /usr/bin/gfortran
-FLAGS := -g -fdefault-real-8
+F90 = mpif90 -c
+LD = mpif90
+FLAGS := -r8
 #FLAGS := -g 
 
-INC_NETCDF = /usr/local/include
-LIB_NETCDF = /usr/local/lib64
+INC_NETCDF = ${NETCDF_DIR}/include
+LIB_NETCDF = ${NETCDF_DIR}/lib
 #
 #LIB_HDF = ${TACC_HDF5_LIB}
 
