@@ -70,12 +70,11 @@ implicit none
     DO WHILE (k .LE. nzm-2)
        if (k.eq.1) then
          dthvdz(k) = (thetav(k+1) - thetav(k))/(z(k+1)-z(k))
-       !elseif (k.eq.nzm-1.or.k.eq.2) then
-       else
+       elseif (k.eq.nzm-1.or.k.eq.2) then
          dthvdz(k) = (thetav(k+1) - thetav(k-1))/(z(k+1)-z(k-1))
-       !else 
-       !  dzavg = 0.5*(0.25*(z(k+2)-z(k-2)) + 0.5*(z(k+1)-z(k-1))) 
-       !  dthvdz(k) = (-thetav(k+2) +8.* thetav(k+1) - 8.* thetav(k-1) + thetav(k-2))/(12.*dzavg)
+       else 
+         dzavg = 0.5*(0.25*(z(k+2)-z(k-2)) + 0.5*(z(k+1)-z(k-1))) 
+         dthvdz(k) = (-thetav(k+2) +8.* thetav(k+1) - 8.* thetav(k-1) + thetav(k-2))/(12.*dzavg)
        end if
        IF (maxqke < dthvdz(k)) then
            maxqke = dthvdz(k)
