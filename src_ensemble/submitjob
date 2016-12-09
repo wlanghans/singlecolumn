@@ -1,0 +1,21 @@
+#!/bin/bash -l
+# Job name:
+#SBATCH --job-name=run1Densemble
+#
+# Partition:
+#SBATCH --partition=lr3
+#
+# Processors:
+#SBATCH --ntasks=12
+#
+# Wall clock limit:
+#SBATCH --time=00:30:00
+#
+# qos
+#SBATCH --qos=lr_debug
+#
+#
+
+## Run command
+mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble/" 243
+
