@@ -1,0 +1,10 @@
+#!/bin/bash
+input=$1
+fname=${input/.F90/}
+#ifort -I${NETCDF_DIR}/include -r8 -O3 -c ${fname}.F90
+#ifort -O3 -o ${fname} ${fname}.o -L${NETCDF_DIR}/lib -L${HDF5_DIR}/lib -lnetcdf -lnetcdff -lhdf5_hl -lhdf5 -lz
+mpif90 -I${NETCDF_DIR}/include -r8 -O3 -c ${fname}.F90
+mpif90 -O3 -o ${fname} ${fname}.o -L${NETCDF_DIR}/lib -L${HDF5_DIR}/lib -lnetcdf -lnetcdff -lhdf5_hl -lhdf5 -lz
+#f95 -I${NETCDF_DIR}/include -O3 -c ${fname}.F90
+#f95 -O3 -o ${fname} ${fname}.o -L${NETCDF_DIR}/lib -L${HDF5_DIR}/lib -lnetcdf -lnetcdff -lhdf5_hl -lhdf5 -lz
+rm ${fname}.o

@@ -1,18 +1,19 @@
 Program Parallel_Run_Ensemble
   use mpi
   use netcdf
+  USE IFPORT
   implicit none
 
   character(100) :: param, path_in 
   character(50),dimension(:),allocatable :: runname
-  character(50) :: namehlp,command
+  character(200) :: namehlp,command
 
   integer :: my_id, Nproc, ierr, Nruns, N_local_runs, N_max
    integer, allocatable, dimension(:) :: mpi_id
 
   integer :: i,k
   integer :: itmp(10)
-  integer :: run_start, run_end
+  integer :: run_start, run_end, status
 
 
   call MPI_Init(ierr)
@@ -69,9 +70,11 @@ Program Parallel_Run_Ensemble
 
 
   do i=1,N_local_runs
-   command = "./sc_sam_wl "//trim(runname(i))
-   write(*,*) command
-   !call EXECUTE_COMMAND_LINE ( command, WAIT = .TRUE. )
+   command = "cd "//trim(path_in)//"; ./sc_sam_wl "//trim(runname(i))//" > "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(runname(i))//".out"
+   status = system( command)
+    if ( status .ne. 0 ) then 
+       write(*,*) 'ERROR: Simulation ', trim(runname(i)), ' was unsuccessful'
+    end if
   end do
 
   call MPI_Finalize(ierr)

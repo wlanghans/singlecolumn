@@ -32,14 +32,15 @@ pname=("ctketau" "pwmin" "tauneggers" "Wc")
 
 pmin=( 200.0 1.1  200.0 0.1)
 pmax=(1000.0 1.9 1000.0 0.9 )
-nrange=(11 11 11 11)
+#nrange=(11 11 11 11)
+nrange=(3 3 3 3)
 
 # define run dir
 rundir="/global/scratch/langhans/opt_ensemble/"
 srcdir="/global/home/users/langhans/singlecolumn/"
 
 #executable
-exec=$srcdir/sc_sam_wl
+execfile=${srcdir}'/sc_sam_wl'
 
 # define format for naming convection of runs: Casename_i_j_k_l  with ijkl the indices defining the parameter vector from the 3D parameter space
 pfmt='%02g_%02g_%02g_%02g'
@@ -97,7 +98,6 @@ echo There are $ncomb parameter combinations
 
 let "nruns=${#cases[@]}*$ncomb"
 
-echo About to run $nruns simulations
 echo Cases: ${cases[@]:0}
 echo Parameter names: 
 printf '%10s\t' ${pname[@]:0}
@@ -111,13 +111,14 @@ echo Size of parameter array:
 printf '%10i\t' ${nrange[@]:0}
 echo
 
+echo About to run $nruns simulations
 #loop over all ensemble members: #cases x #comb 
 
 exec=1  #[0: don't execute runs, 1: execute runs]
 # start loop over runs
 run=0
 nend=`expr $nruns  - 1`
-echo $nend
+
 while [ $run -le $nend ]; do
 
 if [ ${exec} -eq 1 ]
@@ -180,7 +181,7 @@ fixedtau=.true.
 fixedpblh = -2000.
 dopblh = .true.
 pblhfluxmin = .false.
-pblhthgrad=.false.
+pblhthgrad=.true.
 dosurface=.true.
 sfc_flx_fxd=.true.
 sfc_tau_fxd=.true.
@@ -202,6 +203,7 @@ snapshot_start = 0
 snapshot_period =  6 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .true.
+snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
 EOF
 
 #write case specific parameters (CPBL or BOMEX)
@@ -240,7 +242,7 @@ fluxq0   = 2.5e-05
 tau0     = 0.0
 EOF
 cat <<EOF >>${rundir}/${runname}/CaseName
-WITEK
+WITEK11
 EOF
 
 
@@ -261,7 +263,7 @@ fluxq0   = 2.5e-05
 tau0     = 0.0
 EOF
 cat <<EOF >>${rundir}/${runname}/CaseName
-WITEK
+WITEK11
 EOF
 
 elif [ $case == "CPBL3" ]
@@ -281,7 +283,7 @@ fluxq0   = 2.5e-05
 tau0     = 0.0
 EOF
 cat <<EOF >>${rundir}/${runname}/CaseName
-WITEK
+WITEK11
 EOF
 
 elif [ $case == "CPBL4" ]
@@ -301,7 +303,7 @@ fluxq0   = 2.5e-05
 tau0     = 0.0
 EOF
 cat <<EOF >>${rundir}/${runname}/CaseName
-WITEK
+WITEK11
 EOF
 
 else
@@ -332,10 +334,10 @@ EOF
 
 #advance run number
 run=`expr $run + 1 `
-echo $run
-
-#copy executable to rundir
-cp $exec $rundir
 
 done
+
+#copy executable to rundir
+echo Copying executable $exec to Run Dir
+cp ${execfile} $rundir
 
