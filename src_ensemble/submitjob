@@ -17,5 +17,6 @@
 #
 
 ## Run command
-mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble/" 243
+#mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble/" 243 "/global/home/users/langhans/singlecolumn/src_ensemble/"
+mpirun ./getrmsetot "/global/scratch/langhans/opt_ensemble/"
 

@@ -79,7 +79,7 @@ zflx2=fspan(20.,3000.,nzflx2)
 
 ; create target variables
 ; 3 for BOMEX and 4 each (theta and qt at 3 and 5 hours) of CPBL2 and CPBL4
-mean=new((/7,nzmean2/),float)
+mean=new((/11,nzmean2/),float)
 
 
 do k=0,nzmean2-1
@@ -102,10 +102,16 @@ do k=0,nzmean2-1
   lfound=0
   do l=0,nzcpbl1-2
     if (zcpbl1(l+1).ge.zmean2(k).and.zcpbl1(l).le.zmean2(k)) then
+      ; first CPBL case
       mean(3,k) = thlcpbl(0,l) + (zmean2(k)-zcpbl1(l))*(thlcpbl(0,l+1)-thlcpbl(0,l))/(zcpbl1(l+1)-zcpbl1(l))
-      mean(4,k) = qtcpbl(1,l)  + (zmean2(k)-zcpbl1(l))*(qtcpbl(1,l+1)-qtcpbl(1,l))  /(zcpbl1(l+1)-zcpbl1(l))
-      mean(5,k) = thlcpbl(2,l) + (zmean2(k)-zcpbl1(l))*(thlcpbl(2,l+1)-thlcpbl(2,l))/(zcpbl1(l+1)-zcpbl1(l))
-      mean(6,k) = qtcpbl(3,l)  + (zmean2(k)-zcpbl1(l))*(qtcpbl(3,l+1)-qtcpbl(3,l))  /(zcpbl1(l+1)-zcpbl1(l))
+      mean(4,k) = qtcpbl(0,l)  + (zmean2(k)-zcpbl1(l))*(qtcpbl(0,l+1)-qtcpbl(0,l))  /(zcpbl1(l+1)-zcpbl1(l))
+      mean(5,k) = thlcpbl(1,l) + (zmean2(k)-zcpbl1(l))*(thlcpbl(1,l+1)-thlcpbl(1,l))/(zcpbl1(l+1)-zcpbl1(l))
+      mean(6,k) = qtcpbl(1,l)  + (zmean2(k)-zcpbl1(l))*(qtcpbl(1,l+1)-qtcpbl(1,l))  /(zcpbl1(l+1)-zcpbl1(l))
+      ; second CPBL case
+      mean(7,k) = thlcpbl(2,l) + (zmean2(k)-zcpbl1(l))*(thlcpbl(2,l+1)-thlcpbl(2,l))/(zcpbl1(l+1)-zcpbl1(l))
+      mean(8,k) = qtcpbl(2,l)  + (zmean2(k)-zcpbl1(l))*(qtcpbl(2,l+1)-qtcpbl(2,l))  /(zcpbl1(l+1)-zcpbl1(l))
+      mean(9,k) = thlcpbl(3,l) + (zmean2(k)-zcpbl1(l))*(thlcpbl(3,l+1)-thlcpbl(3,l))/(zcpbl1(l+1)-zcpbl1(l))
+      mean(10,k) = qtcpbl(3,l)  + (zmean2(k)-zcpbl1(l))*(qtcpbl(3,l+1)-qtcpbl(3,l))  /(zcpbl1(l+1)-zcpbl1(l))
       lfound=1
     end if
   end do
@@ -114,6 +120,10 @@ do k=0,nzmean2-1
       mean(4,k) = -999.
       mean(5,k) = -999.
       mean(6,k) = -999.
+      mean(7,k) = -999.
+      mean(8,k) = -999.
+      mean(9,k) = -999.
+      mean(10,k) = -999.
   end if
   
   
@@ -149,11 +159,11 @@ end do
        fAtt@creation_date = systemfunc ("date")
        fileattdef( ncdf, fAtt )            ; copy file attributes
 
-       outmean=(/mean((/0,3,5/),:)/)
+       outmean=(/mean((/0,3,5,7,9/),:)/)
 
        outmean!0 = "case"
        outmean!1 = "height1"
-       outmean&case = (/0,1,2/)
+       outmean&case = (/0,1,2,3,4/)
        outmean&height1  = zmean2
        outmean@long_name = "mean profiles"           ; assign attributes 
        outmean@_FillValue = -999.           ; assign attributes 
@@ -164,10 +174,10 @@ end do
        outmean2@_FillValue = -999.           ; assign attributes 
 
        ncdf->THL  = outmean                                         
-       outmean=(/mean((/1,4,6/),:)/)
+       outmean=(/mean((/1,4,6,8,10/),:)/)
        outmean!0 = "case"
        outmean!1 = "height1"
-       outmean&case = (/0,1,2/)
+       outmean&case = (/0,1,2,3,4/)
        outmean&height1  = zmean2
        outmean@long_name = "mean profiles"           ; assign attributes 
        outmean@_FillValue = -999.           ; assign attributes 
