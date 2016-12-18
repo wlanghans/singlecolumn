@@ -6,17 +6,20 @@
 #SBATCH --partition=lr3
 #
 # Processors:
-#SBATCH --ntasks=12
+#SBATCH --ntasks=1200
 #
 # Wall clock limit:
-#SBATCH --time=00:30:00
+#SBATCH --time=04:00:00
 #
 # qos
-#SBATCH --qos=lr_debug
+#SBATCH --qos=lr_normal
 #
 #
 
+#cd /global/home/users/langhans/singlecolumn/src_ensemble
+#./createnamelists > createnamelists.out
+
 ## Run command
-#mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble/" 243 "/global/home/users/langhans/singlecolumn/src_ensemble/"
-mpirun ./getrmsetot "/global/scratch/langhans/opt_ensemble/"
+mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble/" 43923 "/global/home/users/langhans/singlecolumn/src_ensemble/"
+#mpirun ./getrmsetot "/global/scratch/langhans/opt_ensemble/"
 

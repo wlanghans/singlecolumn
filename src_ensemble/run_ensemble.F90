@@ -6,7 +6,7 @@ Program Parallel_Run_Ensemble
 
   character(300) :: param, path_in,pathin,path_ncl
   character(50),dimension(:),allocatable :: runname
-  character(200) :: namehlp,command, casename,filein
+  character(500) :: namehlp,command, casename,filein
 
   integer :: my_id, Nproc, ierr, Nruns, N_local_runs, N_max
   integer, allocatable, dimension(:) :: mpi_id
@@ -75,28 +75,27 @@ Program Parallel_Run_Ensemble
   do i=1,N_local_runs
    namehlp = trim(runname(i))
    command = "cd "//trim(path_in)//"; ./sc_sam_wl "//trim(runname(i))//" > "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(runname(i))//".out"
-   !status = system( command)
-   ! if ( status .ne. 0 ) then 
-   !    write(*,*) 'ERROR: Simulation ', trim(runname(i)), ' was unsuccessful'
-   ! end if
-   !!FIX THIS
+   status = system( command)
+    if ( status .ne. 0 ) then 
+       write(*,*) 'ERROR: Simulation ', trim(runname(i)), ' was unsuccessful'
+    end if
    if (namehlp(1:5).eq."BOMEX"  ) then
-      casename = "BOMEX"
-      pathin=""//trim(path_in)//"/"//trim(runname(i))//"/"
-      filein="BOMEX_snapshot.nc"
+      casename = '"BOMEX"'
+      pathin='"'//trim(path_in)//"/"//trim(runname(i))//"/"//'"'
+      filein='"BOMEX_snapshot.nc"'
    elseif (namehlp(1:5).eq."CPBL2"  ) then
-      casename = "CPBL2"
-      pathin=""//trim(path_in)//"/"//trim(runname(i))//"/"
-      filein="WITEK11_snapshot.nc"
+      casename = '"CPBL2"'
+      pathin='"'//trim(path_in)//"/"//trim(runname(i))//"/"//'"'
+      filein='"WITEK11_snapshot.nc"'
    elseif (namehlp(1:5).eq."CPBL4"  ) then
-      casename = "CPBL4"
-      pathin=""//trim(path_in)//"/"//trim(runname(i))//"/"
-      filein="WITEK11_snapshot.nc"
+      casename = '"CPBL4"'
+      pathin='"'//trim(path_in)//"/"//trim(runname(i))//"/"//'"'
+      filein='"WITEK11_snapshot.nc"'
    else
       write(*,*) 'ERROR: Case unknown. Stopping.'
       call MPI_FINALIZE(ierr)
    end if
-   command = "cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl casename="//trim(casename)//" filein="//trim(filein)//" pathin="//trim(pathin)
+   command = "cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
    status = system(command)
     if ( status .ne. 0 ) then 
        write(*,*) 'ERROR: ncl postproc ', trim(runname(i)), ' was unsuccessful'

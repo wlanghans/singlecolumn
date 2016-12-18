@@ -33,7 +33,7 @@ pname=("ctketau" "pwmin" "tauneggers" "Wc")
 pmin=( 200.0 1.1  200.0 0.1)
 pmax=(1000.0 1.9 1000.0 0.9 )
 #nrange=(11 11 11 11)
-nrange=(3 3 3 3)
+nrange=(11 11 11 11)
 
 # define run dir
 rundir="/global/scratch/langhans/opt_ensemble/"
@@ -89,6 +89,9 @@ done
 i=0
 nfin2=`expr $pnumber - 1`
 while [ $i -le $nfin2 ]; do
+cat <<EOF >${rundir}/param_${i}
+${pname[i]}
+EOF
 j=0
 nfin=`expr ${nrange[i]} - 1`
 while [ $j -le ${nfin} ]; do
@@ -216,8 +219,9 @@ snapshot_do = .true.
 snapshot_start = 0
 snapshot_period =  12 ! 45
 snapshot_end = 1000000000
-snapshot_as_double = .true.
-snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
+snapshot_as_double = .false.
+!snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
+snapshot_fields = 'thl,rho,qt,qcl,qtflx,tflx'
 EOF
 
 #write case specific parameters (CPBL or BOMEX)

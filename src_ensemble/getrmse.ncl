@@ -57,16 +57,16 @@ do t=0,dimsizes(t_ind)-1
     tmax = ind(abs(time-t_ind(t)-tavg).eq.min(abs(time-t_ind(t)-tavg)))
     nt  =tmax-tmin+1
     avgind = ispan(tmin,tmax,1)
-    thl1D(t,:)=doubletofloat(dim_avg_n(f->thl(avgind,:),0))
-    qt1D(t,:)=doubletofloat(dim_avg_n(f->qt(avgind,:),0))
+    thl1D(t,:)=(dim_avg_n(f->thl(avgind,:),0))
+    qt1D(t,:)=(dim_avg_n(f->qt(avgind,:),0))
   
     if (casename.eq."BOMEX") then
-    rhoi1D(1:nzm-1)  = doubletofloat((0.5*(dim_avg_n(f->rho(avgind,0:nzm-2),0) + dim_avg_n(f->rho(avgind,1:nzm-1),0))))
+    rhoi1D(1:nzm-1)  = ((0.5*(dim_avg_n(f->rho(avgind,0:nzm-2),0) + dim_avg_n(f->rho(avgind,1:nzm-1),0))))
     rhoi1D(0) = 2.*rhoi1D(1) - rhoi1D(2)
     rhoi1D(nzm)= 2.*rhoi1D(nzm-1) - rhoi1D(nzm-2)
-    qc1D(:)=doubletofloat(dim_avg_n(f->qcl(avgind,:),0))
-    wthl1D(:)=doubletofloat(dim_avg_n(f->tflx(avgind,:),0) )
-    wqt1D(:)=doubletofloat(dim_avg_n(f->qtflx(avgind,:),0)) 
+    qc1D(:)=(dim_avg_n(f->qcl(avgind,:),0))
+    wthl1D(:)=(dim_avg_n(f->tflx(avgind,:),0) )
+    wqt1D(:)=(dim_avg_n(f->qtflx(avgind,:),0)) 
     end if
 end do
 
