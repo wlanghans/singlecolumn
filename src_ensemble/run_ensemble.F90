@@ -6,7 +6,8 @@ Program Parallel_Run_Ensemble
 
   character(300) :: param, path_in,pathin,path_ncl
   character(50),dimension(:),allocatable :: runname
-  character(500) :: namehlp,command, casename,filein
+  character(500) :: namehlp, casename,filein
+  character(700) ::command
 
   integer :: my_id, Nproc, ierr, Nruns, N_local_runs, N_max
   integer, allocatable, dimension(:) :: mpi_id
@@ -74,11 +75,6 @@ Program Parallel_Run_Ensemble
 
   do i=1,N_local_runs
    namehlp = trim(runname(i))
-   command = "cd "//trim(path_in)//"; ./sc_sam_wl "//trim(runname(i))//" > "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(runname(i))//".out"
-   status = system( command)
-    if ( status .ne. 0 ) then 
-       write(*,*) 'ERROR: Simulation ', trim(runname(i)), ' was unsuccessful'
-    end if
    if (namehlp(1:5).eq."BOMEX"  ) then
       casename = '"BOMEX"'
       pathin='"'//trim(path_in)//"/"//trim(runname(i))//"/"//'"'
@@ -95,11 +91,24 @@ Program Parallel_Run_Ensemble
       write(*,*) 'ERROR: Case unknown. Stopping.'
       call MPI_FINALIZE(ierr)
    end if
-   command = "cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
-   status = system(command)
+
+   command = "cd "//trim(path_in)//"; ./sc_sam_wl "//trim(runname(i))//" > "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(runname(i))//".out"
+   command=trim(command)//" ; cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
+   command=trim(command)//"; rm -rf "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(filein)
+   status = system( trim(command))
     if ( status .ne. 0 ) then 
-       write(*,*) 'ERROR: ncl postproc ', trim(runname(i)), ' was unsuccessful'
+       write(*,*) 'ERROR: Simulation ', trim(runname(i)), ' was unsuccessful'
+       call MPI_FINALIZE(ierr)
+    else
+       write(*,*) 'Simulation ', trim(runname(i)), ' was successful'
     end if
+!   command = "cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
+   !status = system(command)
+   ! if ( status .ne. 0 ) then 
+   !    write(*,*) 'ERROR: ncl postproc ', trim(runname(i)), ' was unsuccessful'
+   !    write(*,*) command
+   !    call MPI_FINALIZE(ierr)
+   ! end if
   end do
 
   call MPI_Finalize(ierr)
