@@ -1,0 +1,304 @@
+#!/bin/bash
+
+# run with the following input
+# ./runsingle runname pvalue1 pvalue2 pvalue3 pvalue4 keepnc
+
+# define cases and parameters to be tuned
+cases=("CPBL2" "CPBL4" "BOMEX")
+pname=("ctketau" "pwmin" "tauneggers" "Wc")  
+
+echo Run ID: ${1}
+echo Parameters: 1:${2} 2:${3} 3:${4} 4:${5}
+
+pvalue=( 0.0 0.0  0.0 0.0)
+                 #runname is a character 
+pvalue[0]=${2}   #value for parameter one
+pvalue[1]=${3}   #value for parameter two
+pvalue[2]=${4}   #value for parameter three
+pvalue[3]=${5}   #value for parameter four
+keepnc=${6}   #integer: 0...netcdf will be deleted after run  1...netcdf will be kept after run
+#if [ ${2} ... check if all 4 are read in ]
+#then
+#  echo ERROR: Find indices is currently coded for 4 parameters! 
+#  exit
+#fi
+
+# Teixeira and Cheineit 2003
+# use Pr=1 and Ck=0.5 Cee=0.16, lee=l/2.5
+# exponential decay length on l is 100 m, but apparently the formulation of l is insensitive to this length scale
+# ctketau= 600 s [they observe a span between 500 and 700 s]
+# maybe modify stability correction on turbulent length scale: modify 0.7 coefficient in stability correction
+
+# Cheineit and Teixeira 2003
+# use expoential decay length for l that's 100 m
+# use Ck=0.55 ctketau=620 s, PR=1
+
+# Cheineit 2003 JAS uses plumes only, thus ctketau=0 and pwmin=0
+
+# Witek 2011: Pr=0.56 (larger C coefficient for tke transport) since MF not accounted for TKE transport; varies eps by +-30%
+
+# Suselj 2012 use Pr=1., ctketau=400 s, Ck=1., Cee=0.16, tauneggers=500 s - 900 s
+
+# Neggers 2002 JAS use tauneggers=333 s for BOMEX and tauneggers=250 s for SCMS
+
+# Cheinet 2004 JAS tests tauneggers= 240 - 420 s
+
+
+#Lenschow and Stephens 1980; van Ulden and Siebesma 1997: frac area with buoyant updrafts is around 0.1; BOMEX: around 0.5
+
+
+#pwmin=1.1 to 1.8 means a=13.6 to 3.6% area fraction
+
+# follow deRoode to estimate Wc between 0.1 and 1. and use linear relation to derive Wa from Wc
+
+pmin=( 200.0 1.1  200.0 0.1)
+pmax=(1000.0 1.9 1000.0 0.9 )
+
+# define run dir
+rundir="/global/scratch/langhans/opt_single/"
+# define src dir
+srcdir="/global/home/users/langhans/singlecolumn/"
+# define ncl script dir
+ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
+
+# define executable name
+execfile=${srcdir}'/sc_sam_wl'
+
+
+
+pnumber=${#pname[@]}
+ncases=${#cases[@]}
+
+if [ -d $rundir ]
+then
+  echo ERROR: Directory $rundir already exists!
+  exit
+else
+  mkdir $rundir
+fi
+
+#copy executable to rundir
+cp ${execfile} $rundir
+
+#loop over all cases 
+
+# start loop over runs
+run=0
+nend=`expr $ncases  - 1`
+rmsetot=0.
+while [ $run -le $nend ]; do
+
+case=${cases[run]}
+
+runname=${1}"_"${case} 
+
+#create run nfolder
+if [ -d ${rundir}/${runname} ]
+then
+  echo ERROR: Directory ${rundir}/${runname} already exists!
+  exit
+else
+  mkdir ${rundir}/${runname}
+fi
+
+
+
+#write part of namelist thats common to all runs
+cat <<EOF >${rundir}/${runname}/prm
+&PARAMETERS
+dz = 20.
+nzm=200
+doconstdz = .true.
+betap=1.0
+betam=0.0
+dt=10.
+dosequential=.true.
+dosgs=.true.
+dosgscloud=.true.
+dozerosigma=.true. 
+donoenvcloud = .true.
+dovartrans=.false.
+dotlflux=.false.
+lcld=150.
+dosmagor=.false.
+dowitekpbl = .false.
+doteixpbl = .true.
+doconsttk= .false.
+fixedtau=.true.
+fixedpblh = -2000.
+dopblh = .true.
+pblhfluxmin = .false.
+pblhthgrad=.true.
+dosurface=.true.
+sfc_flx_fxd=.true.
+sfc_tau_fxd=.true.
+doneuman= .true.
+dotkedirichlet=.true.
+doedmf = .true.
+dosingleplume=.false.
+nup=40
+fixedfa=.true.
+fixedeps = .false.
+witekeps = .false.
+neggerseps = .true.
+donoplumesat=.false.
+dolongwave=.false.
+doshortwave=.false.
+dothuburn=.true.
+snapshot_do = .true.
+snapshot_start = 0
+snapshot_period =  12 ! 45
+snapshot_end = 1000000000
+snapshot_as_double = .false.
+!snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
+snapshot_fields = 'thl,rho,qt,qcl,qtflx,tflx'
+EOF
+
+#write case specific parameters (CPBL or BOMEX)
+if [ $case == "BOMEX" ]
+then
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1080  
+doforcing=.true.
+dosubsidence=.true.
+docoriolis=.true.
+doenergyunit=.false.
+ocean=.true.
+land=.false.
+fluxt0   = 8.e-03    
+fluxq0   = 5.2e-05 
+tau0     = 0.0784
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+BOMEX
+EOF
+  
+elif [ $case == "CPBL1" ]
+then
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1800  
+doforcing=.false.
+dosubsidence=.false.
+docoriolis=.false.
+doenergyunit=.false.
+ocean=.false.
+land=.true.
+fluxt0   = 0.03    
+fluxq0   = 2.5e-05 
+tau0     = 0.0
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+WITEK11
+EOF
+
+
+elif [ $case == "CPBL2" ]
+then
+
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1800  
+doforcing=.false.
+dosubsidence=.false.
+docoriolis=.false.
+doenergyunit=.false.
+ocean=.false.
+land=.true.
+fluxt0   = 0.03    
+fluxq0   = 2.5e-05 
+tau0     = 0.0
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+WITEK11
+EOF
+
+elif [ $case == "CPBL3" ]
+then
+
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1800  
+doforcing=.false.
+dosubsidence=.false.
+docoriolis=.false.
+doenergyunit=.false.
+ocean=.false.
+land=.true.
+fluxt0   = 0.06    
+fluxq0   = 2.5e-05 
+tau0     = 0.0
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+WITEK11
+EOF
+
+elif [ $case == "CPBL4" ]
+then
+
+
+cat <<EOF >>${rundir}/${runname}/prm
+nstop= 1800  
+doforcing=.false.
+dosubsidence=.false.
+docoriolis=.false.
+doenergyunit=.false.
+ocean=.false.
+land=.true.
+fluxt0   = 0.12    
+fluxq0   = 2.5e-05 
+tau0     = 0.0
+EOF
+cat <<EOF >>${rundir}/${runname}/CaseName
+WITEK11
+EOF
+
+else
+  echo "ERROR: Case not specified"
+  exit
+fi
+
+#write specific part of namelist
+nend2=`expr ${pnumber} - 1 `
+for i in `seq 0 ${nend2}`
+do
+  cat <<EOF >>${rundir}/${runname}/prm
+${pname[i]}=${pvalue[i]}
+EOF
+done
+
+#finish namelist
+cat <<EOF >>${rundir}/${runname}/prm
+/
+EOF
+
+# run simulation
+cd ${rundir}
+./sc_sam_wl ${runname} > ${rundir}/${runname}/${runname}.out
+if [ $case == "BOMEX" ]
+then
+ filename="BOMEX_snapshot.nc"
+ weight=0.5
+else
+ filename="WITEK11_snapshot.nc"
+ weight=0.25
+fi
+ncl -Q  ${ncldir}/getrmse.ncl casename='"'${case}'"' filein='"'${filename}'"' pathin='"'${rundir}/${runname}'"'
+if [ ${keepnc} == 0 ]
+then
+rm -rf ${runname}/${filename}
+fi
+
+rmsein=${rundir}/${runname}/rmse_${case}
+
+read -d ' ' rmse < $rmsein
+rmsetot=$(echo "scale=5; $rmsetot + $weight*$rmse" | bc)
+#advance run number
+run=`expr $run + 1 `
+
+done
+
+#get overall RMSE
+echo $rmsetot > ${rundir}/rmse_tot
+
