@@ -57,8 +57,8 @@ do t=0,dimsizes(t_ind)-1
     tmax = ind(abs(time-t_ind(t)-tavg).eq.min(abs(time-t_ind(t)-tavg)))
     nt  =tmax-tmin+1
     avgind = ispan(tmin,tmax,1)
-    thl1D(t,:)=(dim_avg_n(f->thl(avgind,:),0))
-    qt1D(t,:)=(dim_avg_n(f->qt(avgind,:),0))
+    thl1D(t,:)=(dim_avg_n(f->thl(tmin:tmax,:),0))
+    qt1D(t,:)=(dim_avg_n(f->qt(tmin:tmax,:),0))
   
     if (casename.eq."BOMEX") then
     rhoi1D(1:nzm-1)  = ((0.5*(dim_avg_n(f->rho(avgind,0:nzm-2),0) + dim_avg_n(f->rho(avgind,1:nzm-1),0))))
@@ -103,10 +103,12 @@ do k=0,nzmean-1
   if (casename.eq."CPBL4") then
     rmse_thl(n) = rmse_thl(n) + (thl(n+3,k)-thl1D(n,k+1))^2. 
     rmse_qt(n)  = rmse_qt(n)  + (qt(n+3,k)-qt1D(n,k+1))^2. 
+    if (n.eq.0) then
+      ;print(zmean(k)+" "+thl(n+3,k) + " "+thl1D(n,k+1)+" "+(thl(n+3,k)-thl1D(n,k+1))^2.)
+    end if
   end if
 
 end do
-
 end do
 
 if (casename.eq."BOMEX") then
@@ -152,6 +154,7 @@ if (casename.eq."CPBL2".or.casename.eq."CPBL4") then
   rmse_wqt =-999.
   rmse_wthl=-999.
   rmse_qc  =-999.
+  ;print("RMSE THL="+sprintf("%13.8f",avg(rmse_thl(:))))
 end if
 
 system("echo "+ sprintf("%13.8f",rmse) + " "+sprintf("%13.8f",avg(rmse_thl(:))) + " "+ sprintf("%13.8f",avg(rmse_qt(:))) \

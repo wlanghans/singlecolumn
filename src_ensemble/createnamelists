@@ -33,10 +33,10 @@ pname=("ctketau" "pwmin" "tauneggers" "Wc")
 pmin=( 200.0 1.1  200.0 0.1)
 pmax=(1000.0 1.9 1000.0 0.9 )
 #nrange=(11 11 11 11)
-nrange=(11 11 11 11)
+nrange=(9 9 9 9)
 
 # define run dir
-rundir="/global/scratch/langhans/opt_ensemble/"
+rundir="/global/scratch/langhans/opt_ensemble_test/"
 srcdir="/global/home/users/langhans/singlecolumn/"
 
 #executable

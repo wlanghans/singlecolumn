@@ -116,7 +116,8 @@ if (.not.(doneuman.or.sfc_flx_fxd)) then
                             cp * vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
   end if
 else
-  if (dotlflux) sgs_t_flux (1) = (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * cp * sgs_t_flux (1)
+  sgs_t_flux (1) = (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * sgs_t_flux (1)
+  if (dotlflux) sgs_t_flux (1) = cp * sgs_t_flux (1)
 end if
 
 ! Diagnose implicit surface buoyancy flux 

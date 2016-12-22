@@ -18,6 +18,6 @@
 
 
 ## Run command
-#mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble/" 12288 "/global/home/users/langhans/singlecolumn/src_ensemble/"
-mpirun ./getrmsetot "/global/scratch/langhans/opt_ensemble/"
+#mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble_test/" 19683 "/global/home/users/langhans/singlecolumn/src_ensemble/"
+mpirun ./getrmsetot "/global/scratch/langhans/opt_ensemble_test/"
 

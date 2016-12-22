@@ -55,7 +55,7 @@ pmin=( 200.0 1.1  200.0 0.1)
 pmax=(1000.0 1.9 1000.0 0.9 )
 
 # define run dir
-rundir="/global/scratch/langhans/opt_single/"
+rundir='/global/scratch/langhans/'${1}
 # define src dir
 srcdir="/global/home/users/langhans/singlecolumn/"
 # define ncl script dir
@@ -150,8 +150,8 @@ snapshot_start = 0
 snapshot_period =  12 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .false.
-!snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
-snapshot_fields = 'thl,rho,qt,qcl,qtflx,tflx'
+snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
+!snapshot_fields = 'thl,rho,qt,qcl,qtflx,tflx'
 EOF
 
 #write case specific parameters (CPBL or BOMEX)
