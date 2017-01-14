@@ -9,7 +9,7 @@ implicit none
 integer :: ierr
 
 NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
-                     fluxt0,fluxq0,tau0,dt,nstop, dosmagor, doedmf, &
+                     fluxt0,fluxq0,tau0,nstop, dosmagor, doedmf, &
                      betam, betap, z0, sfc_flx_fxd, sfc_tau_fxd, & 
                      ocean, land, nup, dopblh, windshear, &
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 

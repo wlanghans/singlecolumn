@@ -4,7 +4,8 @@
 # ./runsingle runname pvalue1 pvalue2 pvalue3 pvalue4 keepnc
 
 # define cases and parameters to be tuned
-cases=("CPBL2" "CPBL4" "BOMEX")
+#cases=("CPBL2" "CPBL4" "BOMEX")
+cases=("BOMEX")
 pname=("ctketau" "pwmin" "tauneggers" "Wc")  
 
 echo Run ID: ${1}
@@ -55,11 +56,11 @@ pmin=( 200.0 1.1  200.0 0.1)
 pmax=(1000.0 1.9 1000.0 0.9 )
 
 # define run dir
-rundir='/global/scratch/langhans/'${1}
+rundir='/scratch1/scratchdirs/langhans/'${1}
 # define src dir
-srcdir="/global/home/users/langhans/singlecolumn/"
+srcdir="/global/homes/l/langhans/singlecolumn/"
 # define ncl script dir
-ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
+ncldir="/global/homes/l/langhans/singlecolumn/src_ensemble/"
 
 # define executable name
 execfile=${srcdir}'/sc_sam_wl'
@@ -284,7 +285,7 @@ else
  filename="WITEK11_snapshot.nc"
  weight=0.25
 fi
-ncl -Q  ${ncldir}/getrmse.ncl casename='"'${case}'"' filein='"'${filename}'"' pathin='"'${rundir}/${runname}'"'
+ncl -Q  ${ncldir}/getrmse.ncl benchdir='"'${ncldir}'"'  casename='"'${case}'"' filein='"'${filename}'"' pathin='"'${rundir}/${runname}'"'
 if [ ${keepnc} == 0 ]
 then
 rm -rf ${runname}/${filename}

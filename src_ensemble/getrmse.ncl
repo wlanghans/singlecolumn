@@ -1,7 +1,6 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; get the benchmark profile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-benchdir="/global/home/users/langhans/singlecolumn/src_ensemble/"  
 f=addfile(benchdir+"/benchmark.nc","r")
 zmean=f->height1
 zflx=f->height2
