@@ -121,7 +121,7 @@ do k=1,nzm
      !wqt  = -Pr * tk(k) * (qt(kc)-qt(kb)) / (z(kc)-z(kb))
 
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) 
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)))  &
               * (p00/pres(k))**(rgas/cp) / cp
@@ -142,7 +142,7 @@ do k=1,nzm
      a_diss=a_prod_sh+a_prod_bu
  
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) 
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((fac_cond*qpl(k)+fac_sub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1))) * (p00/pres(k))**(rgas/cp)
      end if
@@ -157,7 +157,7 @@ do k=1,nzm
    ! ==================================
 
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((fac_cond*qpl(k)+fac_sub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1))) * (p00/pres(k))**(rgas/cp)
      end if
@@ -189,7 +189,7 @@ do k=1,nzm
    ! ==================================
 
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)+t_flux_mf(k) + t_flux_mf(k+1))) / cp 
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)+t_flux_mf(k) + t_flux_mf(k+1)))
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((lcond*qpl(k)+lsub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1)+qp_flux_mf(k) + qp_flux_mf(k+1)))  &
               * (p00/pres(k))**(rgas/cp) / cp
@@ -223,7 +223,7 @@ do k=1,nzm
    ! ==================================
 
     ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) / cp
+     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1))) 
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((fac_cond*qpl(k)+fac_sub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1))) * (p00/pres(k))**(rgas/cp)
      end if
