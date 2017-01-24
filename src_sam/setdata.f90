@@ -273,7 +273,6 @@ do k = 1,nzm
      u(k)     = 0.0
    end if
    v(k)     = 0.
-   u(k)     = 0.
    tke(k)   = 0.001
    qcl(k)   = 0.
    qpl(k)   = 0.
