@@ -4,6 +4,7 @@ load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 cases=3
 xstr=new(cases,string)
 colors=(/"blue","red","orange"/)
+colorsp=(/"blue","red","orange","darkgreen"/)
 
 
 rmsedir="/global/scratch/langhans/opt_ensemble_test/"
@@ -140,7 +141,7 @@ if (r.eq.0) then
 ;**********************************************
 ; create plot
 ;**********************************************
-  plot=new(5,graphic)
+  plot=new(6,graphic)
   dum=new(4,graphic)
   wks = gsn_open_wks("eps","rmse_at_opt")               ; send graphics to PNG file
 ;**********************************************
@@ -193,6 +194,103 @@ if (r.eq.0) then
 
   gsn_panel(wks,plot(0:3),(/1,4/),False)
 
+  statsd=new((/4,dimsizes(stat)/),float)
+  drmsedx=new(dimsizes(rmse),float)
+  xp=fspan(-3.,0.,4)
+
+  yvalp=new((/4,5/),float)
+
+
+  do ri=0,3
+    if (ri.eq.0) then 
+    dx=p1(dimsizes(p1)-1)-p1(0)
+    end if
+    if (ri.eq.1) then 
+    dx=p2(dimsizes(p2)-1)-p2(0)
+    end if
+    if (ri.eq.2) then 
+    dx=p3(dimsizes(p3)-1)-p3(0)
+    end if
+    if (ri.eq.3) then 
+    dx=p4(dimsizes(p4)-1)-p4(0)
+    end if
+
+    do i=0,dims(0)-1
+    do j=0,dims(1)-1
+    do k=0,dims(2)-1
+    do l=0,dims(3)-1
+   
+     if (ri.eq.0) then
+       indu = min((/i+1,dimsizes(p1)-1/))
+       indd = max((/i-1,0/))
+       drmsedx(i,j,k,l) = (rmse(indu,j,k,l)-rmse(indd,j,k,l)) / (p1(indu)-p1(indd))
+     end if
+     if (ri.eq.1) then
+       indu = min((/j+1,dimsizes(p2)-1/))
+       indd = max((/j-1,0/))
+       drmsedx(i,j,k,l) = (rmse(i,indu,k,l)-rmse(i,indd,k,l)) / (p2(indu)-p2(indd))
+     end if
+     if (ri.eq.2) then
+       indu = min((/k+1,dimsizes(p3)-1/))
+       indd = max((/k-1,0/))
+       drmsedx(i,j,k,l) = (rmse(i,j,indu,l)-rmse(i,j,indd,l)) / (p3(indu)-p3(indd))
+     end if
+     if (ri.eq.3) then
+       indu = min((/l+1,dimsizes(p4)-1/))
+       indd = max((/l-1,0/))
+       drmsedx(i,j,k,l) = (rmse(i,j,k,indu)-rmse(i,j,k,indd)) / (p4(indu)-p4(indd))
+     end if
+    
+    end do
+    end do
+    end do
+    end do
+ 
+    drmsedx = drmsedx * dx
+
+
+    statsd(ri,:)=stat_dispersion(drmsedx,opt)
+  end do
+
+  yvalp(:,0) = statsd(:,2)
+  ;yvalp(:,1) = statsd(:,6)
+  yvalp(:,1) = statsd(:,3)
+  yvalp(:,2) = statsd(:,8)
+  ;yvalp(:,3) = statsd(:,10)
+  yvalp(:,3) = statsd(:,13)
+  yvalp(:,4) = statsd(:,14)
+
+  ;**********************************************
+  ; create plot for drmsedx
+  ;**********************************************
+  wks = gsn_open_wks("eps","drmsedx_box")               ; send graphics to PNG file
+  ;**********************************************
+  ; resources for plot background
+  ;**********************************************
+  delete(res)
+  res            = True                         ; plot mods desired
+ ; res@gsnDraw     = False
+ ; res@gsnFrame    = False
+  res@tmXBLabels = pnames ; labels for each box
+  res@trYMinF = min(statsd(:,2))
+  res@trYMaxF = max(statsd(:,14))
+  res@tiMainString = "dRMSE/dx!B!i!N!; min/10%/median/90%/max"
+  ;**********************************************
+  ; resources for polylines that draws the boxes
+  ;**********************************************
+  llres                   = True
+  llres@gsLineThicknessF  = 2.5                 ; line thickness
+  ;**********************************************
+  ; resources that control color and width of boxes
+  ;**********************************************
+  opti          = True
+  opti@boxWidth = .25                           ; Width of box (x units)
+  opti@boxColors = colorsp       ; Color of box(es)
+  ;***********************************************
+  plot(5) = boxplot(wks,xp,yvalp,opti,res,llres)  ; All 3 options used...
+  draw(plot(5))                                     ; box plot does not call
+  frame(wks)  
+
 end if
 
 ; end loop over cases
@@ -202,18 +300,19 @@ end do
 ;**********************************************
 ; create plot
 ;**********************************************
-  wks = gsn_open_wks("png","box")               ; send graphics to PNG file
+  wks = gsn_open_wks("eps","box")               ; send graphics to PNG file
 ;**********************************************
 ; resources for plot background
 ;**********************************************
   delete(res)
+  delete(opti)
   res            = True                         ; plot mods desired
  ; res@gsnDraw     = False
  ; res@gsnFrame    = False
   res@tmXBLabels = xstr ; labels for each box
   res@trYMinF = 0.
   res@trYMaxF = 1.
-  res@tiMainString = "RMSE; min/max/median/IQR"
+  res@tiMainString = "RMSE; min/25%/median/75%/max"
 ;**********************************************
 ; resources for polylines that draws the boxes
 ;**********************************************  
@@ -229,6 +328,7 @@ end do
   plot(4) = boxplot(wks,x,yval,opti,res,llres)	; All 3 options used...
   draw(plot(4))                                     ; box plot does not call
   frame(wks)                                    ; these for you
+
   
 
 
