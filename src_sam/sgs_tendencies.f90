@@ -14,6 +14,7 @@ integer :: k
 !+++++++++++++++++++++++++++++++++++++++
 ! non-precip water mixing ratio qt 
 !+++++++++++++++++++++++++++++++++++++++
+
 if (doneuman.or.sfc_flx_fxd) then
   !Neuman
   call get_abcd(rho,qt,sumMrt,Crv,tkh,r_s,a,b,c,d,.true.,.true.,sgs_qt_flux (1))
