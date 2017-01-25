@@ -341,10 +341,16 @@ do k=1,nzm
 
  
  ! get final domain averages (convective and environment)
+ if (doedmf) then
  frac_mf2 = 0.5*(frac_mf(k)+frac_mf(k+1))
  qcl(k) = (1.-frac_mf2) * qce + 0.5 * frac_mf2 * (qcsgs_mf(k)+qcsgs_mf(k+1))
  qci(k) = (1.-frac_mf2) * qie + 0.5 * frac_mf2 * (qisgs_mf(k)+qisgs_mf(k+1))
  cfrac_tot(k) = min(frac_mf2,0.5*(cfrac_mf(k+1)+cfrac_mf(k))) + (1.-frac_mf2) * cfrac_pdf(k)
+ else
+ qcl(k) = qce
+ qci(k) = qie
+ cfrac_tot(k) = cfrac_pdf(k)
+ end if
  qn(k) = max(qcl(k) + qci(k),0.)
  qv(k) = max(0.,qt(k) - qn(k))
  

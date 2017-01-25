@@ -267,13 +267,10 @@ do k = 1,nzm
    vg(k) = 0.   
    if (z(k).lt.700.) then
      u(k)     = -8.75
-   elseif (z(k).ge.700..and.z(k).lt.3000.) then
-     u(k)     = -8.75 + (z(k)-700.) * (8.75-4.61)/2300. 
    else
-     u(k)     = 0.0
+     u(k)     = -8.75 + (z(k)-700.) * (8.75-4.61)/2300. 
    end if
    v(k)     = 0.
-   u(k)     = 0.
    tke(k)   = 0.001
    qcl(k)   = 0.
    qpl(k)   = 0.
