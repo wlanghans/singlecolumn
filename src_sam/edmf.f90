@@ -233,6 +233,8 @@ implicit none
             ENT(k-1,i) = 1./(tauneggers*UPW(k-1,i)+1.0e-6) 
           elseif (witekeps) then
             ENT(k-1,i) = 0.7/(smix(k-1)+1.0e-06)
+          elseif (gregoryeps) then
+              ENT(k-1,i) = 0.3 * ggr * max(UPTHV(k-1,i)/thetar(k-1)-1,0.) /(UPW(k-1,i)**2+1.0e-6)
           elseif (randomeps) then
             ! not implemented yet
           end if
@@ -270,6 +272,9 @@ implicit none
        
           ! based on density potential temperature (without qp effect since homogeneous across cell)
           BUOY(k-1,i)=ggr*(0.5*(THVn+UPTHV(k-1,i))/thetar(k-1)-1.)
+          if (gregoryeps) then ! update for w-equation using new Buoyancy
+            ENT(k-1,i) = 0.3 * max(BUOY(k-1,i),0.)/(UPW(k-1,i)**2+1.0e-6)
+          end if
 
           !EntW=exp(-2.*(Wb+Wc*ENT(k-1,i))*(zi(k)-zi(k-1)))
           !Wn2=UPW(k-1,i)**2*EntW + (1.-EntW)*Wa*BUOY(k-1,i)/(Wb+Wc*ENT(k-1,i))

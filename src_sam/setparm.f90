@@ -15,7 +15,7 @@ NAMELIST /PARAMETERS/dz, dt, doconstdz, dosgs, dosmagor, doedmf, dosurface, &
                      snapshot_do, snapshot_start, snapshot_period, snapshot_end, & 
                      snapshot_as_double, snapshot_fields, doconsttk, tkconst, sst, &
                      doteixpbl,dowitekpbl,dolanghanspbl,pblhfluxmin,nzm, fixedtau, doneuman, fixedeps, eps0, Cs_in, Cm_in,&
-                     sfc_cs_fxd, sfc_cm_fxd, neggerseps, randomeps, del0, fixedfa, dosequential, &
+                     sfc_cs_fxd, sfc_cm_fxd, neggerseps,gregoryeps, randomeps, del0, fixedfa, dosequential, &
                      dotkeles,dosingleplume,pblhthgrad,witekeps,dosgscloud, fcor, dosubsidence, docoriolis, dothuburn, doforcing, &
                      doshortwave, dolongwave, doradsimple, dotkedirichlet, donoplumesat, beta, tauneggers, fixedpblh, lcld, &
                      doenergyunit, dovartrans, dotlflux,pwmin,ctketau, dozerosigma, Wc, donoenvcloud
@@ -43,7 +43,7 @@ if (dosgs.and.count((/dotkeles,doteixpbl,dowitekpbl,dolanghanspbl,dosmagor,docon
   write(*,*) 'ERROR: only one eddy-diffusivity closure can be chosen'
   stop
 end if
-if (dosgs.and.doedmf.and.count((/witekeps,fixedeps,neggerseps,randomeps/)).gt.1  ) then
+if (dosgs.and.doedmf.and.count((/witekeps,fixedeps,neggerseps,gregoryeps,randomeps/)).gt.1  ) then
   write(*,*) 'ERROR: only one entrainment option can be chosen.'
   stop
 end if
@@ -54,6 +54,7 @@ if (dosgs.and.doedmf.and.randomeps ) then
   write(*,*) 'Using Neggers entrainment eps~1/w instead'
   randomeps =.false.
   neggerseps=.true.
+  gregoryeps=.false.
   fixedeps  = .false.
 end if
 
