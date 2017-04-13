@@ -57,13 +57,13 @@ pmax=(1000.0 1.9 1000.0 2.0 )
 
 # define run dir
 rundir='/scratch1/scratchdirs/langhans/'${1}
-rundir='/global/scratch/langhans/'${1}
+#rundir='/global/scratch/langhans/'${1}
 # define src dir
 srcdir="/global/homes/l/langhans/singlecolumn/"
-srcdir="/global/home/users/langhans/singlecolumn"
+#srcdir="/global/home/users/langhans/singlecolumn"
 # define ncl script dir
 ncldir="/global/homes/l/langhans/singlecolumn/src_ensemble/"
-ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
+#ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
 
 # define executable name
 execfile=${srcdir}'/sc_sam_wl'
