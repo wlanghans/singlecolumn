@@ -23,8 +23,10 @@ Program Parallel_Get_Rmse
 
 
   integer,parameter :: Nparam=4
-  integer,parameter :: Ncases=3
-  character(10),dimension(Ncases) :: casename=(/"BOMEX","CPBL2","CPBL4"/)
+  integer,parameter :: Ncases=1
+  character(10),dimension(Ncases) :: casename=(/"BOMEX"/)
+  !integer,parameter :: Ncases=3
+  !character(10),dimension(Ncases) :: casename=(/"BOMEX","CPBL2","CPBL4"/)
   integer,dimension(Nparam) :: Nrange
   real, allocatable,dimension(:,:,:,:) :: rmse
   real, allocatable,dimension(:,:) :: pvalue
@@ -40,8 +42,8 @@ Program Parallel_Get_Rmse
   call MPI_COMM_RANK(MPI_COMM_WORLD,my_id,ierr)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,Nproc,ierr)
 
-  if (Ncases.ne.3.or.Nparam.ne.4) then
-     write(*,*) 'ERROR: Ncases has to be 3 and Nparam has to be 4. Stopping.'
+  if (Nparam.ne.4) then
+     write(*,*) 'ERROR: Nparam has to be 4. Stopping.'
      call MPI_FINALIZE(ierr)
   end if
 
@@ -149,6 +151,8 @@ Program Parallel_Get_Rmse
       else
         rmse1Dloc(1,ncount) = rmse1Dloc(1,ncount) + 0.25 * readparam(1)
       end if
+
+      
     
     end do
 
@@ -192,8 +196,8 @@ Program Parallel_Get_Rmse
 
   call check_nc( nf90_def_var( output_ncid,"RMSE_tot",nf90_float,dimids,var_out_id(1) ) )
   call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(1)),nf90_float,dimids,var_out_id(2) ) )
-  call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(2)),nf90_float,dimids,var_out_id(3) ) )
-  call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(3)),nf90_float,dimids,var_out_id(4) ) )
+  !call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(2)),nf90_float,dimids,var_out_id(3) ) )
+  !call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(3)),nf90_float,dimids,var_out_id(4) ) )
 
   call check_nc( nf90_enddef(output_ncid) )
 

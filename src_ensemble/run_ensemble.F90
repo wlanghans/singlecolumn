@@ -42,7 +42,7 @@ Program Parallel_Run_Ensemble
   Nruns = char2int( trim(adjustl(param)) )
   
   call getarg(3,param)
-  path_ncl=trim(adjustl(param))
+  path_ncl='"'//trim(adjustl(param))//'"'
 
 
   itmp(1) = Nruns/Nproc
@@ -97,7 +97,7 @@ Program Parallel_Run_Ensemble
    end if
 
    command = "cd "//trim(path_in)//"; ./sc_sam_wl "//trim(runname(i))//" > "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(runname(i))//".out"
-   command=trim(command)//" ; cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
+   command=trim(command)//" ; cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl benchdir="//"'"//trim(path_ncl)//"'"//" casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
    !command=trim(command)//"; rm -rf "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(filein)
 
    ! make sure previous run has completed yet
@@ -133,11 +133,11 @@ Program Parallel_Run_Ensemble
       do while (.not.filenowexist)
          INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
          t2 = MPI_WTIME() 
-         if (t2-t1.gt.60.) then
-            write(*,*) 'ERROR: Waited for 1 min to get postprocessing done but something is wrong. Stopping.'
+         if (t2-t1.gt.240.) then
+            write(*,*) 'ERROR: Waited for 4 min to get postprocessing done but something is wrong. Stopping.'
             call MPI_FINALIZE(ierr)
          end if  
-         command=" cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
+         command=" cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl benchdir="//"'"//trim(path_ncl)//"'"//" casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
          status = system( trim(command))
       end do
 

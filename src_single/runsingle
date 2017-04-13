@@ -57,10 +57,13 @@ pmax=(1000.0 1.9 1000.0 0.9 )
 
 # define run dir
 rundir='/scratch1/scratchdirs/langhans/'${1}
+rundir='/global/scratch/langhans/'${1}
 # define src dir
 srcdir="/global/homes/l/langhans/singlecolumn/"
+srcdir="/global/home/users/langhans/singlecolumn"
 # define ncl script dir
 ncldir="/global/homes/l/langhans/singlecolumn/src_ensemble/"
+ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
 
 # define executable name
 execfile=${srcdir}'/sc_sam_wl'
@@ -142,6 +145,7 @@ fixedfa=.true.
 fixedeps = .false.
 witekeps = .false.
 neggerseps = .true.
+gregoryeps = .false.
 donoplumesat=.false.
 dolongwave=.false.
 doshortwave=.false.
@@ -151,7 +155,7 @@ snapshot_start = 0
 snapshot_period =  12 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .false.
-snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
+snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf,tend_shear_tke,tend_mix_tke,tend_buoy_tke,tend_diss_tke'
 !snapshot_fields = 'thl,rho,qt,qcl,qtflx,tflx'
 EOF
 

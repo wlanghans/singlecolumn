@@ -3,19 +3,25 @@
 #SBATCH --job-name=run1Densemble
 #
 # Processors:
-#SBATCH --ntasks=1000
+#SBATCH --ntasks=200
 #
 # Wall clock limit:
-#SBATCH --time=01:00:00
+#SBATCH --time=04:00:00
 #
 # qos
-#SBATCH -p regular
+#SBATCH --qos=lr_normal
 #
 #
-#SBATCH --license=SCRATCH
+# Partition:
+#SBATCH --partition=lr3
 
 
 ## Run command
-srun -n 1000 ./run_ensemble "/scratch1/scratchdirs/langhans/opt_ensemble_test/" 19683 "/global/homes/l/langhans/singlecolumn/src_ensemble"
-#mpirun ./getrmsetot "/global/scratch/langhans/opt_ensemble_test/"
+
+#edison
+#srun -n 1000 ./run_ensemble "/scratch1/scratchdirs/langhans/opt_ensemble_test/" 19683 "/global/homes/l/langhans/singlecolumn/src_ensemble"
+
+#lrc
+#mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble_test/" 12100 "/global/home/users/langhans/singlecolumn/src_ensemble"
+mpirun ./getrmsetot "/global/scratch/langhans/opt_ensemble_test/"
 

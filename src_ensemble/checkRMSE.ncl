@@ -1,7 +1,7 @@
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
 
-cases=3
+cases=1
 xstr=new(cases,string)
 colors=(/"blue","red","orange"/)
 colorsp=(/"blue","red","orange","darkgreen"/)
@@ -69,6 +69,11 @@ val_max=new((/3/),float)
 
 ;get three minima
 ind1D=ind(rmse1D.eq.min(rmse1D))
+if (dimsizes(ind1D)gt.1) then
+ print("More than one min/max found, stopping")
+ exit
+end if
+
 ind_min(0,0)=ii1D(ind1D)
 ind_min(0,1)=ij1D(ind1D)
 ind_min(0,2)=ik1D(ind1D)
@@ -77,7 +82,12 @@ val_min(0)=rmse1D(ind1D)
 tmp=rmse1D
 tmp(ind1D) = -999.
 tmp@_FillValue=-999.
+delete(ind1D)
 ind1D=ind(tmp.eq.min(tmp))
+if (dimsizes(ind1D)gt.1) then
+ print("More than one min/max found, stopping")
+ exit
+end if
 ind_min(1,0)=ii1D(ind1D)
 ind_min(1,1)=ij1D(ind1D)
 ind_min(1,2)=ik1D(ind1D)
@@ -85,14 +95,24 @@ ind_min(1,3)=il1D(ind1D)
 val_min(1)=tmp(ind1D)
 tmp(ind1D) = -999.
 tmp@_FillValue=-999.
+delete(ind1D)
 ind1D=ind(tmp.eq.min(tmp))
+if (dimsizes(ind1D)gt.1) then
+ print("More than one min/max found, stopping")
+ exit
+end if
 ind_min(2,0)=ii1D(ind1D)
 ind_min(2,1)=ij1D(ind1D)
 ind_min(2,2)=ik1D(ind1D)
 ind_min(2,3)=il1D(ind1D)
 val_min(2)=tmp(ind1D)
 ;get three maxima
+delete(ind1D)
 ind1D=ind(rmse1D.eq.max(rmse1D))
+if (dimsizes(ind1D)gt.1) then
+ print("More than one min/max found, stopping")
+ exit
+end if
 ind_max(0,0)=ii1D(ind1D)
 ind_max(0,1)=ij1D(ind1D)
 ind_max(0,2)=ik1D(ind1D)
@@ -101,15 +121,25 @@ val_max(0)=rmse1D(ind1D)
 tmp=rmse1D
 tmp(ind1D) = -999.
 tmp@_FillValue=-999.
+delete(ind1D)
 ind1D=ind(tmp.eq.max(tmp))
+if (dimsizes(ind1D)gt.1) then
+ print("More than one min/max found, stopping")
+ exit
+end if
 ind_max(1,0)=ii1D(ind1D)
 ind_max(1,1)=ij1D(ind1D)
 ind_max(1,2)=ik1D(ind1D)
 ind_max(1,3)=il1D(ind1D)
-val_max(1)=tmp(ind1D)
+val_max(1)=tmp(ind1D(0))
 tmp(ind1D) = -999.
 tmp@_FillValue=-999.
+delete(ind1D)
 ind1D=ind(tmp.eq.max(tmp))
+if (dimsizes(ind1D)gt.1) then
+ print("More than one min/max found, stopping")
+ exit
+end if
 ind_max(2,0)=ii1D(ind1D)
 ind_max(2,1)=ij1D(ind1D)
 ind_max(2,2)=ik1D(ind1D)
@@ -128,8 +158,8 @@ end do
 
 if (r.eq.0) then
 yval=new((/cases,5/),float)
-x=new((/cases/),float)
-x=fspan(-3.,1.,cases)
+;x=new((/cases/),float)
+;x=fspan(-3.,1.,cases)
 end if
 yval(r,0) = stat(2)
 yval(r,1) = stat(6)
@@ -171,6 +201,7 @@ if (r.eq.0) then
   plot(0)  = gsn_csm_xy (wks,p1,rmse(0:dimsizes(p1)-1,ind_min(0,1),ind_min(0,2),ind_min(0,3)),res)
   dum(0) = gsn_add_polymarker(wks, plot(0), p1(ind_min(0,0)),rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),ind_min(0,3)), pmres)
   res@tiXAxisString=pnames(1)
+  delete(res@tmXBLabels)
   res@tmXBLabels = p2 ; labels for each box
   range=p2(dimsizes(p2)-1)-p2(0)
   res@trXMinF = p2(0)-0.1*range
@@ -178,6 +209,7 @@ if (r.eq.0) then
   plot(1)  = gsn_csm_xy (wks,p2,rmse(ind_min(0,0),0:dimsizes(p2)-1,ind_min(0,2),ind_min(0,3)),res)
   dum(1) = gsn_add_polymarker(wks, plot(1), p2(ind_min(0,1)),rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),ind_min(0,3)), pmres)
   res@tiXAxisString=pnames(2)
+  delete(res@tmXBLabels)
   res@tmXBLabels = p3 ; labels for each box
   range=p3(dimsizes(p3)-1)-p3(0)
   res@trXMinF = p3(0)-0.1*range
@@ -185,6 +217,7 @@ if (r.eq.0) then
   plot(2)  = gsn_csm_xy (wks,p3,rmse(ind_min(0,0),ind_min(0,1),0:dimsizes(p3)-1,ind_min(0,3)),res)
   dum(2) = gsn_add_polymarker(wks, plot(2), p3(ind_min(0,2)),rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),ind_min(0,3)), pmres)
   res@tiXAxisString=pnames(3)
+  delete(res@tmXBLabels)
   res@tmXBLabels = p4 ; labels for each box
   range=p4(dimsizes(p4)-1)-p4(0)
   res@trXMinF = p4(0)-0.1*range
@@ -193,6 +226,8 @@ if (r.eq.0) then
   dum(3) = gsn_add_polymarker(wks, plot(3), p4(ind_min(0,3)),rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),ind_min(0,3)), pmres)
 
   gsn_panel(wks,plot(0:3),(/1,4/),False)
+
+  delete(res@tmXBLabels)
 
   statsd=new((/4,dimsizes(stat)/),float)
   drmsedx=new(dimsizes(rmse),float)
@@ -291,6 +326,8 @@ if (r.eq.0) then
   draw(plot(5))                                     ; box plot does not call
   frame(wks)  
 
+  delete(res@tmXBLabels)
+
 end if
 
 ; end loop over cases
@@ -300,34 +337,35 @@ end do
 ;**********************************************
 ; create plot
 ;**********************************************
-  wks = gsn_open_wks("eps","box")               ; send graphics to PNG file
+;  wks = gsn_open_wks("eps","box")               ; send graphics to PNG file
 ;**********************************************
 ; resources for plot background
 ;**********************************************
-  delete(res)
-  delete(opti)
-  res            = True                         ; plot mods desired
- ; res@gsnDraw     = False
- ; res@gsnFrame    = False
-  res@tmXBLabels = xstr ; labels for each box
-  res@trYMinF = 0.
-  res@trYMaxF = 1.
-  res@tiMainString = "RMSE; min/25%/median/75%/max"
-;**********************************************
-; resources for polylines that draws the boxes
-;**********************************************  
-  llres                   = True			
-  llres@gsLineThicknessF  = 2.5                 ; line thickness 
-;**********************************************
-; resources that control color and width of boxes
-;**********************************************  
-  opti          = True			
-  opti@boxWidth = .25				; Width of box (x units)
-  opti@boxColors = colors  	; Color of box(es)
-;***********************************************
-  plot(4) = boxplot(wks,x,yval,opti,res,llres)	; All 3 options used...
-  draw(plot(4))                                     ; box plot does not call
-  frame(wks)                                    ; these for you
+;  delete(res)
+;  delete(opti)
+;  res            = True                         ; plot mods desired
+; ; res@gsnDraw     = False
+; ; res@gsnFrame    = False
+;  res@tmXBLabels = xstr ; labels for each box
+;  res@trYMinF = 0.
+;  res@trYMaxF = 1.
+;  res@tiMainString = "RMSE; min/25%/median/75%/max"
+;;**********************************************
+;; resources for polylines that draws the boxes
+;;**********************************************  
+;  llres                   = True			
+;  llres@gsLineThicknessF  = 2.5                 ; line thickness 
+;;**********************************************
+;; resources that control color and width of boxes
+;;**********************************************  
+;  opti          = True			
+;  opti@boxWidth = .25				; Width of box (x units)
+;  opti@boxColors = colors  	; Color of box(es)
+;;***********************************************
+;  plot(4) = boxplot(wks,x,yval,opti,res,llres)	; All 3 options used...
+;  draw(plot(4))                                     ; box plot does not call
+;  frame(wks)                                    ; these for you
+;  delete(res@tmXBLabels)
 
   
 

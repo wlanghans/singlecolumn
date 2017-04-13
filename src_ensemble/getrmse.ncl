@@ -1,6 +1,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; get the benchmark profile
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+print("benchdir:" + benchdir)
 f=addfile(benchdir+"/benchmark.nc","r")
 zmean=f->height1
 zflx=f->height2
