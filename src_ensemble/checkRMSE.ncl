@@ -178,7 +178,7 @@ if (r.eq.0) then
   res=True
   res@gsnDraw     = False
   res@gsnFrame    = False
-  res@tiYAxisString="rmse"
+  res@tiYAxisString="RMSE"
   res@xyLineThicknessF=3.
   ;res@gsnXRefLineThicknessF=7.
   ;res@gsnXRefLineColor="blue"
@@ -309,7 +309,8 @@ if (r.eq.0) then
   res@tmXBLabels = pnames ; labels for each box
   res@trYMinF = min(statsd(:,2))
   res@trYMaxF = max(statsd(:,14))
-  res@tiMainString = "dRMSE/dx!B!i!N!; min/10%/median/90%/max"
+  res@tiMainString = "min/10%/median/90%/max"
+  res@tiYAxisString="dRMSE/dx!B!i!N!"
   ;**********************************************
   ; resources for polylines that draws the boxes
   ;**********************************************
