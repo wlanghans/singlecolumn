@@ -52,8 +52,8 @@ keepnc=${6}   #integer: 0...netcdf will be deleted after run  1...netcdf will be
 
 # follow deRoode to estimate Wc between 0.1 and 1. and use linear relation to derive Wa from Wc
 
-pmin=( 200.0 1.1  200.0 0.1)
-pmax=(1000.0 1.9 1000.0 0.9 )
+pmin=( 0.0  1.0  100.0 0.0)
+pmax=(1000.0 1.9 1000.0 2.0 )
 
 # define run dir
 rundir='/scratch1/scratchdirs/langhans/'${1}
