@@ -69,7 +69,7 @@ val_max=new((/3/),float)
 
 ;get three minima
 ind1D=ind(rmse1D.eq.min(rmse1D))
-if (dimsizes(ind1D)gt.1) then
+if (dimsizes(ind1D).gt.1) then
  print("More than one min/max found, stopping")
  exit
 end if
@@ -84,7 +84,7 @@ tmp(ind1D) = -999.
 tmp@_FillValue=-999.
 delete(ind1D)
 ind1D=ind(tmp.eq.min(tmp))
-if (dimsizes(ind1D)gt.1) then
+if (dimsizes(ind1D).gt.1) then
  print("More than one min/max found, stopping")
  exit
 end if
@@ -97,7 +97,7 @@ tmp(ind1D) = -999.
 tmp@_FillValue=-999.
 delete(ind1D)
 ind1D=ind(tmp.eq.min(tmp))
-if (dimsizes(ind1D)gt.1) then
+if (dimsizes(ind1D).gt.1) then
  print("More than one min/max found, stopping")
  exit
 end if
@@ -109,7 +109,7 @@ val_min(2)=tmp(ind1D)
 ;get three maxima
 delete(ind1D)
 ind1D=ind(rmse1D.eq.max(rmse1D))
-if (dimsizes(ind1D)gt.1) then
+if (dimsizes(ind1D).gt.1) then
  print("More than one min/max found, stopping")
  exit
 end if
@@ -123,7 +123,7 @@ tmp(ind1D) = -999.
 tmp@_FillValue=-999.
 delete(ind1D)
 ind1D=ind(tmp.eq.max(tmp))
-if (dimsizes(ind1D)gt.1) then
+if (dimsizes(ind1D).gt.1) then
  print("More than one min/max found, stopping")
  exit
 end if
@@ -136,7 +136,7 @@ tmp(ind1D) = -999.
 tmp@_FillValue=-999.
 delete(ind1D)
 ind1D=ind(tmp.eq.max(tmp))
-if (dimsizes(ind1D)gt.1) then
+if (dimsizes(ind1D).gt.1) then
  print("More than one min/max found, stopping")
  exit
 end if
