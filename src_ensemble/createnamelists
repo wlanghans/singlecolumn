@@ -37,8 +37,8 @@ pmax=(2000.0 2.0 1000.0 2.0 )
 nrange=(11 11 10 11)
 
 # define run dir
-rundir="/scratch1/scratchdirs/langhans/opt_ensemble_test2/"
-srcdir="/global/homes/l/langhans/singlecolumn/"
+rundir="/global/scratch/langhans/opt_ensemble_test2/"
+srcdir="/global/home/users/langhans/singlecolumn/"
 
 #executable
 execfile=${srcdir}'/sc_sam_wl'

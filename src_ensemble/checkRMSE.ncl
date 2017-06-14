@@ -7,7 +7,7 @@ colors=(/"blue","red","orange"/)
 colorsp=(/"blue","red","orange","darkgreen"/)
 
 
-rmsedir="/global/scratch/langhans/opt_ensemble_test/"
+rmsedir="/global/scratch/langhans/opt_ensemble_test2/"
 f=addfile(rmsedir+"/RMSE.nc","r")
 
 p1=f->Wc
