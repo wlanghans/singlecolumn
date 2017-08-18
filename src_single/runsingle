@@ -5,7 +5,7 @@
 
 # define cases and parameters to be tuned
 #cases=("CPBL2" "CPBL4" "BOMEX")
-cases=("BOMEX")
+cases=("BOMEX" "CPBL2")
 pname=("ctketau" "pwmin" "tauneggers" "Wc")  
 
 echo Run ID: ${1}
@@ -56,14 +56,14 @@ pmin=( 0.0  0.0  100.0 0.0)
 pmax=(2000.0 2.0 1000.0 2.0 )
 
 # define run dir
-rundir='/scratch1/scratchdirs/langhans/'${1}
-#rundir='/global/scratch/langhans/'${1}
+#rundir='/scratch1/scratchdirs/langhans/'${1}
+rundir='/global/scratch/langhans/'${1}
 # define src dir
-srcdir="/global/homes/l/langhans/singlecolumn/"
-#srcdir="/global/home/users/langhans/singlecolumn"
+#srcdir="/global/homes/l/langhans/singlecolumn/"
+srcdir="/global/home/users/langhans/singlecolumn"
 # define ncl script dir
-ncldir="/global/homes/l/langhans/singlecolumn/src_ensemble/"
-#ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
+#ncldir="/global/homes/l/langhans/singlecolumn/src_ensemble/"
+ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
 
 # define executable name
 execfile=${srcdir}'/sc_sam_wl'
@@ -90,6 +90,7 @@ cp ${execfile} $rundir
 run=0
 nend=`expr $ncases  - 1`
 rmsetot=0.
+rmsetot2=0.
 while [ $run -le $nend ]; do
 
 case=${cases[run]}
@@ -155,11 +156,12 @@ snapshot_start = 0
 snapshot_period =  12 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .false.
-snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf,tend_shear_tke,tend_mix_tke,tend_buoy_tke,tend_diss_tke'
-!snapshot_fields = 'thl,rho,qt,qcl,qtflx,tflx'
+snapshot_fields = 'thl,th,thr,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf,tend_shear_tke,tend_mix_tke,tend_buoy_tke,tend_diss_tke'
+!snapshot_fields = 'thl,thr,qt,qcl,qtflx,tflx,upthv,upa'
 EOF
 
 #write case specific parameters (CPBL or BOMEX)
+echo $case
 if [ $case == "BOMEX" ]
 then
 
@@ -183,7 +185,7 @@ elif [ $case == "CPBL1" ]
 then
 
 cat <<EOF >>${rundir}/${runname}/prm
-nstop= 1800  
+nstop= 1980  
 doforcing=.false.
 dosubsidence=.false.
 docoriolis=.false.
@@ -204,14 +206,14 @@ then
 
 
 cat <<EOF >>${rundir}/${runname}/prm
-nstop= 1800  
+nstop= 1980  
 doforcing=.false.
 dosubsidence=.false.
 docoriolis=.false.
 doenergyunit=.false.
 ocean=.false.
 land=.true.
-fluxt0   = 0.03    
+fluxt0   = 0.06    
 fluxq0   = 2.5e-05 
 tau0     = 0.0
 EOF
@@ -224,7 +226,7 @@ then
 
 
 cat <<EOF >>${rundir}/${runname}/prm
-nstop= 1800  
+nstop= 1980  
 doforcing=.false.
 dosubsidence=.false.
 docoriolis=.false.
@@ -244,7 +246,7 @@ then
 
 
 cat <<EOF >>${rundir}/${runname}/prm
-nstop= 1800  
+nstop= 1980  
 doforcing=.false.
 dosubsidence=.false.
 docoriolis=.false.
@@ -284,21 +286,24 @@ cd ${rundir}
 if [ $case == "BOMEX" ]
 then
  filename="BOMEX_snapshot.nc"
- weight=0.5
+ weight=$(echo "scale=5; 0.5" | bc)
 else
  filename="WITEK11_snapshot.nc"
- weight=0.25
+ weight=$(echo "scale=5; 0.5" | bc)
 fi
-ncl -Q  ${ncldir}/getrmse.ncl benchdir='"'${ncldir}'"'  casename='"'${case}'"' filein='"'${filename}'"' pathin='"'${rundir}/${runname}'"'
+ncl -Q ${ncldir}/getrmse.ncl benchdir='"'${ncldir}'"'  casename='"'${case}'"' filein='"'${filename}'"' pathin='"'${rundir}/${runname}'"'
 if [ ${keepnc} == 0 ]
 then
 rm -rf ${runname}/${filename}
 fi
 
 rmsein=${rundir}/${runname}/rmse_${case}
+rmsein2=${rundir}/${runname}/rmse_thvd_${case}
 
 read -d ' ' rmse < $rmsein
+read -d ' ' rmse_thvd < $rmsein2
 rmsetot=$(echo "scale=5; $rmsetot + $weight*$rmse" | bc)
+rmsetot2=$(echo "scale=5; $rmsetot2 + $weight*$rmse_thvd" | bc)
 #advance run number
 run=`expr $run + 1 `
 
@@ -306,4 +311,5 @@ done
 
 #get overall RMSE
 echo $rmsetot > ${rundir}/rmse_tot
+echo $rmsetot2 > ${rundir}/rmse_tot_thvd
 

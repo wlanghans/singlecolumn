@@ -1,6 +1,6 @@
 #!/bin/bash
 cases=("CPBL2" "BOMEX")
-pname=("ctketau" "pwmin" "tauneggers" "Wc")  
+pname=("alphathv" "alphaqt" "tauneggers" "Wc")  
 
 # Teixeira and Cheineit 2003
 # use Pr=1 and Ck=0.5 Cee=0.16, lee=l/2.5
@@ -31,12 +31,12 @@ pname=("ctketau" "pwmin" "tauneggers" "Wc")
 # follow deRoode to estimate Wc between 0.1 and 1. and use linear relation to derive Wa from Wc
 
 pmin=( 0.0  0.0  100.0 0.0)
-pmax=(2000.0 2.0 1000.0 2.0 )
+pmax=(4.0 4.0 1000.0 2.0 )
 #nrange=(11 11 11 11)
 nrange=(11 11 10 11)
 
 # define run dir
-rundir="/global/scratch/langhans/opt_ensemble_test4/"
+rundir="/global/scratch/langhans/opt_ensemble_test5/"
 srcdir="/global/home/users/langhans/singlecolumn/"
 
 #executable
@@ -222,6 +222,8 @@ snapshot_end = 1000000000
 snapshot_as_double = .false.
 !snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
 snapshot_fields = 'thl,qt,qcl,qtflx,tflx,thr,upthv,upa,upqt'
+ctketau=0.
+pwmin=0.4
 EOF
 
 #write case specific parameters (CPBL or BOMEX)

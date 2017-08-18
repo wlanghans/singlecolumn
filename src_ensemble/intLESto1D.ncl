@@ -1,9 +1,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; get the mean profiles from BOMEX
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-bomexdir="/global/home/users/langhans/BOMEX_LES/"  
-fin=addfile(bomexdir+"/BOMEXmean.nc","r")
-zmean=doubletofloat(fin->height)
+bomexdir="/global/scratch/langhansOUT_STAT/"
+;"/global/home/users/langhans/BOMEX_LES/"  
+;fin=addfile(bomexdir+"/BOMEXmean.nc","r")
+fin=addfile(bomexdir+"/BOMEX_LES_BOMEX_LES_nmax20.nc","r")
+zmean=doubletofloat(fin->z)
 nzmean=dimsizes(zmean)
 thl1=doubletofloat(fin->THL(0,:))
 qc1=doubletofloat(fin->QC(0,:))
@@ -14,10 +16,14 @@ qt1=doubletofloat(fin->QT(0,:))
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 fin=addfile(bomexdir+"/BOMEXflx.nc","r")
-zflx=doubletofloat(fin->height)
+;zflx=doubletofloat(fin->height)
+zflx=zmean
+zflx(0)=0.
+zflx(1:dimsizes(zflx)-2)-1=0.5*(zmean(1:dimsizes(zflx)-2) + zmean(2:dimsizes(zflx)-1))
 nzflx=dimsizes(zflx)
-thlflx=doubletofloat(fin->THL(0,:))
-qtflx=doubletofloat(fin->QT(0,:))
+;thlflx=doubletofloat(fin->THL(0,:))
+;qtflx=doubletofloat(fin->QT(0,:))
+thlflx=doubletofloat(fin->THLFLUX(0,:))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; get the mean profiles from CPBL

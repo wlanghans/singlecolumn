@@ -107,6 +107,8 @@ real:: latitude0  = 0.    ! longitude of the domain's center
 logical :: dotlflux = .true.
 logical :: dozerosigma=.false.
 logical :: donoenvcloud=.false.
+real :: alphaqt = 0.32
+real :: alphathv = 0.58
 
 
 

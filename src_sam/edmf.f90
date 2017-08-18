@@ -192,9 +192,9 @@ implicit none
          UPV(1,I)=v(1)
 
          ! specific humidity needed (will be convert back in the end)
-         UPQT(1,I)=qt(1)+0.32*UPW(1,I)*sigmaQT/sigmaW
+         UPQT(1,I)=qt(1)+alphaqt *UPW(1,I)*sigmaQT/sigmaW
          ! according to cheinet the 0.58 is for thetav, hence thetav is initialized (instead of theta)
-         UPTHV(1,I)=thetav(1)+0.58*UPW(1,I)*sigmaTHV/sigmaW
+         UPTHV(1,I)=thetav(1)+alphathv*UPW(1,I)*sigmaTHV/sigmaW
          UPTABS(1,I)=UPTHV(1,I)/(1.+epsv*UPQT(1,I)) * (pres(1)/p00)**(rgas/cp) 
          UPQCL(1,I)=qcl(1)
          UPQCI(1,I)=qci(1)

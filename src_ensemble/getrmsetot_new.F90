@@ -11,7 +11,7 @@ Program Parallel_Get_Rmse
   integer :: my_id, Nproc, ierr, Nsetup, N_local_runs, N_max, ncount
   integer, allocatable, dimension(:) :: mpi_id, Nlocalvec,displace
 
-  integer :: i,j,k,l,n,ca
+  integer :: i,j,k,l,n,ca,m
   integer :: itmp(10), Ncombo
   integer :: run_start, run_end, status
   character(2) :: i_str,j_str,k_str,l_str
@@ -31,12 +31,17 @@ Program Parallel_Get_Rmse
   real, allocatable,dimension(:,:,:,:) :: rmse
   real, allocatable,dimension(:,:) :: pvalue
   real, allocatable,dimension(:,:) :: rmse1Dloc,rmse1Dloc2
+  real, allocatable,dimension(:,:,:) :: rmse1Dlocind
+  real, allocatable,dimension(:,:,:) :: rmse1Dind
   real, allocatable,dimension(:,:) :: rmse1D,rmse1D2
   real, dimension(Ncases) :: rmseavg
+  real, dimension(8,Ncases) :: rmseavgind
+  real,dimension(8) :: refval,tmpvec
 
   integer :: output_ncid,dimids(Nparam), param1_varid,param2_varid,param3_varid,param4_varid
   character(50),dimension(Nparam):: dimnames
   integer, dimension(6) :: var_out_id
+
 
 
   call MPI_Init(ierr)
@@ -52,7 +57,7 @@ Program Parallel_Get_Rmse
   allocate(Nlocalvec(Nproc))
   allocate(Displace(Nproc))
   allocate(Recv_Request(Nproc-1))
-  allocate( mpi_status(MPI_STATUS_SIZE,Nproc-1) )
+  allocate(mpi_status(MPI_STATUS_SIZE,Nproc-1))
   allocate(mpi_status1(MPI_STATUS_SIZE))
 
   itmp(1) = 0
@@ -122,9 +127,10 @@ Program Parallel_Get_Rmse
   if(my_id == Nproc-1) run_end = Ncombo-1
   N_local_runs = run_end - run_start+1
 
-  allocate(rmse1Dloc(Ncases+1,N_local_runs),rmse1Dloc2(Ncases+1,N_local_runs))
+  allocate(rmse1Dloc(Ncases+1,N_local_runs),rmse1Dloc2(Ncases+1,N_local_runs),rmse1Dlocind(8,Ncases,N_local_runs))
   rmse1Dloc=0.
   rmse1Dloc2=0.
+  rmse1Dlocind=0.0
 
   ncount=1
   do n=run_start,run_end
@@ -143,11 +149,21 @@ Program Parallel_Get_Rmse
 
       ! read rmsecase
       open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_'//trim(casename(ca)),status='old',form='formatted')
-      read (78,*) readparam(1:8)
+      read (78,*) readparam(1:9)
       close(78)
       open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
-      read (79,*) readparam2(1:8)
+      read (79,*) readparam2(1:9)
       close(79)
+ 
+      tmpvec=readparam2(2:9)
+      if (trim(casename(ca)).eq."BOMEX") then
+        refval = (/300.,0.0,14.e-3,3.e-6,8.,150.,0.3,0.3/)
+      else
+        refval = (/300.,9.26e-6,5.e-3,0.0,20.,70.,0.3,0.3/)
+      end if
+      do m=1,8
+        rmse1Dlocind(m,ca,ncount)=tmpvec(m) 
+      end do
 
       rmse1Dloc(ca+1,ncount) = readparam(1)
       ! get rmse total of run 
@@ -174,9 +190,10 @@ Program Parallel_Get_Rmse
   
   if (my_id.eq.0) then
 
-  allocate(rmse1D(Ncases+1,Ncombo),rmse1D2(Ncases+1,Ncombo))
+  allocate(rmse1D(Ncases+1,Ncombo),rmse1D2(Ncases+1,Ncombo),rmse1Dind(8,Ncases,Ncombo))
   rmse1D=-999.
   rmse1D2=-999.
+  rmse1Dind=-999.
  
   end if
 
@@ -187,6 +204,13 @@ Program Parallel_Get_Rmse
     call MPI_GATHERV(rmse1Dloc2(i,:),N_local_runs,MPI_REAL8, &
                             rmse1D2(i,:),Nlocalvec,Displace,MPI_REAL8, &
                             0,MPI_COMM_WORLD,ierr)
+    if (i.le.Ncases) then
+    do m=1,8
+      call MPI_GATHERV(rmse1Dlocind(m,i,:),N_local_runs,MPI_REAL8, &
+                            rmse1Dind(m,i,:),Nlocalvec,Displace,MPI_REAL8, &
+                            0,MPI_COMM_WORLD,ierr)
+    end do
+    end if
   end do
 
   if (my_id.eq.0) then
@@ -228,18 +252,66 @@ Program Parallel_Get_Rmse
 
   !fill parameter array
   allocate(rmse(Nrange(1),Nrange(2),Nrange(3),Nrange(4)))
+  rmseavgind=0.0
+   
 
-  ! compute case averaged error
+  rmseavgind(1,1) = 0.298500898501127
+  rmseavgind(2,1) = -999.
+  rmseavgind(3,1) = 4.709051607813674e-4
+  rmseavgind(4,1) = 2.291507888805414e-6
+  rmseavgind(5,1) = 8.29152631298648
+  rmseavgind(6,1) = 37.5370361230699
+  rmseavgind(7,1) = 0.110751867145755
+  rmseavgind(8,1) = 4.754294124718259e-4
+
+  rmseavgind(1,2) = 0.142648591929376
+  rmseavgind(2,2) = 9.579204282494366e-5
+  rmseavgind(3,2) = 1.561694507888805e-4
+  rmseavgind(4,2) = -999.
+  rmseavgind(5,2) = 5.55608093415176
+  rmseavgind(6,2) = 18.0438175345439
+  rmseavgind(7,2) = 0.119297832160030
+  rmseavgind(8,2) = 1.220929376408715e-4
+
+
+  ! compute average error for each case and each parameter 
+  write(*,*) 'Parameter-averaged rmse'
   do ca=1,Ncases
-    rmseavg(ca) = sum(rmse1D(ca+1,:))/float(Ncombo)
-    write(*,'(A,A,x,f10.7)') 'case ',casename(ca), rmseavg(ca)
+    do m=1,8
+      !rmseavgind(m,ca) = sum(rmse1Dind(m,ca,:))/float(Ncombo) 
+      !write(*,'(A,A,x,A,i1.1,x,f10.7)') 'case ',casename(ca),', parameter ', m, rmseavgind(m,ca)
+      write(*,*) 'case ',casename(ca),', parameter ', m ,' ',rmseavgind(m,ca)
+    end do
   end do
-  ! compute total error; normalize each error with the mean case error
+
+  ! compute error for each case by normalizing with the parameter averages
+  rmse1D=0.0
+  do ca=1,Ncases
+    do m=1,6
+      if ((trim(casename(ca)).eq."BOMEX".and.m.ne.2).or. &
+      (trim(casename(ca)).ne."BOMEX".and.m.ne.4)) then
+        write(*,*) trim(casename(ca)),' ',m
+        rmse1D(1+ca,:) = rmse1D(1+ca,:) + 1./5. * rmse1Dind(m,ca,:) / rmseavgind(m,ca)
+      end if
+    end do
+  end do
+
+  ! compute mean case-specific error
+  ! NOT NEEDED SINCE 1 PER DEFINITION
+  !write(*,*) 'Case-averaged rmse (thvd NOT included)'
+  !do ca=1,Ncases
+  !  rmseavg(ca) = sum(rmse1D(1+ca,:))/float(Ncombo)
+  !  write(*,*) 'case ',casename(ca),' ', rmseavg(ca)
+  !end do
+  ! compute total error from case-specific errors
+  ! normalize each case by the mean case error (not needed since equal to 1)
+
   rmse1D(1,:) = 0.0
   do ca=1,Ncases
-    rmse1D(1,:) = rmse1D(1,:) + 1./float(Ncases) * rmse1D(ca+1,:) / rmseavg(ca)
+    rmse1D(1,:) = rmse1D(1,:) + 1./float(Ncases) * rmse1D(1+ca,:) 
   end do
 
+  ! rearrange
   do ca=1,Ncases+1
   do n=0,Ncombo-1
     i = n/(Nrange(2)*Nrange(3)*Nrange(4))
@@ -247,20 +319,43 @@ Program Parallel_Get_Rmse
     k = (n-i*(Nrange(2)*Nrange(3)*Nrange(4))-j*(Nrange(3)*Nrange(4)))/(Nrange(4))
     l = n-i*(Nrange(2)*Nrange(3)*Nrange(4))-j*(Nrange(3)*Nrange(4)) - k *Nrange(4)
     rmse(i+1,j+1,k+1,l+1) = rmse1D(ca,n+1)
+
+    !if (ca.eq.1.and.pvalue(1,i+1).eq.1400. .and.pvalue(2,j+1).eq.0.8 .and.pvalue(3,k+1).eq.400. .and.pvalue(4,l+1).eq.0.4) then
+    !  write(*,*) 'tot: ', rmse1D(1,n+1), ' BOMEX: ', rmse1D(2,n+1),' CPBL: ',rmse1D(3,n+1)
+    !  do m=1,7
+    !    write(*,*) m,' BOMEX: ', rmse1Dind(m,1,n+1),' CPBL: ',rmse1Dind(m,2,n+1) 
+    !  end do
+    !end if
+
   end do
   call check_nc( nf90_put_var(output_ncid, var_out_id(ca), rmse ) ) 
   end do
   deallocate(rmse1D)
 
-  ! compute case averaged error
+  !! redo this for error including thvd
+ 
+  ! compute error for each case by normalizing with the parameter averages
+  rmse1D2=0.0
   do ca=1,Ncases
-    rmseavg(ca) = sum(rmse1D2(ca+1,:))/float(Ncombo)
-    write(*,'(A,A,x,f10.7)') 'case ',casename(ca), rmseavg(ca)
+    do m=1,8
+      if ((trim(casename(ca)).eq."BOMEX".and.m.ne.2).or. &
+      (trim(casename(ca)).ne."BOMEX".and.m.ne.4)) then
+        rmse1D2(1+ca,:) = rmse1D2(1+ca,:) + 1./7. * rmse1Dind(m,ca,:) / rmseavgind(m,ca)
+      end if
+    end do
   end do
-  ! compute total error; normalize each error with the mean case error
+
+  ! compute mean case-specific error
+  !write(*,*) 'Case-averaged rmse (thvd included)'
+  !do ca=1,Ncases
+  !  rmseavg(ca) = sum(rmse1D2(1+ca,:))/float(Ncombo)
+  !  write(*,'(A,A,x,f10.7)') 'case ',casename(ca), rmseavg(ca)
+  !end do
+  ! compute total error from case-specific errors
+  ! normalize each case by the mean case error (not needed since average is 1)
   rmse1D2(1,:) = 0.0
   do ca=1,Ncases
-    rmse1D2(1,:) = rmse1D2(1,:) + 1./float(Ncases) * rmse1D2(ca+1,:) / rmseavg(ca)
+    rmse1D2(1,:) = rmse1D2(1,:) + 1./float(Ncases) * rmse1D2(1+ca,:) 
   end do
 
   do ca=1,Ncases+1

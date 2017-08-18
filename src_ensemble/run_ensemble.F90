@@ -6,13 +6,13 @@ Program Parallel_Run_Ensemble
 
   character(300) :: param, path_in,pathin,path_ncl
   character(50),dimension(:),allocatable :: runname
-  character(500) :: namehlp, casename,filein
+  character(500) :: namehlp, casename,filein,fileinprev
   character(700) ::command, fileprev, filenow
 
   integer :: my_id, Nproc, ierr, Nruns, N_local_runs, N_max
   integer, allocatable, dimension(:) :: mpi_id
 
-  integer :: i,k
+  integer :: i,j,k
   integer :: itmp(10)
   integer :: run_start, run_end, status
 
@@ -96,9 +96,6 @@ Program Parallel_Run_Ensemble
       call MPI_FINALIZE(ierr)
    end if
 
-   command = "cd "//trim(path_in)//"; ./sc_sam_wl "//trim(runname(i))//" > "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(runname(i))//".out"
-   command=trim(command)//" ; cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl benchdir="//"'"//trim(path_ncl)//"'"//" casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
-   !command=trim(command)//"; rm -rf "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(filein)
 
    ! make sure previous run has completed yet
    if (i.gt.1) then
@@ -118,42 +115,47 @@ Program Parallel_Run_Ensemble
       end do
 
    end if
+
+   ! remove netcdf file from previous run
+   write(*,*) 'Simulation ', trim(runname(i-1)), ' was successful'
+   command=" rm -rf "//trim(path_in)//"/"//trim(runname(i-1))//"/"//trim(fileinprev)
+   status = system( trim(command))
+
    end if
+
+   command = "cd "//trim(path_in)//"; ./sc_sam_wl "//trim(runname(i))//" > "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(runname(i))//".out"
+   command=trim(command)//" ; cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl benchdir="//"'"//trim(path_ncl)//"'"//" casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
+   !command=trim(command)//"; rm -rf "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(filein)
 
    filenow=trim(path_in)//"/"//trim(runname(i))//"/rmse_"//trim(namehlp(1:5))
-   INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
-   if (.not.filenowexist) then
+   !INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
+   !if (.not.filenowexist) then
 
    status = system( trim(command))
-   INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
-   if (.not.filenowexist) then
+   !INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
+   !if (.not.filenowexist) then
 
-      t1  = MPI_WTIME() 
+   !   t1  = MPI_WTIME() 
  
-      do while (.not.filenowexist)
-         INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
-         t2 = MPI_WTIME() 
-         if (t2-t1.gt.240.) then
-            write(*,*) 'ERROR: Waited for 4 min to get postprocessing done but something is wrong. Stopping.'
-            call MPI_FINALIZE(ierr)
-         end if  
-         command=" cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl benchdir="//"'"//trim(path_ncl)//"'"//" casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
-         status = system( trim(command))
-      end do
+   !   do while (.not.filenowexist)
+   !      INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
+   !      t2 = MPI_WTIME() 
+   !      if (t2-t1.gt.240.) then
+   !         write(*,*) 'ERROR: Waited for 4 min to get postprocessing done but something is wrong. Stopping.'
+   !         call MPI_FINALIZE(ierr)
+   !      end if  
+   !      command=" cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl benchdir="//"'"//trim(path_ncl)//"'"//" casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
+   !      status = system( trim(command))
+   !   end do
 
-   end if
+   !end if
  
-   write(*,*) 'Simulation ', trim(runname(i)), ' was successful'
 
-
-   command=" rm -rf "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(filein)
-   status = system( trim(command))
-
-   else
+   !else
  
-     write(*,*) 'Simulation ', trim(runname(i)), ' was already completed earlier'
+   !  write(*,*) 'Simulation ', trim(runname(i)), ' was already completed earlier'
 
-   end if
+   !end if
 
 !    if ( status .ne. 0 ) then 
 !       write(*,*) 'ERROR: Simulation ', i,' /',N_local_runs,' ', trim(runname(i)), ' was unsuccessful'
@@ -170,6 +172,7 @@ Program Parallel_Run_Ensemble
    ! end if
 
 
+   fileinprev=filein
    fileprev=filenow
   end do
 

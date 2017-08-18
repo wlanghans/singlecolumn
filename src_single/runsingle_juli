@@ -1,6 +1,30 @@
 #!/bin/bash
-cases=("CPBL2" "BOMEX")
-pname=("ctketau" "pwmin" "tauneggers" "Wc")  
+
+# run with the following input
+# ./runsingle runname pvalue1 pvalue2 pvalue3 pvalue4 keepnc
+
+# define cases and parameters to be tuned
+#cases=("CPBL2" "CPBL4" "BOMEX")
+cases=("BOMEX" "CPBL2")
+pname=("alphathv" "alphaqt" "ctketau" "pwmin" "tauneggers" "Wc")  
+
+echo Run ID: ${1}
+echo Parameters: 1:${2} 2:${3} 3:${4} 4:${5} 5:${6} 6:${7}
+
+pvalue=( 0.0 0.0  0.0 0.0 0.0 0.0 )
+                 #runname is a character 
+pvalue[0]=${2}   #value for parameter one
+pvalue[1]=${3}   #value for parameter two
+pvalue[2]=${4}   #value for parameter three
+pvalue[3]=${5}   #value for parameter four
+pvalue[4]=${6}   #value for parameter five
+pvalue[5]=${7}   #value for parameter six
+keepnc=${8}   #integer: 0...netcdf will be deleted after run  1...netcdf will be kept after run
+#if [ ${2} ... check if all 4 are read in ]
+#then
+#  echo ERROR: Find indices is currently coded for 4 parameters! 
+#  exit
+#fi
 
 # Teixeira and Cheineit 2003
 # use Pr=1 and Ck=0.5 Cee=0.16, lee=l/2.5
@@ -30,30 +54,26 @@ pname=("ctketau" "pwmin" "tauneggers" "Wc")
 
 # follow deRoode to estimate Wc between 0.1 and 1. and use linear relation to derive Wa from Wc
 
-pmin=( 0.0  0.0  100.0 0.0)
-pmax=(2000.0 2.0 1000.0 2.0 )
-#nrange=(11 11 11 11)
-nrange=(11 11 10 11)
+pmin=( 0.0  0.0  100.0 0.0 0.0 0.0)
+pmax=(2000.0 2.0 1000.0 2.0 4.0 4.0)
 
 # define run dir
-rundir="/global/scratch/langhans/opt_ensemble_test4/"
-srcdir="/global/home/users/langhans/singlecolumn/"
+#rundir='/scratch1/scratchdirs/langhans/'${1}
+rundir='/global/scratch/langhans/'${1}
+# define src dir
+#srcdir="/global/homes/l/langhans/singlecolumn/"
+srcdir="/global/home/users/langhans/singlecolumn"
+# define ncl script dir
+#ncldir="/global/homes/l/langhans/singlecolumn/src_ensemble/"
+ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
 
-#executable
+# define executable name
 execfile=${srcdir}'/sc_sam_wl'
 
-# define format for naming convection of runs: Casename_i_j_k_l  with ijkl the indices defining the parameter vector from the 3D parameter space
-pfmt='%02g_%02g_%02g_%02g'
 
-runind=${nrange[@]:0}
 
-if [ ${#pname[@]} != ${#pmin[@]} -o ${#pname[@]} != ${#pmax[@]} ]
-  then
-    echo "ERROR: number of parameter names and values is not the same"
-  exit
-else
-  pnumber=${#pname[@]}
-fi
+pnumber=${#pname[@]}
+ncases=${#cases[@]}
 
 if [ -d $rundir ]
 then
@@ -63,104 +83,21 @@ else
   mkdir $rundir
 fi
 
+#copy executable to rundir
+cp ${execfile} $rundir
 
-#get increment array
-pinc=${pmin[@]:0}
-i=0
-while [ $i -lt ${#pname[@]} ];do
-if [ ${nrange[i]} -lt 2 ]
-then
-  echo At least 2 values have to be specified for each parameter
-  exit
-fi
+#loop over all cases 
 
-pinc[i]=$(echo "scale=5; (${pmax[i]}-${pmin[i]})/(${nrange[i]}-1)" | bc)
-
-pmaxnew=$(echo "scale=5; ${pmin[i]}+(${nrange[i]}-1)*${pinc[i]}" | bc) 
-echo Parameter ${pname[i]}
-printf '%10s\t' "Max aim" "Max actual"
-echo
-printf '%10.5f\t' ${pmax[i]} $pmaxnew
-echo
-
-i=`expr $i + 1`
-done
-
-i=0
-nfin2=`expr $pnumber - 1`
-while [ $i -le $nfin2 ]; do
-cat <<EOF >${rundir}/param_${i}
-${pname[i]}
-EOF
-j=0
-nfin=`expr ${nrange[i]} - 1`
-while [ $j -le ${nfin} ]; do
-cat <<EOF >>${rundir}/param_${i}
-$(echo "scale=5; ${pmin[i]}+${j}*${pinc[i]}" | bc)
-EOF
-j=`expr $j + 1`
-done
-i=`expr $i + 1`
-done
-
-
-ncomb=1
-i=0
-while [ $i -lt $pnumber ]; do
-let "ncomb=${nrange[i]}*$ncomb"
-i=`expr $i + 1`
-done
-
-echo There are $ncomb parameter combinations
-
-let "nruns=${#cases[@]}*$ncomb"
-
-echo Cases: ${cases[@]:0}
-echo Parameter names: 
-printf '%10s\t' ${pname[@]:0}
-echo
-echo Parameter mins/maxs: 
-printf '%10.3f\t' ${pmin[@]:0}
-echo
-printf '%10.3f\t' ${pmax[@]:0}
-echo
-echo Size of parameter array: 
-printf '%10i\t' ${nrange[@]:0}
-echo
-
-echo About to run $nruns simulations
-#loop over all ensemble members: #cases x #comb 
-
-exec=1  #[0: don't execute runs, 1: execute runs]
 # start loop over runs
 run=0
-nend=`expr $nruns  - 1`
-
+nend=`expr $ncases  - 1`
+rmsetot=0.
+rmsetot2=0.
 while [ $run -le $nend ]; do
 
-if [ ${exec} -eq 1 ]
-then
+case=${cases[run]}
 
-if [ $pnumber -ne 4 ]
-then
-  echo ERROR: Find indices is currently coded for 4 parameters! 
-  exit
-else
-  #get indices from run index
-  let "ncase=$run/$ncomb"
-  let "runind[0]=($run-$ncase*$ncomb)/(${nrange[1]}*${nrange[2]}*${nrange[3]})"
-  let "runind[1]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]})/(${nrange[2]}*${nrange[3]})"
-  let "runind[2]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]})/${nrange[3]}"
-  let "runind[3]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]}-runind[2]*${nrange[3]})"
-fi
-
-case=${cases[ncase]}
-echo Creating case $case simulation number $run / $nruns
-
-# get parameter array for this specific simulation
-# there is a nCases x n1 x n2 x...x nparam total simulations
-
-runname="$case""_"`printf $pfmt ${runind[0]} ${runind[1]} ${runind[2]} ${runind[3]}`
+runname=${1}"_"${case} 
 
 #create run nfolder
 if [ -d ${rundir}/${runname} ]
@@ -211,6 +148,7 @@ fixedfa=.true.
 fixedeps = .false.
 witekeps = .false.
 neggerseps = .true.
+gregoryeps = .false.
 donoplumesat=.false.
 dolongwave=.false.
 doshortwave=.false.
@@ -220,11 +158,12 @@ snapshot_start = 0
 snapshot_period =  12 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .false.
-!snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
-snapshot_fields = 'thl,qt,qcl,qtflx,tflx,thr,upthv,upa,upqt'
+!snapshot_fields = 'thl,th,thr,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf,tend_shear_tke,tend_mix_tke,tend_buoy_tke,tend_diss_tke'
+snapshot_fields = 'thl,thr,qt,qcl,qtflx,tflx,upthv,upqt,upa'
 EOF
 
 #write case specific parameters (CPBL or BOMEX)
+echo $case
 if [ $case == "BOMEX" ]
 then
 
@@ -333,7 +272,6 @@ fi
 nend2=`expr ${pnumber} - 1 `
 for i in `seq 0 ${nend2}`
 do
-  pvalue[i]=$(echo "scale=5; ${pmin[i]}+${runind[i]}*${pinc[i]}" | bc)
   cat <<EOF >>${rundir}/${runname}/prm
 ${pname[i]}=${pvalue[i]}
 EOF
@@ -344,18 +282,36 @@ cat <<EOF >>${rundir}/${runname}/prm
 /
 EOF
 
-fi # if exec
+# run simulation
+cd ${rundir}
+./sc_sam_wl ${runname} > ${rundir}/${runname}/${runname}.out
+if [ $case == "BOMEX" ]
+then
+ filename="BOMEX_snapshot.nc"
+ weight=$(echo "scale=5; 0.5" | bc)
+else
+ filename="WITEK11_snapshot.nc"
+ weight=$(echo "scale=5; 0.5" | bc)
+fi
+ncl -Q ${ncldir}/getrmse.ncl benchdir='"'${ncldir}'"'  casename='"'${case}'"' filein='"'${filename}'"' pathin='"'${rundir}/${runname}'"'
+if [ ${keepnc} == 0 ]
+then
+rm -rf ${runname}/${filename}
+fi
 
-cat <<EOF >> ${rundir}/runlist
-${runname}
-EOF
+rmsein=${rundir}/${runname}/rmse_${case}
+rmsein2=${rundir}/${runname}/rmse_thvd_${case}
 
+read -d ' ' rmse < $rmsein
+read -d ' ' rmse_thvd < $rmsein2
+rmsetot=$(echo "scale=5; $rmsetot + $weight*$rmse" | bc)
+rmsetot2=$(echo "scale=5; $rmsetot2 + $weight*$rmse_thvd" | bc)
 #advance run number
 run=`expr $run + 1 `
 
 done
 
-#copy executable to rundir
-echo Copying executable $exec to Run Dir
-cp ${execfile} $rundir
+#get overall RMSE
+echo $rmsetot > ${rundir}/rmse_tot
+echo $rmsetot2 > ${rundir}/rmse_tot_thvd
 

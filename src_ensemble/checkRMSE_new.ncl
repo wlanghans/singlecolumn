@@ -7,19 +7,19 @@ colors=(/"blue","red","orange"/)
 colorsp=(/"blue","red","orange","darkgreen"/)
 
 
-rmsedir="/global/scratch/langhans/opt_ensemble_test4/"
+rmsedir="/global/scratch/langhans/opt_ensemble_test5/"
 f=addfile(rmsedir+"/RMSE.nc","r")
 
 p1=f->Wc
 p2=f->tauneggers
-p3=f->pwmin
-p4=f->ctketau
+p3=f->alphaqt
+p4=f->alphathv
 
-pnames=(/"b!BF8!e!FN!","!F8!t!F!!BF8!e!NF!","P!B!wmin!N!","!F8!t!F!!B!l!N!"/)
+pnames=(/"b!BF8!e!FN!","!F8!t!F!!BF8!e!NF!","a!B!q!N!","a!B!!F8!q!F!v!N!"/)
 
 do r=0,cases-1
  if (r.eq.0) then
- rmse=f->RMSE_thvd_BOMEX
+ rmse=f->RMSE_thvd_tot
  xstr(r)="total"
  end if
  if (r.eq.1) then
@@ -132,11 +132,11 @@ print("Case: "+xstr(r))
 
 do i=0,num_min-1
 ; if (p4(ind_min(i,3)).lt.600.) then
-   print("RMSE min "+ sprinti("%i",i+1) + " RMSE="+rmse(ind_min(i,0),ind_min(i,1),ind_min(i,2),ind_min(i,3)) +" for ctketau="+p4(ind_min(i,3))  + " pwmin="+p3(ind_min(i,2)) + " tauneggers="+p2(ind_min(i,1)) + " Wc="+p1(ind_min(i,0)) )
+   print("RMSE min "+ sprinti("%i",i+1) + " RMSE="+rmse(ind_min(i,0),ind_min(i,1),ind_min(i,2),ind_min(i,3)) +" for a thv="+p4(ind_min(i,3))  + " a qt="+p3(ind_min(i,2)) + " tauneggers="+p2(ind_min(i,1)) + " Wc="+p1(ind_min(i,0)) )
 ; end if
 end do
 do i=0,num_min-1
- ;print("RMSE max "+ sprinti("%i",i+1) + " RMSE="+rmse(ind_max(i,0),ind_max(i,1),ind_max(i,2),ind_max(i,3)) +" for ctketau="+p4(ind_max(i,3))  + " pwmin="+p3(ind_max(i,2)) + " tauneggers="+p2(ind_max(i,1)) +" Wc="+p1(ind_max(i,0)) )
+ ;print("RMSE max "+ sprinti("%i",i+1) + " RMSE="+rmse(ind_max(i,0),ind_max(i,1),ind_max(i,2),ind_max(i,3)) +" for a thv="+p4(ind_max(i,3))  + " a qt="+p3(ind_max(i,2)) + " tauneggers="+p2(ind_max(i,1)) +" Wc="+p1(ind_max(i,0)) )
 end do
 
 ; now plot RMSE stats
