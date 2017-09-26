@@ -167,7 +167,7 @@ do k=1,nzm
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
 
      ! get Km 
-     tk(k) = Ck*smix(k)*sqrt(tke(k))
+     tk(k) = 0.0 !Ck*smix(k)*sqrt(tke(k))
 
      a_prod_sh=(tk(k)+0.001)*def2(k)
      a_prod_bu= ggr/thetar(k) * tke_thvflx(k) !-(tk(k)+0.001) * Pr * buoy_sgs(k) !        ggr/thetar(k) * tke_thvflx(k)

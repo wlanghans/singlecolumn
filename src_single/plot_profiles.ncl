@@ -158,7 +158,7 @@ end do
 
 ; get benchmark LES data
 
-f=addfile("/global/home/users/langhans/singlecolumn/src_ensemble/benchmark_SAM_BOMEXhighlarge_qt.nc","r")
+f=addfile("/global/homes/l/langhans/singlecolumn/src_ensemble/benchmark_SAM_BOMEXhighlarge_qt.nc","r")
 
 if (casein.eq."CPBL2") then
    Bt_ind = (/1,2/)

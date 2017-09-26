@@ -37,7 +37,7 @@ implicit none
       INTEGER :: K,I
       REAL :: wthv,wqt,wthl,qstar,thstar,sigmaW,sigmaQT,sigmaTH,sigmaTHV,zs, &
            pwmax,wmin,wmax,wlv,wtv
-      REAL :: QTn,Tn,THVn,QCLn,QCIn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit, Wa
+      REAL :: QTn,Tn,THVn,QCLn,QCIn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit, Wa, taun
 
 ! w parameters
       REAL,PARAMETER :: &
@@ -230,7 +230,8 @@ implicit none
           elseif (neggerseps) then
             !ENT(k-1,i) = 2.*nuneggers*wstar/(UPW(k-1,i)+1.0e-6)/pblh 
             !ENT(k-1,i) = 2.*tauneggers*wstar/(UPW(k-1,i)+1.0e-6)/pblh 
-            ENT(k-1,i) = 1./(tauneggers*UPW(k-1,i)+1.0e-6) 
+            taun= tauneggers + (1./3.*z(k)/UPW(k-1,i)-tauneggers )* exp(-z(k)/100.)
+            ENT(k-1,i) = 1./(taun*UPW(k-1,i)+1.0e-6)
           elseif (witekeps) then
             ENT(k-1,i) = 0.7/(smix(k-1)+1.0e-06)
           elseif (gregoryeps) then
