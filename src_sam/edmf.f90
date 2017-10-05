@@ -37,7 +37,7 @@ implicit none
       INTEGER :: K,I
       REAL :: wthv,wqt,wthl,qstar,thstar,sigmaW,sigmaQT,sigmaTH,sigmaTHV,zs, &
            pwmax,wmin,wmax,wlv,wtv
-      REAL :: QTn,Tn,THVn,QCLn,QCIn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit, Wa, taun
+      REAL :: QTn,Tn,THVn,QCLn,QCIn,Un,Vn,Wn2,EntEXP,EntW, hlp, acrit, Wa, taun, pblh2
 
 ! w parameters
       REAL,PARAMETER :: &
@@ -132,12 +132,13 @@ implicit none
     pwmax=3.5
 
 ! see Lenschow et al. (1980), JAS
-    wstar=max(0.,(ggr/thetav(1)*wthv*pblh)**(1./3.))
+    pblh2=max(zs,pblh)
+    wstar=max(0.,(ggr/thetav(1)*wthv*pblh2)**(1./3.))
     qstar=wqt/wstar
     thstar=wthl/wstar 
-    sigmaW=1.34*wstar*(zs/pblh)**(1./3.)*(1.-0.8*zs/pblh)
-    sigmaQT=1.34*qstar*(zs/pblh)**(-1./3.)
-    sigmaTH=1.34*thstar*(zs/pblh)**(-1./3.)
+    sigmaW=1.34*wstar*(zs/pblh2)**(1./3.)*(1.-0.8*zs/pblh2)
+    sigmaQT=1.34*qstar*(zs/pblh2)**(-1./3.)
+    sigmaTH=1.34*thstar*(zs/pblh2)**(-1./3.)
  
 ! now get sigmaTHV from linearization of pot. temp. and using a corr. coeff between qv and theta of 0.75 (see Sobjan 1991)
     sigmaTHV=sqrt(sigmaTH**2+epsv**2*theta(1)**2*sigmaQT**2 &
