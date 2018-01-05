@@ -149,8 +149,8 @@ implicit none
    
     if (dosingleplume) then
        ! following Soares (2004) and Witek (2011)
-
        UPA(1,1) = 0.1
+       feddy=1.d0
        UPW(1,1) = 0.0
        UPM(1,1) = 0.0
        UPU(1,1)=u(1)
@@ -193,9 +193,9 @@ implicit none
          UPV(1,I)=v(1)
 
          ! specific humidity needed (will be convert back in the end)
-         UPQT(1,I)=qt(1)+alphaqt *UPW(1,I)*sigmaQT/sigmaW
+         UPQT(1,I)=qt(1)+ alphaqt *UPW(1,I)*sigmaQT/sigmaW
          ! according to cheinet the 0.58 is for thetav, hence thetav is initialized (instead of theta)
-         UPTHV(1,I)=thetav(1)+alphathv*UPW(1,I)*sigmaTHV/sigmaW
+         UPTHV(1,I)=thetav(1)+ alphathv*UPW(1,I)*sigmaTHV/sigmaW
          UPTABS(1,I)=UPTHV(1,I)/(1.+epsv*UPQT(1,I)) * (pres(1)/p00)**(rgas/cp) 
          UPQCL(1,I)=qcl(1)
          UPQCI(1,I)=qci(1)
@@ -211,6 +211,14 @@ implicit none
          tke_mf(1)   = tke_mf(1)   + UPA(1,I)* 3./4. * UPW(1,i)**2
       ENDDO
 
+      if (frac_mf(1).ne.0.5) then
+         feddy = 1.d0 - (0.5d0 - 0.5*erf(wmin/sigmaW/sqrt(2.d0)) &
+                + wmin/sqrt(2.d0*pi)/sigmaW*exp(-wmin**2/(2.d0*sigmaW**2)))
+         feddy=min(1.,max(0.5,feddy))
+      else
+         feddy = 0.5
+      end if
+ 
     end if
 
     qcsgs_mf(1)=qcsgs_mf(1)/frac_mf(1)

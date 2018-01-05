@@ -12,7 +12,7 @@ real grd,betdz,Ck,Ce,Ces,Ce1,Ce2,Pr,Cee,Cs
 real ratio,a_prod_sh,a_prod_bu,a_diss
 real lstarn, lstarp, bbb, omn, omp, tketau
 real qsatt,dqsat, dtkedtsum, dtkedtmin, l23
-real :: thetalt, thetalk, thetall, qtt, qtk, qtl, covarqtthetal, varqt, varthetal, wthl, wqt
+real :: thetalt, thetalk, thetall, qtt, qtk, qtl, covarqtthetal, varqt, varthetal, wthl, wqt, fracmfavg
 integer i,j,k,kc,kb
 
 
@@ -26,6 +26,8 @@ end if
 Cs = 0.15
 Ce=Ck**3/Cs**4
 Ces=Ce/0.7*3.0	
+
+if ((.not.doedmf).or.donoscale) feddy=1.
 
 
 do k=1,nzm      
@@ -157,17 +159,28 @@ do k=1,nzm
    ! ==================================
 
      ! use previously evaluated fluxes
-     wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))
+     if (k.eq.1) then
+       wthl = (0.5*(feddy*t_flux_ed(k) + t_flux_ed(k+1)))
+       wqt  = 0.5* (feddy*qt_flux_ed(k) + qt_flux_ed(k+1))
+     else
+       wthl = (0.5*(t_flux_ed(k) + t_flux_ed(k+1)))
+       wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
+     end if
      if (qp(k).gt.0.0) then
        wthl = wthl +  ((fac_cond*qpl(k)+fac_sub*qpi(k))/qp(k) * 0.5*(qp_flux_ed(k) + qp_flux_ed(k+1))) * (p00/pres(k))**(rgas/cp)
      end if
-     wqt  = 0.5*(qt_flux_ed(k) + qt_flux_ed(k+1))
 
      ! get buoyancy flux from PDF scheme
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
 
      ! get Km 
-     tk(k) = 0.0 !Ck*smix(k)*sqrt(tke(k))
+     if (doedmf.and..not.donoscale) then
+       fracmfavg=frac_mf(1)   ! even small plumes are assumed to be upright
+     else
+       fracmfavg=0.0
+     end if
+     tk(k) = (1.-fracmfavg) * Ck*smix(k)*sqrt(tke(k))
+     !tk(k) = Ck*smix(k)*sqrt(tke(k))
 
      a_prod_sh=(tk(k)+0.001)*def2(k)
      a_prod_bu= ggr/thetar(k) * tke_thvflx(k) !-(tk(k)+0.001) * Pr * buoy_sgs(k) !        ggr/thetar(k) * tke_thvflx(k)

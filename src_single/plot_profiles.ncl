@@ -11,12 +11,20 @@ else
   tavg=1800.
 end if
 
-colors=(/"blue"/)
+;colors=(/"firebrick3"/)
+;colors=(/"darkorchid3"/)
+;colors=(/"dodgerblue3"/)
+;colors=(/"darkslategray"/)
 dashes=(/0,1,2,3,4/)
 thickness=(/3.,1.5,1.5,1.5,1.5/)
 plot=new(20,graphic)
 
 wks   = gsn_open_wks ("eps","plot_"+casein)                   ; open workstation
+gsn_define_colormap(wks,"matlab_jet")
+colors=ispan(5,65,8)
+
+color=colors(1)
+;dont use 4
 
 f=addfile(filein,"r")
 
@@ -158,7 +166,7 @@ end do
 
 ; get benchmark LES data
 
-f=addfile("/global/homes/l/langhans/singlecolumn/src_ensemble/benchmark_SAM_BOMEXhighlarge_qt.nc","r")
+f=addfile("/global/home/users/langhans/singlecolumn/src_ensemble/benchmark_SAM_BOMEXhighlarge_qt.nc","r")
 
 if (casein.eq."CPBL2") then
    Bt_ind = (/1,2/)
@@ -268,6 +276,7 @@ end do
  else
    res@trYMaxF=3000.
  end if
+ ;res@trYMaxF=400.
  res@tiYAxisString = "Height (m)"
  res@tiXAxisString = "!F8!q!F! (K)"
 
@@ -289,18 +298,19 @@ end do
  else
  res@trXMinF=300.
  res@trXMaxF=303.
+ ;res@trXMaxF=301.5
  
  grad_txt_les=sprintf("%5.3f",avg(thgrad)*1000.) +" K/km"
  grad_txt_1D=sprintf("%5.3f",avg(thgrad1D)*1000.) +" K/km"
 
  end if
- plot(0)  = gsn_csm_xy (wks,thl,zles,res) ; create plot
- res@xyLineColor = colors(0)
+ plot(0)  = gsn_csm_xy (wks,thl(0,:),zles,res) ; create plot
+ res@xyLineColor = color
 
  res@tmYLLabelsOn         = False              ; do not draw bottom labels
  res@tiYAxisOn            = False
 
- plot(1)  = gsn_csm_xy (wks,thl1D,z,res) ; create plot
+ plot(1)  = gsn_csm_xy (wks,thl1D(0,:),z,res) ; create plot
 
 
  if (casein.ne."BOMEX") then
@@ -309,7 +319,7 @@ end do
    txres@txFontColor = "black"
    text = gsn_add_text(wks,plot(0),grad_txt_les,302., \
                                     1500. ,txres)
-   txres@txFontColor = colors(0)
+   txres@txFontColor = color
    text = gsn_add_text(wks,plot(0),grad_txt_1D,302., \
                                     1200. ,txres)
  end if
@@ -322,15 +332,17 @@ end do
  ;res@trXMinF=14.5
  else
  res@trXMinF=2.
+ ;res@trXMinF=4.5
  res@trXMaxF=6.
+ ;res@trXMaxF=5.4
  end if
  res@tiXAxisString = "q!B!t!N! (g/kg)"
  qt=qt*1000.
  qt1D=qt1D*1000.
  res@xyLineColor = "black"
- plot(2)  = gsn_csm_xy (wks,qt,zles,res) ; create plot
- res@xyLineColor = colors(0)
- plot(3)  = gsn_csm_xy (wks,qt1D,z,res) ; create plot
+ plot(2)  = gsn_csm_xy (wks,qt(0,:),zles,res) ; create plot
+ res@xyLineColor = color
+ plot(3)  = gsn_csm_xy (wks,qt1D(0,:),z,res) ; create plot
  overlay(plot(2),plot(3))
 
  if (casein.eq."BOMEX") then
@@ -341,7 +353,7 @@ end do
  qc1D=qc1D*1000.
  res@xyLineColor = "black"
  plot(4)  = gsn_csm_xy (wks,qc,zles,res) ; create plot
- res@xyLineColor = colors(0)
+ res@xyLineColor = color
  plot(5)  = gsn_csm_xy (wks,qc1D,z,res) ; create plot
  overlay(plot(4),plot(5))
  end if
@@ -357,19 +369,19 @@ end do
  res@tiXAxisString = "<w !F8!q!F!!B!l!N!> (W m!S!-2!N!)"
  res@xyLineColor = "black"
  res@gsnXRefLine = 0.0
- plot(6)  = gsn_csm_xy (wks,wthl,zflx,res) ; create plot
- res@xyLineColor = colors(0)
+ plot(6)  = gsn_csm_xy (wks,wthl(0,:),zflx,res) ; create plot
+ res@xyLineColor = color
  res@xyDashPattern = 0
- plot(7)  = gsn_csm_xy (wks,wthl1D,zi,res) ; create plot
+ plot(7)  = gsn_csm_xy (wks,wthl1D(0,:),zi,res) ; create plot
  overlay(plot(6),plot(7))
  res@xyDashPattern = 0
  if (casein.ne."BOMEX") then
  res@tmYLLabelsOn         = True              ; do not draw bottom labels
  res@tiYAxisOn            = True
  end if
- plot(14)  = gsn_csm_xy (wks,wthl1D_ed,zi,res) ; create plot
+ plot(14)  = gsn_csm_xy (wks,wthl1D_ed(0,:),zi,res) ; create plot
  res@xyDashPattern = 14
- plot(10)  = gsn_csm_xy (wks,wthl1D_mf,zi,res) ; create plot
+ plot(10)  = gsn_csm_xy (wks,wthl1D_mf(0,:),zi,res) ; create plot
  if (casein.ne."BOMEX") then
  res@tmYLLabelsOn         = False              ; do not draw bottom labels
  res@tiYAxisOn            = False
@@ -391,16 +403,16 @@ end do
  res@tmYLLabelsOn         = True              ; do not draw bottom labels
  res@tiYAxisOn            = True
  end if
- plot(8)  = gsn_csm_xy (wks,wqt,zflx,res) ; create plot
- res@xyLineColor = colors(0)
- plot(9)  = gsn_csm_xy (wks,wqt1D,zi,res) ; create plot
+ plot(8)  = gsn_csm_xy (wks,wqt(0,:),zflx,res) ; create plot
+ res@xyLineColor = color
+ plot(9)  = gsn_csm_xy (wks,wqt1D(0,:),zi,res) ; create plot
  overlay(plot(8),plot(9))
  res@tmYLLabelsOn         = False              ; do not draw bottom labels
  res@tiYAxisOn            =  False
  res@tiXAxisOn            =  True
- plot(15)  = gsn_csm_xy (wks,wqt1D_ed,zi,res) ; create plot
+ plot(15)  = gsn_csm_xy (wks,wqt1D_ed(0,:),zi,res) ; create plot
  res@xyDashPattern = 14
- plot(11)  = gsn_csm_xy (wks,wqt1D_mf,zi,res) ; create plot
+ plot(11)  = gsn_csm_xy (wks,wqt1D_mf(0,:),zi,res) ; create plot
  overlay(plot(15),plot(11))
 
  res@trXMinF=0.
@@ -410,19 +422,21 @@ end do
  ;res@tiXAxisString = "w!B!u!N! (m s!S!-1!N!)"
  ;plot(12)  = gsn_csm_xy (wks,WU(:,0,:),zi,res) ; create plot
  if (casein.eq."BOMEX") then
- res@trXMinF=-1.0
- res@trXMaxF=1.0
+ res@trXMinF=-.2
+ res@trXMaxF=.6
  else
- res@trXMinF=-1.0
- res@trXMaxF=1.0
+ res@trXMinF=-.6
+ ;res@trXMinF=0.0
+ ;res@trXMaxF=.8
+ res@trXMaxF=0.6
  end if
  res@tiXAxisString = "!F8!q!F!!B!v!N!' (K)"
  res@xyDashPattern =0 
  res@xyMonoDashPattern = True
  res@xyLineColor = "black"
- plot(13)  = gsn_csm_xy (wks,thvd,zles,res) ; create plot
- res@xyLineColor = colors(0)
- plot(16)  = gsn_csm_xy (wks,thvd1D,z,res) ; create plot
+ plot(13)  = gsn_csm_xy (wks,thvd(0,:),zles,res) ; create plot
+ res@xyLineColor = color
+ plot(16)  = gsn_csm_xy (wks,thvd1D(0,:),z,res) ; create plot
  overlay(plot(13),plot(16))
 
  if (casein.eq."BOMEX") then
@@ -431,6 +445,7 @@ end do
  else
  res@trXMinF=0.
  res@trXMaxF=1.
+ ;res@trXMaxF=.6
  end if
  res@xyMonoDashPattern = False
  res@tiXAxisString = "q!B!t!N!' (g/kg)"
@@ -439,9 +454,9 @@ end do
  res@xyLineColor = "black"
  qtd=qtd*1000.
  qtd1D=qtd1D*1000.
- plot(17)  = gsn_csm_xy (wks,qtd,zles,res) ; create plot
- res@xyLineColor = colors(0)
- plot(18)  = gsn_csm_xy (wks,qtd1D,z,res) ; create plot
+ plot(17)  = gsn_csm_xy (wks,qtd(0,:),zles,res) ; create plot
+ res@xyLineColor = color
+ plot(18)  = gsn_csm_xy (wks,qtd1D(0,:),z,res) ; create plot
  overlay(plot(17),plot(18))
 
  resP                    = True                 ; modify the panel plot
@@ -450,9 +465,11 @@ end do
  resP@gsnPanelMainString = casein     ; new way of setting main title (as of NCL V6.4.0)
   if (casein.eq."BOMEX") then
   gsn_panel(wks,plot((/0,2,4,6,8,14,15,13,17/)),(/3,4/),resP)           
+  ;gsn_panel(wks,plot((/0,2,13,17/)),(/2,2/),resP)           
 ;  gsn_panel(wks,plot((/0,6,12,13/)),(/1,4/),resP)           
   else
   gsn_panel(wks,plot((/0,2,6,8,14,15,13,17/)),(/2,4/),resP)           
+  ;gsn_panel(wks,plot((/0,2,13,17/)),(/2,2/),resP)           
   end if
 
 

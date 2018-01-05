@@ -56,6 +56,7 @@ logical :: dovartrans=.false.
 real :: lcld = 250.
 real :: ctketau=0.5
 logical:: doedmf = .false.
+logical:: donoscale = .true.
 real :: Wc=0.5
 real :: pwmin=1.2
 logical:: donoplumesat=.false.

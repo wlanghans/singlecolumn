@@ -58,14 +58,14 @@ pmin=( 0.0 0.0 0.0  0.0  100.0 0.0)
 pmax=(4.0 4.0 2000.0 2.0 1000.0 2.0)
 
 # define run dir
-rundir='/scratch1/scratchdirs/langhans/'${1}
-#rundir='/global/scratch/langhans/'${1}
+#rundir='/scratch1/scratchdirs/langhans/'${1}
+rundir='/global/scratch/langhans/'${1}
 # define src dir
-srcdir="/global/homes/l/langhans/singlecolumn/"
-#srcdir="/global/home/users/langhans/singlecolumn"
+#srcdir="/global/homes/l/langhans/singlecolumn/"
+srcdir="/global/home/users/langhans/singlecolumn"
 # define ncl script dir
-ncldir="/global/homes/l/langhans/singlecolumn/src_ensemble/"
-#ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
+#ncldir="/global/homes/l/langhans/singlecolumn/src_ensemble/"
+ncldir="/global/home/users/langhans/singlecolumn/src_ensemble/"
 
 # define executable name
 execfile=${srcdir}'/sc_sam_wl'
@@ -142,6 +142,7 @@ sfc_tau_fxd=.true.
 doneuman= .true.
 dotkedirichlet=.true.
 doedmf = .true.
+donoscale = .true.
 dosingleplume=.false.
 nup=40
 fixedfa=.true.
@@ -158,8 +159,8 @@ snapshot_start = 0
 snapshot_period =  12 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .false.
-!snapshot_fields = 'thl,th,thr,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf,tend_shear_tke,tend_mix_tke,tend_buoy_tke,tend_diss_tke'
-snapshot_fields = 'thl,thr,qt,qcl,qtflx,tflx,upthv,upqt,upa'
+snapshot_fields = 'thl,th,thr,thv,tabs,tke,rho,presi,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,uptabs,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf,tend_shear_tke,tend_mix_tke,tend_buoy_tke,tend_diss_tke'
+!snapshot_fields = 'thl,thr,qt,qcl,qtflx,tflx,upthv,upqt,upa'
 EOF
 
 #write case specific parameters (CPBL or BOMEX)
