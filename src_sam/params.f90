@@ -62,6 +62,7 @@ real :: pwmin=1.2
 logical:: donoplumesat=.false.
 logical:: fixedeps=.true.
 logical:: neggerseps=.false.
+logical :: neggersslooz=.false.
 logical:: gregoryeps=.false.
 real:: tauneggers=500.
 logical:: randomeps=.false.

@@ -149,6 +149,7 @@ fixedfa=.true.
 fixedeps = .false.
 witekeps = .false.
 neggerseps = .true.
+neggersslooz=.false.
 gregoryeps = .false.
 donoplumesat=.false.
 dolongwave=.false.
