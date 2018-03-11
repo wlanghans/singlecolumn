@@ -235,7 +235,7 @@ implicit none
        DO k=2,nzm
  
           if (fixedeps) then
-            ENT(k-1,i) = eps0
+            ENT(k-1,i) = max(eps0,1./(3.*z(k)))
           elseif (neggerseps) then
             !ENT(k-1,i) = 2.*nuneggers*wstar/(UPW(k-1,i)+1.0e-6)/pblh 
             !ENT(k-1,i) = 2.*tauneggers*wstar/(UPW(k-1,i)+1.0e-6)/pblh 

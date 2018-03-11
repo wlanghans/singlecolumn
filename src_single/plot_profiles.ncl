@@ -23,7 +23,7 @@ wks   = gsn_open_wks ("eps","plot_"+casein)                   ; open workstation
 gsn_define_colormap(wks,"matlab_jet")
 colors=ispan(5,65,8)
 
-color=colors(1)
+color="darkgreen";colors(1)
 ;dont use 4
 
 f=addfile(filein,"r")
@@ -274,7 +274,7 @@ end do
  if (casein.eq."BOMEX") then
    res@trYMaxF=2000.
  else
-   res@trYMaxF=3000.
+   res@trYMaxF=2500.
  end if
  ;res@trYMaxF=400.
  res@tiYAxisString = "Height (m)"
@@ -298,7 +298,7 @@ end do
  else
  res@trXMinF=300.
  res@trXMaxF=303.
- ;res@trXMaxF=301.5
+ res@trXMaxF=301.5
  
  grad_txt_les=sprintf("%5.3f",avg(thgrad)*1000.) +" K/km"
  grad_txt_1D=sprintf("%5.3f",avg(thgrad1D)*1000.) +" K/km"
@@ -329,7 +329,7 @@ end do
  if (casein.eq."BOMEX") then
  res@trXMinF=9.
  res@trXMaxF=17.5
- ;res@trXMinF=14.5
+ res@trXMinF=12.;14.5
  else
  res@trXMinF=2.
  ;res@trXMinF=4.5
@@ -361,10 +361,10 @@ end do
  if (casein.eq."BOMEX") then
  res@trXMinF=-40.
  res@trXMaxF=20.
- ;res@trXMinF=14.5
+ res@trXMinF=-30.
  else
- res@trXMinF=-40.
- res@trXMaxF=100.
+ res@trXMinF=-20.
+ res@trXMaxF=80.
  end if
  res@tiXAxisString = "<w !F8!q!F!!B!l!N!> (W m!S!-2!N!)"
  res@xyLineColor = "black"

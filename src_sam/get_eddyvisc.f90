@@ -182,8 +182,8 @@ do k=1,nzm
      tk(k) = (1.-fracmfavg) * Ck*smix(k)*sqrt(tke(k))
      !tk(k) = Ck*smix(k)*sqrt(tke(k))
 
-     a_prod_sh=(tk(k)+0.001)*def2(k)
-     a_prod_bu= ggr/thetar(k) * tke_thvflx(k) !-(tk(k)+0.001) * Pr * buoy_sgs(k) !        ggr/thetar(k) * tke_thvflx(k)
+     a_prod_sh=(tk(k)+0.001)*def2(k)/(1.-fracmfavg)
+     a_prod_bu= ggr/thetar(k) * tke_thvflx(k)/(1.-fracmfavg) !-(tk(k)+0.001) * Pr * buoy_sgs(k) !        ggr/thetar(k) * tke_thvflx(k)
      a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
      dtkedtmin = -tke(k)/dt
