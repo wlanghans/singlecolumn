@@ -7,19 +7,31 @@ colors=(/"blue","red","orange"/)
 colorsp=(/"blue","red","orange","darkgreen"/)
 
 
-rmsedir="/global/scratch/langhans/opt_ensemble_test4/"
+rmsedir="/global/scratch/langhans/metamodel_large2/"
 f=addfile(rmsedir+"/RMSE.nc","r")
 
-p1=f->Wc
-p2=f->tauneggers
-p3=f->pwmin
-p4=f->ctketau
 
-pnames=(/"b!BF8!e!FN!","!F8!t!F!!BF8!e!NF!","P!B!wmin!N!","!F8!t!F!!B!l!N!"/)
+p1=f->alphathv
+p2=f->alphaqt
+p3=f->ctketau
+p4=f->pwmin
+p5=f->tauneggers
+p6=f->Wc
+
+ind_trad=new(6,integer)
+ind_trad(0)=4
+ind_trad(1)=4
+ind_trad(2)=4
+ind_trad(3)=4
+ind_trad(4)=4
+ind_trad(5)=4
+
+
+pnames=(/"a!BF8!q!F!v","a!B!qt","!F8!t!FB!l!NF!","w!B!min!N!","!F8!t!F!!BF8!e!NF!","b!BF8!e!NF!"/)
 
 do r=0,cases-1
  if (r.eq.0) then
- rmse=f->RMSE_thvd_BOMEX
+ rmse=f->RMSE_thvd_tot
  xstr(r)="total"
  end if
  if (r.eq.1) then
@@ -37,14 +49,22 @@ ii = new(dims,integer)
 ij = new(dims,integer)
 ik = new(dims,integer)
 il = new(dims,integer)
+im = new(dims,integer)
+in = new(dims,integer)
 do i=0,dims(0)-1
 do j=0,dims(1)-1
 do k=0,dims(2)-1
 do l=0,dims(3)-1
-  ii(i,j,k,l)=i
-  ij(i,j,k,l)=j
-  ik(i,j,k,l)=k
-  il(i,j,k,l)=l
+do m=0,dims(4)-1
+do n=0,dims(5)-1
+  ii(i,j,k,l,m,n)=i
+  ij(i,j,k,l,m,n)=j
+  ik(i,j,k,l,m,n)=k
+  il(i,j,k,l,m,n)=l
+  im(i,j,k,l,m,n)=m
+  in(i,j,k,l,m,n)=n
+end do
+end do
 end do
 end do
 end do
@@ -54,10 +74,14 @@ ii1D = ndtooned(ii)
 ij1D = ndtooned(ij)
 ik1D = ndtooned(ik)
 il1D = ndtooned(il)
+im1D = ndtooned(im)
+in1D = ndtooned(in)
 delete(ii)
 delete(ij)
 delete(ik)
 delete(il)
+delete(im)
+delete(in)
 
 opt   = False
 ; get several statistics
@@ -67,16 +91,17 @@ print("Lower dectile: " + stat(3))
 print("Lower 5%: " + stat(24))
 print("Lower 1%: " + stat(23))
 best1=stat(23)
+best01=stat(22)
 best5=stat(24)
 best10=stat(3)
 loct = stat(23)
-num_min=600
-ind_min=new((/num_min,4/),integer)
-ind_lmin=new(4,integer)
-ind_lmin=(/1,3,6,0/)
+num_min=40
+ind_min=new((/num_min,6/),integer)
+ind_lmin=new(6,integer)
+;ind_lmin=(/1,3,6,0/)
 
 val_min=new((/num_min/),float)
-ind_max=new((/num_min,4/),integer)
+ind_max=new((/num_min,6/),integer)
 val_max=new((/num_min/),float)
 
 ;get six minima
@@ -99,6 +124,8 @@ ind_min(i,0)=ii1D(ind1D)
 ind_min(i,1)=ij1D(ind1D)
 ind_min(i,2)=ik1D(ind1D)
 ind_min(i,3)=il1D(ind1D)
+ind_min(i,4)=im1D(ind1D)
+ind_min(i,5)=in1D(ind1D)
 val_min(i)=rmse1D(ind1D)
 tmp(ind1D) = -999.
 delete(ind1D)
@@ -122,6 +149,8 @@ ind_max(i,0)=ii1D(ind1D)
 ind_max(i,1)=ij1D(ind1D)
 ind_max(i,2)=ik1D(ind1D)
 ind_max(i,3)=il1D(ind1D)
+ind_max(i,4)=im1D(ind1D)
+ind_max(i,5)=in1D(ind1D)
 val_max(i)=rmse1D(ind1D)
 tmp(ind1D) = -999.
 delete(ind1D)
@@ -131,12 +160,7 @@ end do
 print("Case: "+xstr(r))
 
 do i=0,num_min-1
-; if (p4(ind_min(i,3)).lt.600.) then
-   print("RMSE min "+ sprinti("%i",i+1) + " RMSE="+rmse(ind_min(i,0),ind_min(i,1),ind_min(i,2),ind_min(i,3)) +" for ctketau="+p4(ind_min(i,3))  + " pwmin="+p3(ind_min(i,2)) + " tauneggers="+p2(ind_min(i,1)) + " Wc="+p1(ind_min(i,0)) )
-; end if
-end do
-do i=0,num_min-1
- ;print("RMSE max "+ sprinti("%i",i+1) + " RMSE="+rmse(ind_max(i,0),ind_max(i,1),ind_max(i,2),ind_max(i,3)) +" for ctketau="+p4(ind_max(i,3))  + " pwmin="+p3(ind_max(i,2)) + " tauneggers="+p2(ind_max(i,1)) +" Wc="+p1(ind_max(i,0)) )
+   print("RMSE min "+ sprinti("%i",i+1) + " RMSE="+rmse(ind_min(i,0),ind_min(i,1),ind_min(i,2),ind_min(i,3),ind_min(i,4),ind_min(i,5)) +" for a_thv="+p1(ind_min(i,5))+ " a_qt="+p2(ind_min(i,4))+" ctketau="+p3(ind_min(i,3))  + " pwmin="+p4(ind_min(i,2)) + " tauneggers="+p5(ind_min(i,1)) + " Wc="+p6(ind_min(i,0)) )
 end do
 
 ; now plot RMSE stats
@@ -164,13 +188,13 @@ if (r.eq.0) then
   res=True
   res@gsnDraw     = False
   res@gsnFrame    = False
-  res@tiYAxisString="RMSE r!H-10V2F35!D!FV-2H3!"
+  res@tiYAxisString="r!H-10V2F35!D!FV-2H3!"
   res@xyLineThicknessF=3.
-  res@gsnYRefLineThicknessF=2.
+  res@gsnYRefLineThicknessF=3.
   res@gsnYRefLineColors="gray"
-  res@gsnYRefLine=(/best1,best5/)
+  res@gsnYRefLine=(/best01/)
   res@xyMarkLineMode="MarkLines"
-  res@xyLineColor= colors(0)
+  res@xyLineColor= "black";colors(0)
   res@xyMarker = 1
   res@xyMarkerSizeF=0.05
   res@trYMaxF = max(rmse)
@@ -187,40 +211,45 @@ if (r.eq.0) then
   res@trXMaxF = p1(dimsizes(p1)-1)+0.1*range
   
   ;ind_min(0,:)=ind_lmin(:)
-  plot(0)  = gsn_csm_xy (wks,p1,rmse(0:dimsizes(p1)-1,ind_min(0,1),ind_min(0,2),ind_min(0,3)),res)
-  dum(0) = gsn_add_polymarker(wks, plot(0), p1(ind_min(0,0)),rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),ind_min(0,3)), pmres)
+  plot(0)  = gsn_csm_xy (wks,p1,rmse(0:dimsizes(p1)-1,ind_trad(1),ind_trad(2),ind_trad(3),ind_trad(4),ind_trad(5)),res)
+  dum(0) = gsn_add_polymarker(wks, plot(0), p1(ind_trad(0)),rmse(ind_trad(0),ind_trad(1),ind_trad(2),ind_trad(3),ind_trad(4),ind_trad(5)), pmres)
   res@tiXAxisString=pnames(1)
   delete(res@tmXBLabels)
+
   res@tmXBLabels = p2 ; labels for each box
   range=p2(dimsizes(p2)-1)-p2(0)
   res@trXMinF = p2(0)-0.1*range
   res@trXMaxF = p2(dimsizes(p2)-1)+0.1*range
-  plot(1)  = gsn_csm_xy (wks,p2,rmse(ind_min(0,0),0:dimsizes(p2)-1,ind_min(0,2),ind_min(0,3)),res)
-  dum(1) = gsn_add_polymarker(wks, plot(1), p2(ind_min(0,1)),rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),ind_min(0,3)), pmres)
-  res@tiXAxisString="a";pnames(2)
+  res@tiXAxisString=pnames(1)
+  plot(1)  = gsn_csm_xy (wks,p2,rmse(ind_trad(0),0:dimsizes(p2)-1,ind_trad(2),ind_trad(3),ind_trad(4),ind_trad(5)),res)
+  dum(1) = gsn_add_polymarker(wks, plot(1), p2(ind_trad(1)),rmse(ind_trad(0),ind_trad(1),ind_trad(2),ind_trad(3),ind_trad(4),ind_trad(5)), pmres)
   delete(res@tmXBLabels)
   res@tmXBLabels = p3 ; labels for each box
   range=p3(dimsizes(p3)-1)-p3(0)
+  res@trXMinF = p3(0)-0.1*range
+  res@trXMaxF = p3(dimsizes(p3)-1)+0.1*range
 ;  res@trXMaxF = 0.5*(1.-erf((p3(0)-0.1*range)/sqrt(2.)))
 ;  res@trXMinF = 0.5*(1.-erf((p3(dimsizes(p3)-1)+0.1*range)/sqrt(2.)))
-  af=0.5*(1.-erf(p3/sqrt(2.)))
-  range=af(0)-af(dimsizes(af)-1)
-  res@trXMinF = 0.;af(dimsizes(af)-1)+0.1*range
-  res@trXMaxF = 0.5;af(0)-0.1*range
    
-  plot(2)  = gsn_csm_xy (wks,af,rmse(ind_min(0,0),ind_min(0,1),0:dimsizes(p3)-1,ind_min(0,3)),res)
-  afx=0.5*(1.-erf((p3(ind_min(0,2)))/sqrt(2.)))
-  dum(2) = gsn_add_polymarker(wks, plot(2), afx,rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),ind_min(0,3)), pmres)
-  res@tiXAxisString=pnames(3)
+  plot(2)  = gsn_csm_xy (wks,p3,rmse(ind_trad(0),ind_trad(1),0:dimsizes(p3)-1,ind_trad(3),ind_trad(4),ind_trad(5)),res)
+  dum(2) = gsn_add_polymarker(wks, plot(2), p3(ind_trad(2)),rmse(ind_trad(0),ind_trad(1),ind_trad(2),ind_trad(3),ind_trad(4),ind_trad(5)), pmres)
+
+  res@tiXAxisString="a";pnames(3)
+  af=0.5*(1.-erf(p4/sqrt(2.)))
+  range=af(0)-af(dimsizes(af)-1)
+  res@trXMinF = af(dimsizes(af)-1)+0.1*range
+  res@trXMaxF = af(0)-0.1*range
   delete(res@tmXBLabels)
-  res@tmXBLabels = p4 ; labels for each box
-  range=p4(dimsizes(p4)-1)-p4(0)
-  res@trXMinF = p4(0)-0.1*range
-  res@trXMaxF = p4(dimsizes(p4)-1)+0.1*range
-  plot(3)  = gsn_csm_xy (wks,p4,rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),0:dimsizes(p4)-1),res)
-  dum(3) = gsn_add_polymarker(wks, plot(3), p4(ind_min(0,3)),rmse(ind_min(0,0),ind_min(0,1),ind_min(0,2),ind_min(0,3)), pmres)
+  res@tmXBLabels = af ; labels for each box
+
+  afx=0.5*(1.-erf((p4(ind_trad(3)))/sqrt(2.)))
+  plot(3)  = gsn_csm_xy (wks,af,rmse(ind_trad(0),ind_trad(1),ind_trad(2),0:dimsizes(p4)-1,ind_trad(4),ind_trad(5)),res)
+  dum(3) = gsn_add_polymarker(wks, plot(3), afx,rmse(ind_trad(0),ind_trad(1),ind_trad(2),ind_trad(3),ind_trad(4),ind_trad(5)), pmres)
 
   gsn_panel(wks,plot(0:3),(/1,4/),False)
+ 
+  exit
+
 
   delete(res@tmXBLabels)
 

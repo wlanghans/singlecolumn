@@ -1,6 +1,6 @@
 #!/bin/bash
-cases=("CPBL2" "BOMEX")
-pname=("ctketau" "pwmin" "tauneggers" "Wc")  
+cases=("BOMEX" "CPBL2")
+pname=("alphathv" "alphaqt" "ctketau" "pwmin" "tauneggers" "Wc")  
 
 # Teixeira and Cheineit 2003
 # use Pr=1 and Ck=0.5 Cee=0.16, lee=l/2.5
@@ -30,23 +30,37 @@ pname=("ctketau" "pwmin" "tauneggers" "Wc")
 
 # follow deRoode to estimate Wc between 0.1 and 1. and use linear relation to derive Wa from Wc
 
-pmin=( 0.0  0.0  100.0 0.0)
-pmax=(2000.0 2.0 1000.0 2.0 )
-#nrange=(11 11 11 11)
-nrange=(11 11 10 11)
+alphathv=4.00000
+alphaqt=4.00000
+ctketau=2000.00000
+pwmin=2.00000
+tauneggers=1000.00000
+Wc=2.00000
+
+
+pmin=(0.0 0.0 0.0 0.0 100.0 0.0)
+pmax=(4.0 4.0 2000.0 2.0 1000.0 2.0)
+#pmin=(1.8 1.8 900.0 0.9 500.0 0.9)
+nrange=(9 9 9 9 9 9)
+
+#pmax=(2.2 2.2 1100.0 1.1 600.0 1.1)
 
 # define run dir
-rundir="/global/scratch/langhans/opt_ensemble_test4/"
+rundir="/global/scratch/langhans/metamodel_large2/"
 srcdir="/global/home/users/langhans/singlecolumn/"
 
 #executable
 execfile=${srcdir}'/sc_sam_wl'
 
-# define format for naming convection of runs: Casename_i_j_k_l  with ijkl the indices defining the parameter vector from the 3D parameter space
-pfmt='%02g_%02g_%02g_%02g'
+# define format for naming convection of runs: Casename_i_j_k_l_m_n  with ijklmn the indices defining the parameter vector from the 6D parameter space
+pfmt='%02g_%02g_%02g_%02g_%02g_%02g'
 
 runind=${nrange[@]:0}
+nruns=${nrange[@]:0}
 
+echo ${#pname[@]}
+echo ${#pmin[@]}
+echo ${#pmax[@]}
 if [ ${#pname[@]} != ${#pmin[@]} -o ${#pname[@]} != ${#pmax[@]} ]
   then
     echo "ERROR: number of parameter names and values is not the same"
@@ -113,7 +127,7 @@ done
 
 echo There are $ncomb parameter combinations
 
-let "nruns=${#cases[@]}*$ncomb"
+let "nrunsall=${#cases[@]}*$ncomb"
 
 echo Cases: ${cases[@]:0}
 echo Parameter names: 
@@ -128,39 +142,52 @@ echo Size of parameter array:
 printf '%10i\t' ${nrange[@]:0}
 echo
 
-echo About to run $nruns simulations
+echo About to run $nrunsall simulations
 #loop over all ensemble members: #cases x #comb 
 
 exec=1  #[0: don't execute runs, 1: execute runs]
 # start loop over runs
 run=0
-nend=`expr $nruns  - 1`
+nend=`expr $nrunsall  - 1`
 
 while [ $run -le $nend ]; do
 
 if [ ${exec} -eq 1 ]
 then
 
-if [ $pnumber -ne 4 ]
+if [ $pnumber -ne 6 ]
 then
   echo ERROR: Find indices is currently coded for 4 parameters! 
   exit
 else
   #get indices from run index
+  #fore four parameters
+  #let "ncase=$run/$ncomb"
+  #let "runind[0]=($run-$ncase*$ncomb)/(${nrange[1]}*${nrange[2]}*${nrange[3]})"
+  #let "runind[1]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]})/(${nrange[2]}*${nrange[3]})"
+  #let "runind[2]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]})/${nrange[3]}"
+  #let "runind[3]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]}-runind[2]*${nrange[3]})"
   let "ncase=$run/$ncomb"
-  let "runind[0]=($run-$ncase*$ncomb)/(${nrange[1]}*${nrange[2]}*${nrange[3]})"
-  let "runind[1]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]})/(${nrange[2]}*${nrange[3]})"
-  let "runind[2]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]})/${nrange[3]}"
-  let "runind[3]=($run-$ncase*$ncomb-runind[0]*${nrange[1]}*${nrange[2]}*${nrange[3]}-runind[1]*${nrange[2]}*${nrange[3]}-runind[2]*${nrange[3]})"
+  let "nruns[0]=${nrange[1]}*${nrange[2]}*${nrange[3]}*${nrange[4]}*${nrange[5]}"
+  let "nruns[1]=${nrange[2]}*${nrange[3]}*${nrange[4]}*${nrange[5]}"
+  let "nruns[2]=${nrange[3]}*${nrange[4]}*${nrange[5]}"
+  let "nruns[3]=${nrange[4]}*${nrange[5]}"
+  let "nruns[4]=${nrange[5]}"
+  let "runind[0]=($run-$ncase*$ncomb)/${nruns[0]}"
+  let "runind[1]=($run-$ncase*$ncomb-${runind[0]}*${nruns[0]})/${nruns[1]}"
+  let "runind[2]=($run-$ncase*$ncomb-${runind[0]}*${nruns[0]}-${runind[1]}*${nruns[1]})/${nruns[2]}"
+  let "runind[3]=($run-$ncase*$ncomb-${runind[0]}*${nruns[0]}-${runind[1]}*${nruns[1]}-${runind[2]}*${nruns[2]})/${nruns[3]}"
+  let "runind[4]=($run-$ncase*$ncomb-${runind[0]}*${nruns[0]}-${runind[1]}*${nruns[1]}-${runind[2]}*${nruns[2]}-${runind[3]}*${nruns[3]})/${nruns[4]}"
+  let "runind[5]=$run-$ncase*$ncomb-${runind[0]}*${nruns[0]}-${runind[1]}*${nruns[1]}-${runind[2]}*${nruns[2]}-${runind[3]}*${nruns[3]}-${runind[4]}*${nruns[4]}"
 fi
 
 case=${cases[ncase]}
-echo Creating case $case simulation number $run / $nruns
+echo Creating case $case simulation number $run / $nrunsall
 
 # get parameter array for this specific simulation
 # there is a nCases x n1 x n2 x...x nparam total simulations
 
-runname="$case""_"`printf $pfmt ${runind[0]} ${runind[1]} ${runind[2]} ${runind[3]}`
+runname="$case""_"`printf $pfmt ${runind[0]} ${runind[1]} ${runind[2]} ${runind[3]} ${runind[4]} ${runind[5]}`
 
 #create run nfolder
 if [ -d ${rundir}/${runname} ]
@@ -185,7 +212,7 @@ dt=10.
 dosequential=.true.
 dosgs=.true.
 dosgscloud=.true.
-dozerosigma=.true. 
+dozerosigma=.true.
 donoenvcloud = .true.
 dovartrans=.false.
 dotlflux=.false.
@@ -205,12 +232,16 @@ sfc_tau_fxd=.true.
 doneuman= .true.
 dotkedirichlet=.true.
 doedmf = .true.
+donoscale = .true.
 dosingleplume=.false.
 nup=40
 fixedfa=.true.
 fixedeps = .false.
+eps0=0.0025
 witekeps = .false.
 neggerseps = .true.
+neggersslooz=.false.
+gregoryeps = .false.
 donoplumesat=.false.
 dolongwave=.false.
 doshortwave=.false.
@@ -220,8 +251,8 @@ snapshot_start = 0
 snapshot_period =  12 ! 45
 snapshot_end = 1000000000
 snapshot_as_double = .false.
-!snapshot_fields = 'thl,th,thv,tabs,tke,rho,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf'
-snapshot_fields = 'thl,qt,qcl,qtflx,tflx,thr,upthv,upa,upqt'
+!snapshot_fields = 'thl,th,thr,thv,tabs,tke,rho,presi,qt,qcl,qtflx,tflx,totbuoyflx,tkewthv,tk,lmix,pblh,B,upa,upw,upthd,upqcl,upqt,uptabs,upthv,ent,wstar,ustar,lwp,a_mf,tkemf,qtflx_ed,qtflx_mf,tflx_ed,tflx_mf,tke_s,cfrac_tot,cfrac_mf,tend_shear_tke,tend_mix_tke,tend_buoy_tke,tend_diss_tke'
+snapshot_fields = 'thl,thr,qt,qcl,qtflx,tflx,upthv,upqt,upa'
 EOF
 
 #write case specific parameters (CPBL or BOMEX)

@@ -4,9 +4,10 @@
 #
 # Processors:
 #SBATCH --ntasks=1000
+####SBATCH --ntasks=1
 #
 # Wall clock limit:
-#SBATCH --time=04:00:00
+#SBATCH --time=03:00:00
 #
 # qos
 #SBATCH --qos=lr_normal
@@ -17,12 +18,19 @@
 
 
 ## Run command
+#rm -rf /global/scratch/langhans/metamodel_large/
 #./createnamelists
 
 #edison
-#srun -n 500 ./run_ensemble "/scratch1/scratchdirs/langhans/opt_ensemble_test3/" 39930 "/global/homes/l/langhans/singlecolumn/src_ensemble"
+#srun -n 1000 ./run_ensemble "/global/scratch/langhans/metamodel_large2/" 1062882 "/global/homes/l/langhans/singlecolumn/src_ensemble"
 
 #lrc
-#mpirun ./run_ensemble "/global/scratch/langhans/opt_ensemble_test5/" 26620 "/global/home/users/langhans/singlecolumn/src_ensemble"
-mpirun ./getrmsetot_new "/global/scratch/langhans/opt_ensemble_test5/"
+#mpirun ./run_ensemble "/global/scratch/langhans/metamodel_large2/" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble"
+#mpirun ./run_writemmpoints "/global/scratch/langhans/metamodel_n/" 1458 "/global/home/users/langhans/singlecolumn/src_ensemble"
+
+#mpirun ./run_metamodelrmse "/global/scratch/langhans/metamodel_large2" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble" 
+#mpirun ./getrmsetot_new "/global/scratch/langhans/metamodel_large2/"
+
+
+mpirun ./stochsample_mm "/global/scratch/langhans/metamodel/" "/global/home/users/langhans/singlecolumn/src_ensemble" 
 

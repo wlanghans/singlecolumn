@@ -5,16 +5,16 @@ Program Parallel_Get_Rmse
   implicit none
 
   character(300) :: param, path_in,pathin,path_ncl
-  character(50) :: runname
+  character(60) :: runname
   character(200) :: namehlp,command, filein,fname_out
 
   integer :: my_id, Nproc, ierr, Nsetup, N_local_runs, N_max, ncount
   integer, allocatable, dimension(:) :: mpi_id, Nlocalvec,displace
 
-  integer :: i,j,k,l,n,ca,m
+  integer :: i,j,k,l,n,ca,m,o
   integer :: itmp(10), Ncombo
   integer :: run_start, run_end, status
-  character(2) :: i_str,j_str,k_str,l_str
+  character(2) :: i_str,j_str,k_str,l_str,m_str,o_str
   real :: readparam(8),readparam2(8)
   integer, dimension(:), allocatable :: Recv_Request
   integer, dimension(:,:), allocatable :: mpi_status
@@ -22,13 +22,13 @@ Program Parallel_Get_Rmse
   integer ::  Send_Request
 
 
-  integer,parameter :: Nparam=4
+  integer,parameter :: Nparam=6
   !integer,parameter :: Ncases=1
   !character(10),dimension(Ncases) :: casename=(/"BOMEX"/)
   integer,parameter :: Ncases=2
   character(10),dimension(Ncases) :: casename=(/"BOMEX","CPBL2"/)
   integer,dimension(Nparam) :: Nrange
-  real, allocatable,dimension(:,:,:,:) :: rmse
+  real, allocatable,dimension(:,:,:,:,:,:) :: rmse
   real, allocatable,dimension(:,:) :: pvalue
   real, allocatable,dimension(:,:) :: rmse1Dloc,rmse1Dloc2
   real, allocatable,dimension(:,:,:) :: rmse1Dlocind
@@ -38,7 +38,7 @@ Program Parallel_Get_Rmse
   real, dimension(8,Ncases) :: rmseavgind
   real,dimension(8) :: refval,tmpvec
 
-  integer :: output_ncid,dimids(Nparam), param1_varid,param2_varid,param3_varid,param4_varid
+  integer :: output_ncid,dimids(Nparam), param1_varid,param2_varid,param3_varid,param4_varid,param5_varid,param6_varid
   character(50),dimension(Nparam):: dimnames
   integer, dimension(6) :: var_out_id
 
@@ -48,7 +48,7 @@ Program Parallel_Get_Rmse
   call MPI_COMM_RANK(MPI_COMM_WORLD,my_id,ierr)
   call MPI_COMM_SIZE(MPI_COMM_WORLD,Nproc,ierr)
 
-  if (Nparam.ne.4) then
+  if (Nparam.ne.6) then
      write(*,*) 'ERROR: Nparam has to be 4. Stopping.'
      call MPI_FINALIZE(ierr)
   end if
@@ -135,20 +135,24 @@ Program Parallel_Get_Rmse
   ncount=1
   do n=run_start,run_end
 
-    i = n/(Nrange(2)*Nrange(3)*Nrange(4)) 
-    j = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)))/(Nrange(3)*Nrange(4))
-    k = (n-i*(Nrange(2)*Nrange(3)*Nrange(4))-j*(Nrange(3)*Nrange(4)))/(Nrange(4))
-    l = n-i*(Nrange(2)*Nrange(3)*Nrange(4))-j*(Nrange(3)*Nrange(4)) - k * Nrange(4)
+    i = n/(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) 
+    j = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))
+    k = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(4)*Nrange(5)*Nrange(6))
+    l = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(5)*Nrange(6))
+    m = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6))-l*(Nrange(5)*Nrange(6)))/Nrange(6)
+    o = n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6))-l*(Nrange(5)*Nrange(6))-m*Nrange(6)
     write(i_str,'(i2.2)') i
     write(j_str,'(i2.2)') j
     write(k_str,'(i2.2)') k
     write(l_str,'(i2.2)') l
+    write(m_str,'(i2.2)') m
+    write(o_str,'(i2.2)') o
 
     do ca=1,Ncases
-      runname = trim(casename(ca))//'_'//trim(i_str)//'_'//trim(j_str)//'_'//trim(k_str)//'_'//trim(l_str)
+      runname = trim(casename(ca))//'_'//trim(i_str)//'_'//trim(j_str)//'_'//trim(k_str)//'_'//trim(l_str)//'_'//trim(m_str)//'_'//trim(o_str)
 
       ! read rmsecase
-      open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_'//trim(casename(ca)),status='old',form='formatted')
+      open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
       read (78,*) readparam(1:9)
       close(78)
       open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
@@ -226,17 +230,21 @@ Program Parallel_Get_Rmse
   call check_nc( nf90_def_dim(output_ncid,trim(dimnames(2)),Nrange(2),dimids(2)) )
   call check_nc( nf90_def_dim(output_ncid,trim(dimnames(3)),Nrange(3),dimids(3)) )
   call check_nc( nf90_def_dim(output_ncid,trim(dimnames(4)),Nrange(4),dimids(4)) )
+  call check_nc( nf90_def_dim(output_ncid,trim(dimnames(5)),Nrange(5),dimids(5)) )
+  call check_nc( nf90_def_dim(output_ncid,trim(dimnames(6)),Nrange(6),dimids(6)) )
 
   !  Define Variables
   call check_nc( nf90_def_var(output_ncid,trim(dimnames(1)),nf90_float,dimids(1),param1_varid) )
   call check_nc( nf90_def_var(output_ncid,trim(dimnames(2)),nf90_float,dimids(2),param2_varid) )
   call check_nc( nf90_def_var(output_ncid,trim(dimnames(3)),nf90_float,dimids(3),param3_varid) )
   call check_nc( nf90_def_var(output_ncid,trim(dimnames(4)),nf90_float,dimids(4),param4_varid) )
+  call check_nc( nf90_def_var(output_ncid,trim(dimnames(5)),nf90_float,dimids(5),param5_varid) )
+  call check_nc( nf90_def_var(output_ncid,trim(dimnames(6)),nf90_float,dimids(6),param6_varid) )
 
 
-  call check_nc( nf90_def_var( output_ncid,"RMSE_tot",nf90_float,dimids,var_out_id(1) ) )
-  call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(1)),nf90_float,dimids,var_out_id(2) ) )
-  call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(2)),nf90_float,dimids,var_out_id(3) ) )
+  !call check_nc( nf90_def_var( output_ncid,"RMSE_tot",nf90_float,dimids,var_out_id(1) ) )
+  !call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(1)),nf90_float,dimids,var_out_id(2) ) )
+  !call check_nc( nf90_def_var( output_ncid,"RMSE_"//trim(casename(2)),nf90_float,dimids,var_out_id(3) ) )
   call check_nc( nf90_def_var( output_ncid,"RMSE_thvd_tot",nf90_float,dimids,var_out_id(4) ) )
   call check_nc( nf90_def_var( output_ncid,"RMSE_thvd_"//trim(casename(1)),nf90_float,dimids,var_out_id(5) ) )
   call check_nc( nf90_def_var( output_ncid,"RMSE_thvd_"//trim(casename(2)),nf90_float,dimids,var_out_id(6) ) )
@@ -249,11 +257,13 @@ Program Parallel_Get_Rmse
   call check_nc( nf90_put_var(output_ncid, param2_varid, pvalue(2,1:Nrange(2)) ) )
   call check_nc( nf90_put_var(output_ncid, param3_varid, pvalue(3,1:Nrange(3)) ) )
   call check_nc( nf90_put_var(output_ncid, param4_varid, pvalue(4,1:Nrange(4)) ) )
+  call check_nc( nf90_put_var(output_ncid, param5_varid, pvalue(5,1:Nrange(5)) ) )
+  call check_nc( nf90_put_var(output_ncid, param6_varid, pvalue(6,1:Nrange(6)) ) )
 
   !fill parameter array
-  allocate(rmse(Nrange(1),Nrange(2),Nrange(3),Nrange(4)))
+  allocate(rmse(Nrange(1),Nrange(2),Nrange(3),Nrange(4),Nrange(5),Nrange(6)))
   rmseavgind=0.0
-   
+
 
   rmseavgind(1,1) = 0.298500898501127
   rmseavgind(2,1) = -999.
@@ -263,6 +273,7 @@ Program Parallel_Get_Rmse
   rmseavgind(6,1) = 37.5370361230699
   rmseavgind(7,1) = 0.110751867145755
   rmseavgind(8,1) = 4.754294124718259e-4
+
 
   rmseavgind(1,2) = 0.142648591929376
   rmseavgind(2,2) = 9.579204282494366e-5
@@ -291,7 +302,7 @@ Program Parallel_Get_Rmse
       if ((trim(casename(ca)).eq."BOMEX".and.m.ne.2).or. &
       (trim(casename(ca)).ne."BOMEX".and.m.ne.4)) then
         write(*,*) trim(casename(ca)),' ',m
-        rmse1D(1+ca,:) = rmse1D(1+ca,:) + 1./5. * rmse1Dind(m,ca,:) / rmseavgind(m,ca)
+        rmse1D(1+ca,:) = rmse1D(1+ca,:) + 1./7. * rmse1Dind(m,ca,:) / rmseavgind(m,ca)
       end if
     end do
   end do
@@ -314,11 +325,13 @@ Program Parallel_Get_Rmse
   ! rearrange
   do ca=1,Ncases+1
   do n=0,Ncombo-1
-    i = n/(Nrange(2)*Nrange(3)*Nrange(4))
-    j = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)))/(Nrange(3)*Nrange(4))
-    k = (n-i*(Nrange(2)*Nrange(3)*Nrange(4))-j*(Nrange(3)*Nrange(4)))/(Nrange(4))
-    l = n-i*(Nrange(2)*Nrange(3)*Nrange(4))-j*(Nrange(3)*Nrange(4)) - k *Nrange(4)
-    rmse(i+1,j+1,k+1,l+1) = rmse1D(ca,n+1)
+    i = n/(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))
+    j = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))
+    k = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(4)*Nrange(5)*Nrange(6))
+    l = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(5)*Nrange(6))
+    m = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6))-l*(Nrange(5)*Nrange(6)))/Nrange(6)
+    o = n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6))-l*(Nrange(5)*Nrange(6))-m*Nrange(6)    
+    rmse(i+1,j+1,k+1,l+1,m+1,o+1) = rmse1D(ca,n+1)
 
     !if (ca.eq.1.and.pvalue(1,i+1).eq.1400. .and.pvalue(2,j+1).eq.0.8 .and.pvalue(3,k+1).eq.400. .and.pvalue(4,l+1).eq.0.4) then
     !  write(*,*) 'tot: ', rmse1D(1,n+1), ' BOMEX: ', rmse1D(2,n+1),' CPBL: ',rmse1D(3,n+1)
@@ -328,22 +341,22 @@ Program Parallel_Get_Rmse
     !end if
 
   end do
-  call check_nc( nf90_put_var(output_ncid, var_out_id(ca), rmse ) ) 
+ ! call check_nc( nf90_put_var(output_ncid, var_out_id(ca), rmse ) ) 
   end do
   deallocate(rmse1D)
 
   !! redo this for error including thvd
  
   ! compute error for each case by normalizing with the parameter averages
-  rmse1D2=0.0
-  do ca=1,Ncases
-    do m=1,8
-      if ((trim(casename(ca)).eq."BOMEX".and.m.ne.2).or. &
-      (trim(casename(ca)).ne."BOMEX".and.m.ne.4)) then
-        rmse1D2(1+ca,:) = rmse1D2(1+ca,:) + 1./7. * rmse1Dind(m,ca,:) / rmseavgind(m,ca)
-      end if
-    end do
-  end do
+  !rmse1D2=0.0
+  !do ca=1,Ncases
+  !  do m=1,8
+  !    if ((trim(casename(ca)).eq."BOMEX".and.m.ne.2).or. &
+  !    (trim(casename(ca)).ne."BOMEX".and.m.ne.4)) then
+  !      rmse1D2(1+ca,:) = rmse1D2(1+ca,:) + 1./7. * rmse1Dind(m,ca,:) / rmseavgind(m,ca)
+  !    end if
+  !  end do
+!  end do
 
   ! compute mean case-specific error
   !write(*,*) 'Case-averaged rmse (thvd included)'
@@ -353,18 +366,20 @@ Program Parallel_Get_Rmse
   !end do
   ! compute total error from case-specific errors
   ! normalize each case by the mean case error (not needed since average is 1)
-  rmse1D2(1,:) = 0.0
-  do ca=1,Ncases
-    rmse1D2(1,:) = rmse1D2(1,:) + 1./float(Ncases) * rmse1D2(1+ca,:) 
-  end do
+  !rmse1D2(1,:) = 0.0
+  !do ca=1,Ncases
+  !  rmse1D2(1,:) = rmse1D2(1,:) + 1./float(Ncases) * rmse1D2(1+ca,:) 
+  !end do
 
   do ca=1,Ncases+1
   do n=0,Ncombo-1
-    i = n/(Nrange(2)*Nrange(3)*Nrange(4))
-    j = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)))/(Nrange(3)*Nrange(4))
-    k = (n-i*(Nrange(2)*Nrange(3)*Nrange(4))-j*(Nrange(3)*Nrange(4)))/(Nrange(4))
-    l = n-i*(Nrange(2)*Nrange(3)*Nrange(4))-j*(Nrange(3)*Nrange(4)) - k *Nrange(4)
-    rmse(i+1,j+1,k+1,l+1) = rmse1D2(ca,n+1)
+    i = n/(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))
+    j = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))
+    k = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(4)*Nrange(5)*Nrange(6))
+    l = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6)))/(Nrange(5)*Nrange(6))
+    m = (n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6))-l*(Nrange(5)*Nrange(6)))/Nrange(6)
+    o = n-i*(Nrange(2)*Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6))-j*(Nrange(3)*Nrange(4)*Nrange(5)*Nrange(6)) - k * (Nrange(4)*Nrange(5)*Nrange(6))-l*(Nrange(5)*Nrange(6))-m*Nrange(6)
+    rmse(i+1,j+1,k+1,l+1,m+1,o+1) = rmse1D2(ca,n+1)
   end do
   call check_nc( nf90_put_var(output_ncid, var_out_id(3+ca), rmse ) ) 
   end do
