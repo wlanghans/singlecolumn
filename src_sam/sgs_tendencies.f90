@@ -8,58 +8,94 @@ implicit none
 
 ! local variables
 
-real,dimension(nzm) :: a, b, c, d
+real,dimension(nzm) :: a, b, c, d, tkhm, tkm, frac_mf_avg, qte, te
 integer :: k
 
 !+++++++++++++++++++++++++++++++++++++++
 ! non-precip water mixing ratio qt 
 !+++++++++++++++++++++++++++++++++++++++
 
+! multiply Km by area fraction of environment
+frac_mf_avg(1:nzm) = 0.5*(frac_mf(1:nzm)+frac_mf(2:nz))
+if (doedmf.and..not.donoscale) then
+  tkm(1:nzm)=(1.0-frac_mf_avg(1:nzm)) * tk(1:nzm) 
+  tkhm(1:nzm)=(1.0-frac_mf_avg(1:nzm)) * tkh(1:nzm) 
+else
+  tkm=tk
+  tkhm=tkh
+end if
+
+!if doenvedmf, then the EDMF equation has the environment values (not domain means)
+
+
+if (doedmf.and.(.not.donoscale).and.doenvedmf) then
+  do k=1,nzm
+  if (frac_mf_avg(k).gt.0.0) then
+    if (frac_mf(k+1).gt.0.0) then
+      qte(k) = (qt(k) - frac_mf_avg(k)*0.5*(qtsgs_mf(k+1)+qtsgs_mf(k)))/(1.-frac_mf_avg(k))
+    else
+      qte(k) = (qt(k) - frac_mf_avg(k)*qtsgs_mf(k))/(1.-frac_mf_avg(k))
+    end if
+  else
+    qte(k) = qt(k)
+  end if
+  end do
+else
+  qte = qt
+end if
+
 if (doneuman.or.sfc_flx_fxd) then
   !Neuman
-  call get_abcd(rho,qt,sumMrt,Crv,tkh,r_s,a,b,c,d,.true.,.true.,sgs_qt_flux (1))
+  call get_abcd(rho,qte,sumMrt,Crv,tkhm,r_s,a,b,c,d,.true.,.true.,sgs_qt_flux (1))
 else
   !Dirichlet
-  call get_abcd(rho,qt,sumMrt,Crv,tkh,r_s,a,b,c,d,.true.,.false.)
+  call get_abcd(rho,qte,sumMrt,Crv,tkhm,r_s,a,b,c,d,.true.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
 if (.not.(doneuman.or.sfc_flx_fxd)) then
   ! Diagnose implicit surface flux in Wm2 for output
-  sgs_qt_flux (1) = - (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * lcond * vmag * Crv * (betam*qt(1) + betap*d(1) - r_s )
+  sgs_qt_flux (1) = - (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * lcond * vmag * Crv * (betam*qte(1) + betap*d(1) - r_s )
 else
   ! Nothing to do
   sgs_qt_flux (1) = (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * lcond * sgs_qt_flux (1) 
 end if
   ! Diagnose implicit atm flux in Wm2 for output
 sgs_qt_flux (2:nzm) =0.5*(rho(1:nzm-1)+rho(2:nzm)) * lcond  * (  &  
-              (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
-                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qt(2:nzm)-qt(1:nzm-1)) ) &
-                           +(sumMrt(2:nzm) - (betap*d(2:nzm) + betam*qt(2:nzm)) * sumM(2:nzm) ))
+              (-1.) /adzw(2:nzm)/dz *         0.5*(tkhm(1:nzm-1) + tkhm(2:nzm)) *                  &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qte(2:nzm)-qte(1:nzm-1)) ) &
+                           +(sumMrt(2:nzm) - (betap*d(2:nzm) + betam*qte(2:nzm)) * sumM(2:nzm) ))
 ! and components in kinematic units
 qt_flux_ed(1)     = sgs_qt_flux (1) / lcond/ (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3)))
 qt_flux_ed(nz)    = 0.0
-qt_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
-                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qt(2:nzm)-qt(1:nzm-1)) )
+qt_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkhm(1:nzm-1) + tkhm(2:nzm)) *           &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qte(2:nzm)-qte(1:nzm-1)) )
 qt_flux_mf(1)     = 0.
 qt_flux_mf(nz)    = 0.
-qt_flux_mf(2:nzm) = (sumMrt(2:nzm) - (betap*d(2:nzm) + betam*qt(2:nzm)) * sumM(2:nzm) )
+qt_flux_mf(2:nzm) = (sumMrt(2:nzm) - (betap*d(2:nzm) + betam*qte(2:nzm)) * sumM(2:nzm) )
 
 ! compute qt tendency
-tend_sgs_qt = (d-qt)/dt    
+tend_sgs_qt = (d-qte)/dt    
 
 ! update qt
-if (dosequential) qt = d 
+if (dosequential) then 
+  if (doedmf.and.(.not.donoscale).and.doenvedmf) then
+    qt = qt + dt * tend_sgs_qt  ! tendency for environment and mean are the same
+  else
+    qt = d 
+  end if
+end if
 
 !+++++++++++++++++++++++++++++++++++++++
-! precip water mixing ratio qt 
+! precip water mixing ratio qp 
 !+++++++++++++++++++++++++++++++++++++++
+
 if (doneuman.or.sfc_flx_fxd) then
   !Neuman
-  call get_abcd(rho,qp,sumMrp,Crv,tkh,0.0,a,b,c,d,.false.,.true.,0.0)
+  call get_abcd(rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.true.,0.0)
 else
   !Dirichlet
-  call get_abcd(rho,qp,sumMrp,Crv,tkh,0.0,a,b,c,d,.false.,.false.)
+  call get_abcd(rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
@@ -67,12 +103,12 @@ call tridiag(a,b,c,d,nzm)
 sgs_qp_flux(1)  = 0.
 sgs_qp_flux(nz) = 0.
 sgs_qp_flux (2:nzm) =  0.5*(rho(1:nzm-1)+rho(2:nzm)) * lcond  * &  
-              (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
+              (-1.) /adzw(2:nzm)/dz *         0.5*(tkhm(1:nzm-1) + tkhm(2:nzm)) *                  &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qp(2:nzm)-qp(1:nzm-1)) ) ! &
 ! and components in kinematic units
 qp_flux_ed(1)     = 0.
 qp_flux_ed(nz)    = 0.0
-qp_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
+qp_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkhm(1:nzm-1) + tkhm(2:nzm)) *           &
                            (betap* (d(2:nzm)- d(1:nzm-1))+betam*(qp(2:nzm)-qp(1:nzm-1)) )
 qp_flux_mf(1)     = 0.
 qp_flux_mf(nz)    = 0.
@@ -81,7 +117,7 @@ qp_flux_mf(2:nzm) = 0. !(sumMrp(2:nzm) - (betap*d(2:nzm) + betam*qp(2:nzm)) * su
 ! compute qt tendency
 tend_sgs_qp = (d-qp)/dt    
 
-! update qt
+! update qp
 if (dosequential) qp = d 
 
 
@@ -93,16 +129,61 @@ if (dotlflux) then
   sgs_t_flux (1) = sgs_t_flux (1)/cp
   t = (t -ggr * z)/cp * (p00/pres)**(rgas/cp)
   t_s = t_s/cp * (p00/presi(1))**(rgas/cp)
+
+  if (doedmf.and.(.not.donoscale).and.doenvedmf) then
+
+  do k=1,nzm
+  if (frac_mf_avg(k).gt.0.0) then
+  if (frac_mf(k+1).gt.0.0) then
+    tp(k) = 0.5*(cp*tabs_mf(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k) +&
+              cp*tabs_mf(k+1)  - lcond * qcsgs_mf(k+1) - lsub * qisgs_mf(k+1))/cp * (p00/pres(k))**(rgas/cp)
+  else
+    tp(k) = (cp*tabs_mf(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k))/cp * (p00/pres(k))**(rgas/cp)
+  end if
+  end if
+  end do
+
+  end if
+
+
+else
+
+  if (doedmf.and.(.not.donoscale).and.doenvedmf) then
+
+  do k=1,nzm
+  if (frac_mf_avg(k).gt.0.0) then
+  if (frac_mf(k+1).gt.0.0) then
+    tp(k) = 0.5*(cp*tabs_mf(k) + ggr*zi(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k) +&
+              cp*tabs_mf(k+1) + ggr*zi(k+1) - lcond * qcsgs_mf(k+1) - lsub * qisgs_mf(k+1))
+  else
+    tp(k) = cp*tabs_mf(k) + ggr*z(k) - lcond * qcsgs_mf(k) - lsub * qisgs_mf(k)
+  end if
+  end if
+  end do
+
+  end if
+
 end if
 
 
+if (doedmf.and.(.not.donoscale).and.doenvedmf) then
+do k=1,nzm
+  if (frac_mf_avg(k).gt.0.0) then
+    te(k) = (t(k)-frac_mf_avg(k)*tp(k))/(1.-frac_mf_avg(k))
+  else
+    te(k) = t(k)
+  end if
+end do
+else
+  te=t
+end if
 
 if (doneuman.or.sfc_flx_fxd) then 
   !Neuman
-  call get_abcd(rho,t,sumMt,Ctheta,tkh,t_s,a,b,c,d,.true.,.true.,sgs_t_flux (1))
+  call get_abcd(rho,te,sumMt,Ctheta,tkhm,t_s,a,b,c,d,.true.,.true.,sgs_t_flux (1))
 else
   !Dirichlet
-  call get_abcd(rho,t,sumMt,Ctheta,tkh,t_s,a,b,c,d,.true.,.false.)
+  call get_abcd(rho,te,sumMt,Ctheta,tkhm,t_s,a,b,c,d,.true.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
@@ -111,10 +192,10 @@ if (.not.(doneuman.or.sfc_flx_fxd)) then
 ! Diagnose implicit surface flux in W/m2 for output
   if (.not.dotlflux) then
     sgs_t_flux (1)       = - (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * &
-                            vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
+                            vmag * Ctheta * (betam*te(1) + betap*d(1) - t_s )
   else
     sgs_t_flux (1)       = - (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * &
-                            cp * vmag * Ctheta * (betam*t(1) + betap*d(1) - t_s )
+                            cp * vmag * Ctheta * (betam*te(1) + betap*d(1) - t_s )
   end if
 else
   sgs_t_flux (1) = (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) * sgs_t_flux (1)
@@ -131,27 +212,27 @@ end if
 
 ! Diagnose atm. sgs fluxes in Wm2 for output
 sgs_t_flux (2:nzm)       = 0.5*(rho(1:nzm-1)+rho(2:nzm)) * ( & 
-            (-1.)/adzw(2:nzm)/dz * 0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *                  &
-                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) ) &
-        + sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm))
+            (-1.)/adzw(2:nzm)/dz * 0.5*(tkhm(1:nzm-1) + tkhm(2:nzm)) *                  &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(te(2:nzm)-te(1:nzm-1)) ) &
+        + sumMt(2:nzm) - (betap*d(2:nzm) + betam*te(2:nzm)) * sumM(2:nzm))
 if (dotlflux) sgs_t_flux (2:nzm) = cp * sgs_t_flux (2:nzm) 
 
 ! needs to be in kinematic units since used later
 t_flux_ed(1)     = sgs_t_flux (1) / (2.* (0.5*(rho(1)+rho(2) )) - 0.5*(rho(2)+rho(3))) / cp
 t_flux_ed(nz)    = 0.0
-t_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkh(1:nzm-1) + tkh(2:nzm)) *           &
-                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(t(2:nzm)-t(1:nzm-1)) ) / cp
+t_flux_ed(2:nzm) =  (-1.) /adzw(2:nzm)/dz *         0.5*(tkhm(1:nzm-1) + tkhm(2:nzm)) *           &
+                           (betap* (d(2:nzm)- d(1:nzm-1))+betam*(te(2:nzm)-te(1:nzm-1)) ) / cp
 if (dotlflux) t_flux_ed(2:nzm) = cp * t_flux_ed(2:nzm) 
 t_flux_mf(1)     = 0.
 t_flux_mf(nz)    = 0.
-t_flux_mf(2:nzm) = (sumMt(2:nzm) - (betap*d(2:nzm) + betam*t(2:nzm)) * sumM(2:nzm) )/cp
+t_flux_mf(2:nzm) = (sumMt(2:nzm) - (betap*d(2:nzm) + betam*te(2:nzm)) * sumM(2:nzm) )/cp
 if (dotlflux) t_flux_mf(2:nzm) = cp* t_flux_mf(2:nzm) 
 
 
 if (dotlflux) then
-  tend_sgs_t = cp * (d - t)/dt 
+  tend_sgs_t = cp * (d - te)/dt 
 else
-  tend_sgs_t = (d - t)/dt
+  tend_sgs_t = (d - te)/dt
 end if
 
 ! get buoyancy flux from PDF scheme in Wm2 for output
@@ -165,13 +246,17 @@ do k=2,nzm
 end do
 
 
-
 ! update t
 if (dosequential) then 
-  if (.not.dotlflux) then 
-     t = d
+
+  if (doedmf.and.(.not.donoscale).and.doenvedmf) then
+       t = t + dt*tend_sgs_t ! environment and mean tendency are the same
   else
-     t = d*cp + ggr * z
+   if (.not.dotlflux) then 
+       t = d
+    else
+       t = d*cp + ggr * z
+    end if
   end if
 end if
 

@@ -27,7 +27,9 @@ Cs = 0.15
 Ce=Ck**3/Cs**4
 Ces=Ce/0.7*3.0	
 
-if ((.not.doedmf).or.donoscale) feddy=1.
+!if ((.not.doedmf).or.donoscale) feddy=1.
+!For know, assume that all surface flux goes into the environment (same as in Tapio's EDMF), obviously wrong but let's stick with it for now.
+feddy=1.0
 
 
 do k=1,nzm      
@@ -182,8 +184,8 @@ do k=1,nzm
      tk(k) = (1.-fracmfavg) * Ck*smix(k)*sqrt(tke(k))
      !tk(k) = Ck*smix(k)*sqrt(tke(k))
 
-     a_prod_sh=(tk(k)+0.001)*def2(k)/(1.-fracmfavg)
-     a_prod_bu= ggr/thetar(k) * tke_thvflx(k)/(1.-fracmfavg) !-(tk(k)+0.001) * Pr * buoy_sgs(k) !        ggr/thetar(k) * tke_thvflx(k)
+     a_prod_sh=(tk(k)+0.001)*def2(k)
+     a_prod_bu= ggr/thetar(k) * tke_thvflx(k) !-(tk(k)+0.001) * Pr * buoy_sgs(k) !        ggr/thetar(k) * tke_thvflx(k)
      a_diss=Cee / smix(k)*tke(k)**1.5 ! cap the diss rate (useful for large time steps
      dtkedtsum = a_prod_sh+a_prod_bu-a_diss
      dtkedtmin = -tke(k)/dt

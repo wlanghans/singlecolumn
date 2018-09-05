@@ -23,7 +23,7 @@ wks   = gsn_open_wks ("eps","plot_"+casein)                   ; open workstation
 gsn_define_colormap(wks,"matlab_jet")
 colors=ispan(5,65,8)
 
-color="darkgreen";colors(1)
+color="blue";colors(1)
 ;dont use 4
 
 f=addfile(filein,"r")
@@ -267,7 +267,7 @@ end do
  res@vpHeightF = 0.5
 ; res@tiMainString      = "Potential temperature"             ; add title
  res@xyLineColor = "black"
- res@xyLineThicknessF = 3.
+ res@xyLineThicknessF = 2.
  res@xyDashPattern = 0
  res@vpWidthF=0.6
  res@trYMinF=00.
@@ -319,9 +319,11 @@ end do
    txres@txFontColor = "black"
    text = gsn_add_text(wks,plot(0),grad_txt_les,302., \
                                     1500. ,txres)
+   print(grad_txt_les)
    txres@txFontColor = color
    text = gsn_add_text(wks,plot(0),grad_txt_1D,302., \
                                     1200. ,txres)
+   print(grad_txt_1D)
  end if
 
  overlay(plot(0),plot(1))
@@ -340,7 +342,11 @@ end do
  qt=qt*1000.
  qt1D=qt1D*1000.
  res@xyLineColor = "black"
+ res@tiYAxisOn            = True
+ res@tmYLLabelsOn         = True             ; do not draw bottom labels
  plot(2)  = gsn_csm_xy (wks,qt(0,:),zles,res) ; create plot
+ res@tiYAxisOn            = False
+ res@tmYLLabelsOn         = False             ; do not draw bottom labels
  res@xyLineColor = color
  plot(3)  = gsn_csm_xy (wks,qt1D(0,:),z,res) ; create plot
  overlay(plot(2),plot(3))
@@ -375,17 +381,13 @@ end do
  plot(7)  = gsn_csm_xy (wks,wthl1D(0,:),zi,res) ; create plot
  overlay(plot(6),plot(7))
  res@xyDashPattern = 0
- if (casein.ne."BOMEX") then
  res@tmYLLabelsOn         = True              ; do not draw bottom labels
  res@tiYAxisOn            = True
- end if
  plot(14)  = gsn_csm_xy (wks,wthl1D_ed(0,:),zi,res) ; create plot
  res@xyDashPattern = 14
  plot(10)  = gsn_csm_xy (wks,wthl1D_mf(0,:),zi,res) ; create plot
- if (casein.ne."BOMEX") then
  res@tmYLLabelsOn         = False              ; do not draw bottom labels
  res@tiYAxisOn            = False
- end if
  overlay(plot(14),plot(10))
  res@xyDashPattern = 0
  if (casein.eq."BOMEX") then
@@ -400,8 +402,8 @@ end do
  res@xyLineColor = "black"
  res@xyDashPattern = 0
  if (casein.eq."BOMEX") then
- res@tmYLLabelsOn         = True              ; do not draw bottom labels
- res@tiYAxisOn            = True
+ res@tmYLLabelsOn         = False             ; do not draw bottom labels
+ res@tiYAxisOn            = False
  end if
  plot(8)  = gsn_csm_xy (wks,wqt(0,:),zflx,res) ; create plot
  res@xyLineColor = color
@@ -464,7 +466,7 @@ end do
   resP@gsnPanelLabelBar   = False                 ; add common colorbar
  resP@gsnPanelMainString = casein     ; new way of setting main title (as of NCL V6.4.0)
   if (casein.eq."BOMEX") then
-  gsn_panel(wks,plot((/0,2,4,6,8,14,15,13,17/)),(/3,4/),resP)           
+  gsn_panel(wks,plot((/2,4,6,8,14,15,13,17/)),(/2,4/),resP)           
   ;gsn_panel(wks,plot((/0,2,13,17/)),(/2,2/),resP)           
 ;  gsn_panel(wks,plot((/0,6,12,13/)),(/1,4/),resP)           
   else
