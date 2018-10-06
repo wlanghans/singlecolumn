@@ -91,6 +91,9 @@ implicit none
  frac_mf=0.
 
 
+ feddy=1.0d0
+
+
  
  ! surface fluxes
  ! sensible heat flux (K m s-1)
@@ -211,13 +214,7 @@ implicit none
          tke_mf(1)   = tke_mf(1)   + UPA(1,I)* 3./4. * UPW(1,i)**2
       ENDDO
 
-      if (frac_mf(1).ne.0.5) then
-         feddy = 1.d0 - (0.5d0 - 0.5*erf(wmin/sigmaW/sqrt(2.d0)) &
-                + wmin/sqrt(2.d0*pi)/sigmaW*exp(-wmin**2/(2.d0*sigmaW**2)))
-         feddy=min(1.,max(0.5,feddy))
-      else
-         feddy = 0.5
-      end if
+      feddy= min(1.0d0,max(0.0d0,1.d0 - pwmin/sqrt(2.d0*pi)/(1.-frac_mf(1)) * exp(-0.5d0*pwmin**2)))
  
     end if
 

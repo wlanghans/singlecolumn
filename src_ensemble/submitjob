@@ -1,13 +1,13 @@
 #!/bin/bash -l
 # Job name:
-#SBATCH --job-name=run1Densemble
+#SBATCH --job-name=runmmens
 #
 # Processors:
 #SBATCH --ntasks=1000
 ####SBATCH --ntasks=1
 #
 # Wall clock limit:
-#SBATCH --time=03:00:00
+#SBATCH --time=30:00:00
 #
 # qos
 #SBATCH --qos=lr_normal
@@ -25,12 +25,13 @@
 #srun -n 1000 ./run_ensemble "/global/scratch/langhans/metamodel_large2/" 1062882 "/global/homes/l/langhans/singlecolumn/src_ensemble"
 
 #lrc
-#mpirun ./run_ensemble "/global/scratch/langhans/metamodel_large2/" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble"
-#mpirun ./run_writemmpoints "/global/scratch/langhans/metamodel_n/" 1458 "/global/home/users/langhans/singlecolumn/src_ensemble"
+#mpirun ./run_ensemble "/global/scratch/langhans/metamodel_mm3/" 1458 "/global/home/users/langhans/singlecolumn/src_ensemble"
+#mpirun ./run_ensemble "/global/scratch/langhans/metamodel_large3/" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble"
+#mpirun ./run_writemmpoints "/global/scratch/langhans/metamodel_mm3/" 1458 "/global/home/users/langhans/singlecolumn/src_ensemble"
 
-#mpirun ./run_metamodelrmse "/global/scratch/langhans/metamodel_large2" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble" 
+mpirun ./run_metamodelrmse "/global/scratch/langhans/metamodel_large3" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble" 
 #mpirun ./getrmsetot_new "/global/scratch/langhans/metamodel_large2/"
 
 
-mpirun ./stochsample_mm "/global/scratch/langhans/metamodel/" "/global/home/users/langhans/singlecolumn/src_ensemble" 
+#mpirun ./stochsample_mm "/global/scratch/langhans/metamodel/" "/global/home/users/langhans/singlecolumn/src_ensemble" 
 

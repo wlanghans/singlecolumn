@@ -123,15 +123,18 @@ Program Parallel_Run_Ensemble
 
    end if
 
+   filenow=trim(path_in)//"/"//trim(runname(i))//"/rmse_thvd_"//trim(namehlp(1:5))
+
    command = "cd "//trim(path_in)//"; ./sc_sam_wl "//trim(runname(i))//" > "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(runname(i))//".out"
    command=trim(command)//" ; cd "//trim(path_in)//"/"//trim(runname(i))//"; ncl -Q "//trim(path_ncl)//"/getrmse.ncl benchdir="//"'"//trim(path_ncl)//"'"//" casename="//"'"//trim(casename)//"'"//" filein="//"'"//trim(filein)//"'"//" pathin="//"'"//trim(pathin)//"'"
    !command=trim(command)//"; rm -rf "//trim(path_in)//"/"//trim(runname(i))//"/"//trim(filein)
 
-   filenow=trim(path_in)//"/"//trim(runname(i))//"/rmse_"//trim(namehlp(1:5))
-   !INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
-   !if (.not.filenowexist) then
+   ! ONLY RUN IF HASNT RUN YET
+   INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
+   if (.not.filenowexist) then
+     status = system( trim(command))
+   end if
 
-   status = system( trim(command))
    !INQUIRE(FILE=trim(filenow),EXIST=filenowexist)
    !if (.not.filenowexist) then
 

@@ -9,7 +9,7 @@ $(shell ./mkDepends Filepath Srcfiles > Depends)
 
 F90 = mpif90 -c
 LD = mpif90
-FLAGS := -r8
+FLAGS := -fdefault-real-8
 #FLAGS := -g 
 
 INC_NETCDF = ${NETCDF_DIR}/include

@@ -46,7 +46,7 @@ nrange=(9 9 9 9 9 9)
 #pmax=(2.2 2.2 1100.0 1.1 600.0 1.1)
 
 # define run dir
-rundir="/global/scratch/langhans/metamodel_large2/"
+rundir="/global/scratch/langhans/metamodel_large3/"
 srcdir="/global/home/users/langhans/singlecolumn/"
 
 #executable
@@ -232,7 +232,8 @@ sfc_tau_fxd=.true.
 doneuman= .true.
 dotkedirichlet=.true.
 doedmf = .true.
-donoscale = .true.
+donoscale = .false.
+doenvedmf=.true.
 dosingleplume=.false.
 nup=40
 fixedfa=.true.

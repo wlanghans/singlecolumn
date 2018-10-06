@@ -8,7 +8,7 @@ implicit none
 
 ! local variables
 
-real,dimension(nzm) :: a, b, c, d, tkhm, tkm, frac_mf_avg, qte, te
+real,dimension(nzm) :: a, b, c, d, tkhm, tkm, frac_mf_avg, qte, te, tp
 integer :: k
 
 !+++++++++++++++++++++++++++++++++++++++
@@ -321,7 +321,7 @@ if (dosequential) v=d
 ! tke transport
 !+++++++++++++++++++++++++++++++++++++++
 if (progtke) then
-  tke_s = feddy * (3.75*ustar**2 + 0.2*wstar**2)
+  tke_s = (3.75*ustar**2 + 0.2*wstar**2)
   if (dotkedirichlet) then
     call get_abcd(rho,tke,sumMtke,2.* tk(1)/adz(1)/dz/vmag,tk,tke_s,a,b,c,d,.false.,.false.)
   else
