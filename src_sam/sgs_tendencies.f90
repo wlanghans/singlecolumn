@@ -96,7 +96,7 @@ if (doneuman.or.sfc_flx_fxd) then
   call get_abcd(frac0,rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.true.,0.0)
 else
   !Dirichlet
-  call get_abcd(frac0,frac_mf_avg,rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.false.)
+  call get_abcd(frac0,rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
