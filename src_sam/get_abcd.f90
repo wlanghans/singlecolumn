@@ -1,5 +1,5 @@
 ! ==================================================================
-      SUBROUTINE get_abcd(rhoin,s,sumMs,Cs,tkin, ssfc,a,b,c,d, massflux, dosfcbcneuman, kinflx)
+      SUBROUTINE get_abcd(frac,rhoin,s,sumMs,Cs,tkin, ssfc,a,b,c,d, massflux, dosfcbcneuman, kinflx)
 
       use grid
       use params
@@ -18,6 +18,7 @@
         ! input
         REAL, DIMENSION(nzm),    INTENT(in)  :: rhoin        ! density, S at cell center
         REAL, DIMENSION(nzm),    INTENT(in)  :: s, tkin    ! S and eddy viscosity at cell center
+        REAL, DIMENSION(nzm),    INTENT(in)  :: frac       ! fractional plume area
         REAL, DIMENSION(nz    ), INTENT(in)  :: sumMs      ! sum(MiSi) on faces
         REAL,                    INTENT(in)  :: Cs,ssfc    ! drag coefficient, surface value of S
         LOGICAL,                 INTENT(in)  :: dosfcbcneuman ! If true, then neuman bc conditions, dirichlet otherwise
@@ -58,23 +59,23 @@
            
            
            IF (k.gt.1.and.k.lt.nzm) THEN
-              a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *           &
+              a(k) = rhof(k)/rhoin(k)/adz(k)/dz/(1.-frac(k)) * betap *           &
                     (tkf(k)/adzw(k)/dz)
               !a(k) = rhof(k)/rhoin(k)/adz(k)/dz *                   &
               !      (betap*tkf(k)/adzw(k)/dz - 0.5 * sumMloc(k))
-              b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz * & 
+              b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz/(1.-frac(k)) * & 
                     (-tkf(k+1)/adzw(k+1)/dz ) - & 
-                    betap*rhof(k)/rhoin(k)/adz(k)/dz*               &
+                    betap*rhof(k)/rhoin(k)/adz(k)/dz/(1.-frac(k))*               &
                     (tkf(k)/adzw(k)/dz + sumMloc(k))
               !b(k) = -1./dt +  rhof(k+1)/rhoin(k)/adz(k)/dz * & 
               !      (-betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumMloc(k+1) ) - & 
               !       rhof(k)/rhoin(k)/adz(k)/dz*               &
               !      (betap*tkf(k)/adzw(k)/dz + 0.5 * sumMloc(k))
-              c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz * betap *         &
+              c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz/(1.-frac(k)) * betap *         &
                      (tkf(k+1)/adzw(k+1)/dz + sumMloc(k+1))
               !c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz *              &
               !       (betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumMloc(k+1))
-              d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
+              d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz/(1.-frac(k)) * (                       &
                     tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
                    -tkf(k)*rhof(k)/adzw(k)/dz*betam*(s(k)-s(k-1))         &
                    +(rhof(k)*(sumMs(k) - betam*s(k)*sumMloc(k)))&
@@ -86,39 +87,39 @@
               !     -(rhof(k+1)*sumMs(k+1)) )
            ELSEIF (k.eq.1) THEN
               a(k) = 0.0
-              b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz * &
+              b(k) = -1./dt + betap* rhof(k+1)/rhoin(k)/adz(k)/dz/(1.-frac(k)) * &
                     (-tkf(k+1)/adzw(k+1)/dz ) 
               !b(k) = -1./dt +  rhof(k+1)/rhoin(k)/adz(k)/dz * &
               !      (-betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumMloc(k+1) ) 
               if (.not.dosfcbcneuman) then
-                  b(k) = b(k) - betap*vmag*tkf(1)/adz(k)/dz
+                  b(k) = b(k) - betap*vmag*tkf(1)/adz(k)/dz/(1.-frac(k))
               end if
-              c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz * betap *         &
+              c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz/(1.-frac(k)) * betap *         &
                      (tkf(k+1)/adzw(k+1)/dz + sumMloc(k+1))
               !c(k) = rhof(k+1)/rhoin(k)/adz(k)/dz *                  &
               !       (betap*tkf(k+1)/adzw(k+1)/dz + 0.5 * sumMloc(k+1))
-              d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
+              d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz/(1.-frac(k)) * (                       &
                     tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
                    -rhof(k+1)*(sumMs(k+1) - betam*s(k+1)*sumMloc(k+1)))
               !d(k) = -s(k)/dt - 1./rhoin(k)/adz(k)/dz * (                       &
               !      tkf(k+1)*rhof(k+1)/adzw(k+1)/dz*betam*(s(k+1)-s(k))   &
               !     -rhof(k+1)*sumMs(k+1) )
               if (.not.dosfcbcneuman) then
-                  d(k) = d(k) + rhof(k)/rhoin(k)*vmag*tkf(1)/adz(k)/dz*(betam*s(k)-ssfc)
+                  d(k) = d(k) + rhof(k)/rhoin(k)*vmag*tkf(1)/adz(k)/dz/(1.-frac(k))*(betam*s(k)-ssfc)
               else ! neuman bc, always fully explicit right now
-                  d(k) = d(k) - rhof(k)/rhoin(k)*kinflx/adz(k)/dz
+                  d(k) = d(k) - rhof(k)/rhoin(k)*kinflx/adz(k)/dz/(1.-frac(k))
               end if
            ELSE
-              a(k) = rhof(k)/rhoin(k)/adz(k)/dz * betap *                  &
+              a(k) = rhof(k)/rhoin(k)/adz(k)/dz/(1.-frac(k)) * betap *                  &
                     (tkf(k)/adzw(k)/dz)
               !a(k) = rhof(k)/rhoin(k)/adz(k)/dz *                           &
               !      (betap*tkf(k)/adzw(k)/dz - 0.5 * sumMloc(k))
-              b(k) = -1./dt - betap* rhof(k)/rhoin(k)/adz(k)/dz *          &
+              b(k) = -1./dt - betap* rhof(k)/rhoin(k)/adz(k)/dz/(1.-frac(k)) *          &
                     (tkf(k)/adzw(k)/dz + sumMloc(k) )
               !b(k) = -1./dt - rhof(k)/rhoin(k)/adz(k)/dz *          &
               !      (betap * tkf(k)/adzw(k)/dz + 0.5 * sumMloc(k) )
               c(k) = 0.0
-              d(k) = -s(k)/dt + 1./rhoin(k)/adz(k)/dz * (              &
+              d(k) = -s(k)/dt + 1./rhoin(k)/adz(k)/dz/(1.-frac(k)) * (              &
                     tkf(k)*rhof(k)/adzw(k)/dz*betam*(s(k)-s(k-1))&
                    -rhof(k)*(sumMs(k) - betam*s(k)*sumMloc(k)))
               !d(k) = -s(k)/dt + 1./rhoin(k)/adz(k)/dz * (              &

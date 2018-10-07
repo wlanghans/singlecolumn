@@ -14,6 +14,7 @@ real lstarn, lstarp, bbb, omn, omp, tketau
 real qsatt,dqsat, dtkedtsum, dtkedtmin, l23
 real :: thetalt, thetalk, thetall, qtt, qtk, qtl, covarqtthetal, varqt, varthetal, wthl, wqt
 integer i,j,k,kc,kb
+real :: frac_mf_avg(nzm)
 
 
 if (doteixpbl.or.dolanghanspbl) then
@@ -172,6 +173,13 @@ do k=1,nzm
 
      ! get buoyancy flux from PDF scheme
      tke_thvflx(k) = cthl(k) * wthl + cqt(k) * wqt
+     ! convert domain - wide ed flux to environment flux
+     if (doedmf.and.(.not.donoscale)) then
+       frac_mf_avg(k) = 0.5*(frac_mf(k)+frac_mf(k+1))
+     else
+       frac_mf_avg(k) = 0.0
+     end if
+     tke_thvflx(k) = tke_thvflx(k)/(1.-frac_mf_avg(k))
 
      tk(k) = Ck*smix(k)*sqrt(tke(k))
 

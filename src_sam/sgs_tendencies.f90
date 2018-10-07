@@ -8,22 +8,23 @@ implicit none
 
 ! local variables
 
-real,dimension(nzm) :: a, b, c, d, tkhm, tkm, frac_mf_avg, qte, te, tp
+real,dimension(nzm) :: a, b, c, d, tkhm, tkm, frac_mf_avg, qte, te, tp,frac0
 integer :: k
+
+frac0 = 0.0
 
 !+++++++++++++++++++++++++++++++++++++++
 ! non-precip water mixing ratio qt 
 !+++++++++++++++++++++++++++++++++++++++
 
 ! multiply Km by area fraction of environment
-frac_mf_avg(1:nzm) = 0.5*(frac_mf(1:nzm)+frac_mf(2:nz))
-if (doedmf.and..not.donoscale) then
-  tkm(1:nzm)=(1.0-frac_mf_avg(1:nzm)) * tk(1:nzm) 
-  tkhm(1:nzm)=(1.0-frac_mf_avg(1:nzm)) * tkh(1:nzm) 
+if (doedmf.and.(.not.donoscale)) then
+  frac_mf_avg(1:nzm) = 0.5*(frac_mf(1:nzm)+frac_mf(2:nz))
 else
-  tkm=tk
-  tkhm=tkh
+  frac_mf_avg(1:nzm) = 0.0
 end if
+tkm(1:nzm)=(1.0-frac_mf_avg(1:nzm)) * tk(1:nzm) 
+tkhm(1:nzm)=(1.0-frac_mf_avg(1:nzm)) * tkh(1:nzm) 
 
 !if doenvedmf, then the EDMF equation has the environment values (not domain means)
 
@@ -46,10 +47,10 @@ end if
 
 if (doneuman.or.sfc_flx_fxd) then
   !Neuman
-  call get_abcd(rho,qte,sumMrt,Crv,tkhm,r_s,a,b,c,d,.true.,.true.,sgs_qt_flux (1))
+  call get_abcd(frac_mf_avg,rho,qte,sumMrt,Crv,tkhm,r_s,a,b,c,d,.true.,.true.,sgs_qt_flux (1))
 else
   !Dirichlet
-  call get_abcd(rho,qte,sumMrt,Crv,tkhm,r_s,a,b,c,d,.true.,.false.)
+  call get_abcd(frac_mf_avg,rho,qte,sumMrt,Crv,tkhm,r_s,a,b,c,d,.true.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
@@ -75,7 +76,7 @@ qt_flux_mf(nz)    = 0.
 qt_flux_mf(2:nzm) = (sumMrt(2:nzm) - (betap*d(2:nzm) + betam*qte(2:nzm)) * sumM(2:nzm) )
 
 ! compute qt tendency
-tend_sgs_qt = (d-qte)/dt    
+tend_sgs_qt = (1.-frac_mf_avg) *(d-qte)/dt    
 
 ! update qt
 if (dosequential) then 
@@ -92,10 +93,10 @@ end if
 
 if (doneuman.or.sfc_flx_fxd) then
   !Neuman
-  call get_abcd(rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.true.,0.0)
+  call get_abcd(frac0,rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.true.,0.0)
 else
   !Dirichlet
-  call get_abcd(rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.false.)
+  call get_abcd(frac0,frac_mf_avg,rho,qp,sumMrp,Crv,tkhm,0.0,a,b,c,d,.false.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
@@ -180,10 +181,10 @@ end if
 
 if (doneuman.or.sfc_flx_fxd) then 
   !Neuman
-  call get_abcd(rho,te,sumMt,Ctheta,tkhm,t_s,a,b,c,d,.true.,.true.,sgs_t_flux (1))
+  call get_abcd(frac_mf_avg,rho,te,sumMt,Ctheta,tkhm,t_s,a,b,c,d,.true.,.true.,sgs_t_flux (1))
 else
   !Dirichlet
-  call get_abcd(rho,te,sumMt,Ctheta,tkhm,t_s,a,b,c,d,.true.,.false.)
+  call get_abcd(frac_mf_avg,rho,te,sumMt,Ctheta,tkhm,t_s,a,b,c,d,.true.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
@@ -230,9 +231,9 @@ if (dotlflux) t_flux_mf(2:nzm) = cp* t_flux_mf(2:nzm)
 
 
 if (dotlflux) then
-  tend_sgs_t = cp * (d - te)/dt 
+  tend_sgs_t = (1.-frac_mf_avg) * cp * (d - te)/dt 
 else
-  tend_sgs_t = (d - te)/dt
+  tend_sgs_t = (1.-frac_mf_avg) *(d - te)/dt
 end if
 
 ! get buoyancy flux from PDF scheme in Wm2 for output
@@ -265,10 +266,10 @@ end if
 !+++++++++++++++++++++++++++++++++++++++
 if (doneuman.or.sfc_flx_fxd) then 
   ! Neuman
-  call get_abcd(rho,u,sumMu,Cm,tk,0.,a,b,c,d,.false.,.true.,taux(1))
+  call get_abcd(frac0,rho,u,sumMu,Cm,tk,0.,a,b,c,d,.false.,.true.,taux(1))
 else
   ! Dirichlet
-  call get_abcd(rho,u,sumMu,Cm,tk,0.,a,b,c,d,.false.,.false.)
+  call get_abcd(frac0,rho,u,sumMu,Cm,tk,0.,a,b,c,d,.false.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
@@ -294,10 +295,10 @@ if (dosequential) u=d
 !+++++++++++++++++++++++++++++++++++++++
 if (doneuman.or.sfc_flx_fxd) then 
   ! Neuman
-  call get_abcd(rho,v,sumMv,Cm,tk,0.,a,b,c,d,.false.,.true.,tauy(1))
+  call get_abcd(frac0,rho,v,sumMv,Cm,tk,0.,a,b,c,d,.false.,.true.,tauy(1))
 else
   ! Dirichlet
-  call get_abcd(rho,v,sumMv,Cm,tk,0.,a,b,c,d,.false.,.false.)
+  call get_abcd(frac0,rho,v,sumMv,Cm,tk,0.,a,b,c,d,.false.,.false.)
 end if
 call tridiag(a,b,c,d,nzm)
 
@@ -323,10 +324,10 @@ if (dosequential) v=d
 if (progtke) then
   tke_s = (3.75*ustar**2 + 0.2*wstar**2)
   if (dotkedirichlet) then
-    call get_abcd(rho,tke,sumMtke,2.* tk(1)/adz(1)/dz/vmag,tk,tke_s,a,b,c,d,.false.,.false.)
+    call get_abcd(frac0,rho,tke,sumMtke,2.* tk(1)/adz(1)/dz/vmag,tk,tke_s,a,b,c,d,.false.,.false.)
   else
     sgs_tke_flux(1) = 0.0   ! lower BC for tke transfer (questionable)
-    call get_abcd(rho,tke,sumMtke,0.,tk,tke_s,a,b,c,d,.false.,.true.,sgs_tke_flux(1))
+    call get_abcd(frac0,rho,tke,sumMtke,0.,tk,tke_s,a,b,c,d,.false.,.true.,sgs_tke_flux(1))
   end if
   call tridiag(a,b,c,d,nzm)
 
