@@ -1,13 +1,13 @@
 #!/bin/bash -l
 # Job name:
-#SBATCH --job-name=rmrmses
+#SBATCH --job-name=rmmmfiles
 #
 # Processors:
-####SBATCH --ntasks=1000
+##SBATCH --ntasks=1000
 #SBATCH --ntasks=1
 #
 # Wall clock limit:
-#SBATCH --time=30:00:00
+#SBATCH --time=40:00:00
 #
 # qos
 #SBATCH --qos=lr_normal
@@ -20,21 +20,23 @@
 ## Run command
 #rm -rf /global/scratch/langhans/metamodel_large/
 #./createnamelists
-find /global/scratch/langhans//metamodel_large3 -name 'rmse_thvd_BOMEX'  -exec rm {} \;
-find /global/scratch/langhans//metamodel_large3 -name 'rmse_thvd_CPBL2'  -exec rm {} \;
-find /global/scratch/langhans//metamodel_mm3 -name 'rmse_thvd_BOMEX'  -exec rm {} \;
-find /global/scratch/langhans//metamodel_mm3 -name 'rmse_thvd_CPBL2'  -exec rm {} \;
+#find /global/scratch/langhans//metamodel_large3 -name 'rmse_thvd_BOMEX'  -exec rm {} \;
+#find /global/scratch/langhans//metamodel_large3 -name 'rmse_thvd_CPBL2'  -exec rm {} \;
+#find /global/scratch/langhans//metamodel_mm3 -name 'rmse_thvd_BOMEX'  -exec rm {} \;
+#find /global/scratch/langhans//metamodel_mm3 -name 'rmse_thvd_CPBL2'  -exec rm {} \;
+find /global/scratch/langhans//metamodel_large3 -name 'mmthvdqtdrmse_thvd_BOMEX'  -exec rm {} \;
+find /global/scratch/langhans//metamodel_large3 -name 'mmthvdqtdrmse_thvd_CPBL2'  -exec rm {} \;
 
 #edison
 #srun -n 1000 ./run_ensemble "/global/scratch/langhans/metamodel_large2/" 1062882 "/global/homes/l/langhans/singlecolumn/src_ensemble"
 
 #lrc
-#mpirun ./run_ensemble "/global/scratch/langhans/metamodel_mm3/" 1458 "/global/home/users/langhans/singlecolumn/src_ensemble"
-#mpirun ./run_ensemble "/global/scratch/langhans/metamodel_large3/" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble"
+#mpirun ./run_ensemble_nodeletenc "/global/scratch/langhans/metamodel_mm3/" 1458 "/global/home/users/langhans/singlecolumn/src_ensemble"
+#mpirun ./run_ensemble_finishjob "/global/scratch/langhans/metamodel_large3/" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble"
 #mpirun ./run_writemmpoints "/global/scratch/langhans/metamodel_mm3/" 1458 "/global/home/users/langhans/singlecolumn/src_ensemble"
 
-#mpirun ./run_metamodelrmse "/global/scratch/langhans/metamodel_large3" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble" 
-#mpirun ./getrmsetot_new "/global/scratch/langhans/metamodel_large2/"
+#mpirun ./run_metamodelrmse_finishjob "/global/scratch/langhans/metamodel_large3" 1062882 "/global/home/users/langhans/singlecolumn/src_ensemble" 
+#mpirun ./getrmsetot_new "/global/scratch/langhans/metamodel_large3/"
 
 
 #mpirun ./stochsample_mm "/global/scratch/langhans/metamodel/" "/global/home/users/langhans/singlecolumn/src_ensemble" 

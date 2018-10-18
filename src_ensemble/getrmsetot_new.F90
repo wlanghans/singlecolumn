@@ -15,13 +15,13 @@ Program Parallel_Get_Rmse
   integer :: itmp(10), Ncombo
   integer :: run_start, run_end, status
   character(2) :: i_str,j_str,k_str,l_str,m_str,o_str
-  real :: readparam(8),readparam2(8)
+  real :: readparam(9),readparam2(9)
   integer, dimension(:), allocatable :: Recv_Request
   integer, dimension(:,:), allocatable :: mpi_status
   integer, dimension(:), allocatable :: mpi_status1
   integer ::  Send_Request
 
-  integer,dimension(6) :: maxind
+  integer,dimension(6) :: maxind,minind
 
 
   integer,parameter :: Nparam=6
@@ -154,10 +154,16 @@ Program Parallel_Get_Rmse
       runname = trim(casename(ca))//'_'//trim(i_str)//'_'//trim(j_str)//'_'//trim(k_str)//'_'//trim(l_str)//'_'//trim(m_str)//'_'//trim(o_str)
 
       ! read rmsecase
-      open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'mmthvdqtdrmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
+      !open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'mmthvdqtdrmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
+      !read (78,*) readparam(1:9)
+      !close(78)
+      !open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'mmthvdqtdrmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
+      !read (79,*) readparam2(1:9)
+      !close(79)
+      open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
       read (78,*) readparam(1:9)
       close(78)
-      open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'mmthvdqtdrmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
+      open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
       read (79,*) readparam2(1:9)
       close(79)
  
@@ -223,7 +229,8 @@ Program Parallel_Get_Rmse
  
 
   ! write netcdf file 
-  fname_out =trim(path_in)//"/"//'RMSE_mmthvdqtdrmse_new.nc' 
+  !fname_out =trim(path_in)//"/"//'RMSE_mmthvdqtdrmse_paperreview.nc' 
+  fname_out =trim(path_in)//"/"//'RMSE_paperreview.nc' 
   write(*,*) fname_out
   call check_nc( nf90_create(fname_out,nf90_clobber,output_ncid) )
 
@@ -384,6 +391,11 @@ Program Parallel_Get_Rmse
     rmse(i+1,j+1,k+1,l+1,m+1,o+1) = rmse1D2(ca,n+1)
   end do
   maxind=maxloc(rmse)
+  minind=minloc(rmse)
+  print*,    maxval(rmse)
+  print*, maxind
+  print*,    minval(rmse)
+  print*, minind
 
   call check_nc( nf90_put_var(output_ncid, var_out_id(3+ca), rmse ) ) 
   end do
