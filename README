@@ -1,3 +1,37 @@
-* compile the code
-* run ./sc_wl
-* this runs the Case specified in CaseName; a corresponding directory with prm file has to exist
+The singlecolumn model is in src_sam
+
+
+Step-by-step technical guide
+
+
+A single parameter setting is used to run 1D simulations of three cases. Each simulation advances height profiles in time. The result depends on the specific setting. This document describes how to run these cases for one specific setting and how to get the rmse of that setting.
+
+I'm running everything on Lawrencium or Edison. Instructions are for Edison specifically: 
+
+Get the code
+git clone -b master git@bitbucket.org:wlanghans/singlecolumn.git singlecolumn
+This creates the directory singlecolumn
+compile the src code of the singlecolumn model
+cd singlecolumn/src_sam
+see a list of my loaded modules below; on Edison load cray-netcdf and ncl
+cp Makefile_edison Makefile
+make clean;make
+this should generate (after about 3 min) the executable sc_sam_wl in directory singlecolumn
+Go to src_single and modify the following things in runsingle_juli
+rundir: change to your directory, eg on scratch file system
+srcdir: change to your directory that holds the executable sc_sam_wl
+ncldir: change to .../singlecolumn/src_ensemble
+Run the simulations (1 case)
+./runsingle_juli "runname" 0.0 0.0 0.0 0.4 500. 0.6 0
+This runs the BOMEX and CPBL2 case with a decent parameter setting
+first argument is the name that identifies the specific parameter setting
+second to seventh argument identifies the six parameters (you can find min/maxvalues for each parameter in runsingle_juli (look for pmin and pmax vectors) )
+8th argument: 0: delete netcdf output from simulations after rmse has been evaluated; 1: keep netcdf files
+This will run the BOMEX and CPBL2 case (both described below) and will compute rmse for each case by comparing against a LES benchmark. An overall rmse is computed as the average of the two.
+Find the overall rmse in text file $rundir/rmse_tot_thvd, and the rmse of each individual case in each case directory: the files are named rmse_thvd_BOMEX and rmse_thvd_CPBL2. In each of these files, the rmse error will be the first number in the text file and is written with a "13.8f" (8 digits after the decimal point).
+
+
+The definition of the rmse is described below for each case. The overall rmse is a linear combination of those.
+
+
+
