@@ -154,18 +154,18 @@ Program Parallel_Get_Rmse
       runname = trim(casename(ca))//'_'//trim(i_str)//'_'//trim(j_str)//'_'//trim(k_str)//'_'//trim(l_str)//'_'//trim(m_str)//'_'//trim(o_str)
 
       ! read rmsecase
-      !open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'mmthvdqtdrmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
-      !read (78,*) readparam(1:9)
-      !close(78)
-      !open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'mmthvdqtdrmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
-      !read (79,*) readparam2(1:9)
-      !close(79)
-      open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
+      open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'mmthvdqtdrmse4_thvd_'//trim(casename(ca)),status='old',form='formatted')
       read (78,*) readparam(1:9)
       close(78)
-      open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
+      open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'mmthvdqtdrmse4_thvd_'//trim(casename(ca)),status='old',form='formatted')
       read (79,*) readparam2(1:9)
       close(79)
+      !open(78,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
+      !read (78,*) readparam(1:9)
+      !close(78)
+      !open(79,file=trim(path_in)//"/"//trim(runname)//"/"//'rmse_thvd_'//trim(casename(ca)),status='old',form='formatted')
+      !read (79,*) readparam2(1:9)
+      !close(79)
  
       tmpvec=readparam2(2:9)
       if (trim(casename(ca)).eq."BOMEX") then
@@ -229,8 +229,8 @@ Program Parallel_Get_Rmse
  
 
   ! write netcdf file 
-  !fname_out =trim(path_in)//"/"//'RMSE_mmthvdqtdrmse_paperreview.nc' 
-  fname_out =trim(path_in)//"/"//'RMSE_paperreview.nc' 
+  fname_out =trim(path_in)//"/"//'RMSE_mmthvdqtdrmse4_paperreview.nc' 
+  !fname_out =trim(path_in)//"/"//'RMSE_paperreview.nc' 
   write(*,*) fname_out
   call check_nc( nf90_create(fname_out,nf90_clobber,output_ncid) )
 
@@ -305,7 +305,7 @@ Program Parallel_Get_Rmse
   end do
 
   ! compute error for each case by normalizing with the parameter averages
-  rmse1D=0.0
+  !rmse1D=0.0
   do ca=1,Ncases
     do m=1,6
       if ((trim(casename(ca)).eq."BOMEX".and.m.ne.2).or. &
@@ -326,10 +326,10 @@ Program Parallel_Get_Rmse
   ! compute total error from case-specific errors
   ! normalize each case by the mean case error (not needed since equal to 1)
 
-  rmse1D(1,:) = 0.0
-  do ca=1,Ncases
-    rmse1D(1,:) = rmse1D(1,:) + 1./float(Ncases) * rmse1D(1+ca,:) 
-  end do
+  !rmse1D(1,:) = 0.0
+  !do ca=1,Ncases
+  !  rmse1D(1,:) = rmse1D(1,:) + 1./float(Ncases) * rmse1D(1+ca,:) 
+  !end do
 
   ! rearrange
   do ca=1,Ncases+1
@@ -357,7 +357,7 @@ Program Parallel_Get_Rmse
   !! redo this for error including thvd
  
   ! compute error for each case by normalizing with the parameter averages
-  rmse1D2=0.0
+  !rmse1D2=0.0
   do ca=1,Ncases
     do m=1,8
       if ((trim(casename(ca)).eq."BOMEX".and.m.ne.2).or. &
@@ -376,9 +376,9 @@ Program Parallel_Get_Rmse
   ! compute total error from case-specific errors
   ! normalize each case by the mean case error (not needed since average is 1)
   !rmse1D2(1,:) = 0.0
-  do ca=1,Ncases
-    rmse1D2(1,:) = rmse1D2(1,:) + 1./float(Ncases) * rmse1D2(1+ca,:) 
-  end do
+  !do ca=1,Ncases
+  !  rmse1D2(1,:) = rmse1D2(1,:) + 1./float(Ncases) * rmse1D2(1+ca,:) 
+  !end do
 
   do ca=1,Ncases+1
   do n=0,Ncombo-1

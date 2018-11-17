@@ -23,7 +23,7 @@ wks   = gsn_open_wks ("eps","plot_"+casein)                   ; open workstation
 gsn_define_colormap(wks,"matlab_jet")
 colors=ispan(5,65,8)
 
-color="darkgreen";colors(1)
+color="red";colors(1)
 ;dont use 4
 
 f=addfile(filein,"r")
